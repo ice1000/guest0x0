@@ -5,7 +5,16 @@ import org.jetbrains.annotations.NotNull;
 
 public sealed interface Expr {
   @NotNull SourcePos pos();
-  record Ref(@Override @NotNull SourcePos pos, @NotNull String name) implements Expr {
+  record Unresolved(
+    @Override @NotNull SourcePos pos,
+    @NotNull String name
+  ) implements Expr {
+  }
+
+  record Resolved(
+    @Override @NotNull SourcePos pos,
+    @NotNull LocalVar ref
+  ) implements Expr {
   }
 
   /** @param isApp it's a tuple if false */
@@ -19,7 +28,7 @@ public sealed interface Expr {
 
   record Lam(
     @Override @NotNull SourcePos pos,
-    @NotNull String x,
+    @NotNull LocalVar x,
     @NotNull Expr a
   ) implements Expr {
   }
@@ -45,7 +54,7 @@ public sealed interface Expr {
 
   record Param(
     @NotNull SourcePos pos,
-    @NotNull String x,
+    @NotNull LocalVar x,
     @NotNull Expr type
   ) {
   }

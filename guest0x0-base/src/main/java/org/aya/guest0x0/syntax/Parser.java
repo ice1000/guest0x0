@@ -16,8 +16,9 @@ public record Parser(@NotNull Either<SourceFile, SourcePos> source) {
       case Guest0x0Parser.FstContext fst -> new Expr.Proj(sourcePosOf(fst), expr(fst.expr()), 1);
       case Guest0x0Parser.SndContext snd -> new Expr.Proj(sourcePosOf(snd), expr(snd.expr()), 2);
       case Guest0x0Parser.TreborContext trebor -> new Expr.Trebor(sourcePosOf(trebor));
-      case Guest0x0Parser.LamContext lam -> new Expr.Lam(sourcePosOf(lam), lam.ID().getText(), expr(lam.expr()));
-      case Guest0x0Parser.RefContext ref -> new Expr.Ref(sourcePosOf(ref), ref.ID().getText());
+      case Guest0x0Parser.LamContext lam ->
+        new Expr.Lam(sourcePosOf(lam), new LocalVar(lam.ID().getText()), expr(lam.expr()));
+      case Guest0x0Parser.RefContext ref -> new Expr.Unresolved(sourcePosOf(ref), ref.ID().getText());
       case Guest0x0Parser.PiContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.param()), expr(pi.expr()));
       case Guest0x0Parser.SigContext sig -> new Expr.DT(false, sourcePosOf(sig), param(sig.param()), expr(sig.expr()));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
@@ -25,7 +26,7 @@ public record Parser(@NotNull Either<SourceFile, SourcePos> source) {
   }
 
   private Expr.Param param(Guest0x0Parser.ParamContext param) {
-    return new Expr.Param(sourcePosOf(param), param.ID().getText(), expr(param.expr()));
+    return new Expr.Param(sourcePosOf(param), new LocalVar(param.ID().getText()), expr(param.expr()));
   }
 
   // IN URGENT NEED OF AN ANTLR4 WRAPPER EXTRACTED FROM AYA
