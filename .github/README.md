@@ -1,4 +1,6 @@
 # Guest0x0
 
+![image](https://user-images.githubusercontent.com/16398479/161549473-ef24de7c-3033-4874-8354-54a960b3f873.png)
+
 Experimenting with some basic programming in Java,
 including an equalizer of the first projection of evaluation and just the first projection :trollface:
