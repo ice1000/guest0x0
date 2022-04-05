@@ -1,4 +1,22 @@
 package org.aya.guest0x0.tyck;
 
-public class Elaborator {
+import kala.collection.mutable.MutableMap;
+import org.aya.guest0x0.syntax.Expr;
+import org.aya.guest0x0.syntax.LocalVar;
+import org.aya.guest0x0.syntax.Term;
+import org.jetbrains.annotations.NotNull;
+
+public record Elaborator(
+  @NotNull MutableMap<LocalVar, Term> env
+) {
+  record Synth(@NotNull Term wellTyped, @NotNull Term type) {
+  }
+
+  public @NotNull Synth synth(@NotNull Expr expr) {
+    return switch (expr) {
+      case Expr.Trebor trebor -> new Synth(new Term.U(), new Term.U());
+      case Expr.Resolved resolved -> new Synth(new Term.Ref(resolved.ref()), env.get(resolved.ref()));
+      default -> throw new IllegalArgumentException("Does not support inferring: " + expr);
+    };
+  }
 }
