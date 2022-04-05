@@ -13,20 +13,9 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
 
   public @NotNull Expr expr(@NotNull Expr expr) {
     return switch (expr) {
-      case Expr.DT dt -> {
-        var p = param(dt.param());
-        var old = put(p.x());
-        var cod = expr(dt.cod());
-        recover(old, p.x().name());
-        yield new Expr.DT(dt.isPi(), dt.pos(), p, cod);
-      }
+      case Expr.DT dt -> new Expr.DT(dt.isPi(), dt.pos(), param(dt.param()), bodied(param(dt.param()).x(), dt.cod()));
       case Expr.Two two -> new Expr.Two(two.isApp(), two.pos(), expr(two.f()), expr(two.a()));
-      case Expr.Lam lam -> {
-        var old = put(lam.x());
-        var a = expr(lam.a());
-        recover(old, lam.x().name());
-        yield new Expr.Lam(lam.pos(), lam.x(), a);
-      }
+      case Expr.Lam lam -> new Expr.Lam(lam.pos(), lam.x(), bodied(lam.x(), lam.a()));
       case Expr.Trebor trebor -> trebor;
       case Expr.Unresolved unresolved -> env.getOption(unresolved.name())
         .map(x -> new Expr.Resolved(unresolved.pos(), x))
@@ -36,8 +25,11 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
     };
   }
 
-  private void recover(Option<LocalVar> old, String name) {
-    old.map(this::put).getOrElse(() -> env.remove(name));
+  private @NotNull Expr bodied(LocalVar x, Expr expr) {
+    var old = put(x);
+    var e = expr(expr);
+    old.map(this::put).getOrElse(() -> env.remove(x.name()));
+    return e;
   }
 
   private @NotNull Option<LocalVar> put(LocalVar x) {
