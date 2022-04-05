@@ -8,7 +8,7 @@ import org.aya.util.error.SourcePos;
 import org.jetbrains.annotations.NotNull;
 
 public record Parser(@NotNull Either<SourceFile, SourcePos> source) {
-  @NotNull Expr expr(@NotNull Guest0x0Parser.ExprContext expr) {
+  public @NotNull Expr expr(@NotNull Guest0x0Parser.ExprContext expr) {
     return switch (expr) {
       case Guest0x0Parser.ParenContext paren -> expr(paren.expr());
       case Guest0x0Parser.AppContext app -> new Expr.Two(true, sourcePosOf(app), expr(app.expr(0)), expr(app.expr(1)));
