@@ -1,7 +1,6 @@
 package org.aya.guest0x0.tyck;
 
 import kala.collection.mutable.MutableMap;
-import kala.control.Option;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.LocalVar;
 import org.aya.guest0x0.syntax.Term;
@@ -14,7 +13,23 @@ public record Elaborator(
   }
 
   public @NotNull Term inherit(@NotNull Expr expr, @NotNull Term type) {
-    throw new UnsupportedOperationException("TODO");
+    return switch (expr) {
+      case Expr.Lam lam -> {
+        if (!(Normalizer.f(type) instanceof Term.DT dt) || !dt.isPi())
+          throw new IllegalArgumentException("Expects a right adjoint to type " + expr + ", got: " + type);
+        env.put(lam.x(), dt.param().type());
+        var body = inherit(lam.a(), dt.codomain(new Term.Ref(lam.x())));
+        yield new Term.Lam(new Term.Param(lam.x(), dt.param().type()), body);
+      }
+      case Expr.Two two && !two.isApp() -> {
+        if (!(Normalizer.f(type) instanceof Term.DT dt) || dt.isPi())
+          throw new IllegalArgumentException("Expects a left adjoint to type " + expr + ", got: " + type);
+        var lhs = inherit(two.f(), dt.param().type());
+        var rhs = inherit(two.a(), dt.codomain(lhs));
+        yield new Term.Two(false, lhs, rhs);
+      }
+      default -> throw new UnsupportedOperationException("TODO: conversion");
+    };
   }
 
   public @NotNull Synth synth(@NotNull Expr expr) {

@@ -6,6 +6,10 @@ import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
 
 public record Normalizer(@NotNull MutableMap<LocalVar, Term> rho) {
+  public static @NotNull Term f(@NotNull Term term) {
+    return new Normalizer(MutableMap.create()).term(term);
+  }
+
   public @NotNull Term.Param param(@NotNull Term.Param param) {
     return new Term.Param(param.x(), term(param.type()));
   }
