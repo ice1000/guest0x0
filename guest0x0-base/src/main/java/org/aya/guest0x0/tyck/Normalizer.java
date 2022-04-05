@@ -29,6 +29,7 @@ public record Normalizer(@NotNull MutableMap<LocalVar, Term> rho) {
       case Term.Proj proj -> {
         var t = term(proj.t());
         if (!(t instanceof Term.Two tup)) yield new Term.Proj(t, proj.isOne());
+        assert !tup.isApp();
         yield proj.isOne() ? tup.f() : tup.a();
       }
     };

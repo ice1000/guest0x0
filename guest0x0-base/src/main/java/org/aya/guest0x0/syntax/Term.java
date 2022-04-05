@@ -25,6 +25,9 @@ public sealed interface Term {
   }
 
   record DT(boolean isPi, @NotNull Param param, @NotNull Term cod) implements Term {
+    public @NotNull Term codomain(@NotNull Term term) {
+      return cod.subst(param.x, term);
+    }
   }
 
   record U() implements Term {
