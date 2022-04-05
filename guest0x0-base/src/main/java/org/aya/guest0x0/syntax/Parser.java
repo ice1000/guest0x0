@@ -21,6 +21,11 @@ public record Parser(@NotNull Either<SourceFile, SourcePos> source) {
       case Guest0x0Parser.RefContext ref -> new Expr.Unresolved(sourcePosOf(ref), ref.ID().getText());
       case Guest0x0Parser.PiContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.param()), expr(pi.expr()));
       case Guest0x0Parser.SigContext sig -> new Expr.DT(false, sourcePosOf(sig), param(sig.param()), expr(sig.expr()));
+      case Guest0x0Parser.SimpFunContext pi -> {
+        var paramExpr = pi.expr(0);
+        var param = new Expr.Param(sourcePosOf(paramExpr), new LocalVar("_"), expr(paramExpr));
+        yield new Expr.DT(true, sourcePosOf(pi), param, expr(pi.expr(1)));
+      }
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
   }

@@ -6,10 +6,12 @@ import org.aya.guest0x0.syntax.LocalVar;
 import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Supplier;
+
 public record Elaborator(
   @NotNull MutableMap<LocalVar, Term> env
 ) {
-  record Synth(@NotNull Term wellTyped, @NotNull Term type) {
+  public record Synth(@NotNull Term wellTyped, @NotNull Term type) {
   }
 
   public @NotNull Term inherit(@NotNull Expr expr, @NotNull Term type) {
@@ -17,8 +19,7 @@ public record Elaborator(
       case Expr.Lam lam -> {
         if (!(Normalizer.f(type) instanceof Term.DT dt) || !dt.isPi())
           throw new IllegalArgumentException("Expects a right adjoint to type " + expr + ", got: " + type);
-        env.put(lam.x(), dt.param().type());
-        var body = inherit(lam.a(), dt.codomain(new Term.Ref(lam.x())));
+        var body = hof(lam.x(), dt.param().type(), () -> inherit(lam.a(), dt.codomain(new Term.Ref(lam.x()))));
         yield new Term.Lam(new Term.Param(lam.x(), dt.param().type()), body);
       }
       case Expr.Two two && !two.isApp() -> {
@@ -53,8 +54,7 @@ public record Elaborator(
         if (two.isApp()) {
           if (!(f.type instanceof Term.DT dt) || !dt.isPi())
             throw new IllegalArgumentException("Expects a right adjoint, got: " + f.type);
-          env.put(dt.param().x(), dt.param().type());
-          var a = inherit(two.a(), dt.param().type());
+          var a = hof(dt.param().x(), dt.param().type(), () -> inherit(two.a(), dt.param().type()));
           yield new Synth(new Term.Two(true, f.wellTyped, a), dt.codomain(a));
         } else {
           var a = synth(two.a());
@@ -63,17 +63,19 @@ public record Elaborator(
         }
       }
       case Expr.DT dt -> {
-        var param = param(dt.param());
-        var cod = synth(dt.cod());
-        yield new Synth(new Term.DT(dt.isPi(), param, cod.wellTyped), cod.type);
+        var param = synth(dt.param().type());
+        var x = dt.param().x();
+        var cod = hof(x, param.wellTyped, () -> synth(dt.cod()));
+        yield new Synth(new Term.DT(dt.isPi(), new Term.Param(x, param.wellTyped), cod.wellTyped), cod.type);
       }
       default -> throw new IllegalArgumentException("Synthesis failed: " + expr);
     };
   }
 
-  private @NotNull Term.Param param(@NotNull Expr.Param ppp) {
-    var param = synth(ppp.type());
-    env.put(ppp.x(), param.wellTyped);
-    return new Term.Param(ppp.x(), param.wellTyped);
+  private <T> T hof(@NotNull LocalVar x, @NotNull Term type, @NotNull Supplier<T> t) {
+    env.put(x, type);
+    var ok = t.get();
+    env.remove(x);
+    return ok;
   }
 }

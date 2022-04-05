@@ -6,6 +6,7 @@ import org.aya.guest0x0.parser.Guest0x0Lexer;
 import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Parser;
+import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Resolver;
 import org.aya.util.error.SourceFile;
 import org.jetbrains.annotations.NotNull;
@@ -14,10 +15,19 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BasicExperimentTest {
-  @Test public void basic() {
+  @Test public void resolveId() {
     var e = (Expr.Lam) expr("\\x. x");
     assertNotNull(e);
     assertSame(((Expr.Resolved) e.a()).ref(), e.x());
+  }
+
+  @Test public void tyckId() {
+    var IdE = expr("Pi (A : Type) -> A -> A");
+    var id = expr("\\A. \\x. x");
+    var akJr = new Elaborator(MutableMap.create());
+    var Id = akJr.synth(IdE);
+    var artifact = akJr.inherit(id, Id.wellTyped());
+    assertNotNull(artifact);
   }
 
   private @NotNull Expr expr(String s) {
