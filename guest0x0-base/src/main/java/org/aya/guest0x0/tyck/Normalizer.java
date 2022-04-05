@@ -28,8 +28,8 @@ public record Normalizer(@NotNull MutableMap<LocalVar, Term> rho) {
       }
       case Term.Proj proj -> {
         var t = term(proj.t());
-        if (!(t instanceof Term.Two tup)) yield new Term.Proj(t, proj.oneOrTwo());
-        yield proj.oneOrTwo() == 1 ? tup.f() : tup.a();
+        if (!(t instanceof Term.Two tup)) yield new Term.Proj(t, proj.isOne());
+        yield proj.isOne() ? tup.f() : tup.a();
       }
     };
   }
@@ -54,7 +54,7 @@ public record Normalizer(@NotNull MutableMap<LocalVar, Term> rho) {
           yield new Term.DT(dt.isPi(), param, term(dt.cod()));
         }
         case Term.Two two -> new Term.Two(two.isApp(), term(two.f()), term(two.a()));
-        case Term.Proj proj -> new Term.Proj(term(proj.t()), proj.oneOrTwo());
+        case Term.Proj proj -> new Term.Proj(term(proj.t()), proj.isOne());
       };
     }
 

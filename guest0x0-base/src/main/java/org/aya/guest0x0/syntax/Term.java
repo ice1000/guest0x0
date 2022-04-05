@@ -18,7 +18,7 @@ public sealed interface Term {
   record Two(boolean isApp, @NotNull Term f, @NotNull Term a) implements Term {
   }
 
-  record Proj(@NotNull Term t, int oneOrTwo) implements Term {
+  record Proj(@NotNull Term t, boolean isOne) implements Term {
   }
 
   record Lam(@NotNull Param param, @NotNull Term body) implements Term {

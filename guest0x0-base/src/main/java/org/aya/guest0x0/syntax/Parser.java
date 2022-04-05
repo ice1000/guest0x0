@@ -13,8 +13,8 @@ public record Parser(@NotNull Either<SourceFile, SourcePos> source) {
       case Guest0x0Parser.ParenContext paren -> expr(paren.expr());
       case Guest0x0Parser.AppContext app -> new Expr.Two(true, sourcePosOf(app), expr(app.expr(0)), expr(app.expr(1)));
       case Guest0x0Parser.PairContext p -> new Expr.Two(false, sourcePosOf(p), expr(p.expr(0)), expr(p.expr(1)));
-      case Guest0x0Parser.FstContext fst -> new Expr.Proj(sourcePosOf(fst), expr(fst.expr()), 1);
-      case Guest0x0Parser.SndContext snd -> new Expr.Proj(sourcePosOf(snd), expr(snd.expr()), 2);
+      case Guest0x0Parser.FstContext fst -> new Expr.Proj(sourcePosOf(fst), expr(fst.expr()), true);
+      case Guest0x0Parser.SndContext snd -> new Expr.Proj(sourcePosOf(snd), expr(snd.expr()), false);
       case Guest0x0Parser.TreborContext trebor -> new Expr.Trebor(sourcePosOf(trebor));
       case Guest0x0Parser.LamContext lam ->
         new Expr.Lam(sourcePosOf(lam), new LocalVar(lam.ID().getText()), expr(lam.expr()));

@@ -21,7 +21,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
         .map(x -> new Expr.Resolved(unresolved.pos(), x))
         .getOrThrow(() -> new RuntimeException("unresolved: " + unresolved.name()));
       case Expr.Resolved resolved -> resolved;
-      case Expr.Proj proj -> new Expr.Proj(proj.pos(), expr(proj.t()), proj.oneOrTwo());
+      case Expr.Proj proj -> new Expr.Proj(proj.pos(), expr(proj.t()), proj.isOne());
     };
   }
 

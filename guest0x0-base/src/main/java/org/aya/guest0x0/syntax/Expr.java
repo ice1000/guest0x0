@@ -33,10 +33,11 @@ public sealed interface Expr {
   ) implements Expr {
   }
 
+  /** @param isOne it's a second projection if false */
   record Proj(
     @Override @NotNull SourcePos pos,
     @NotNull Expr t,
-    int oneOrTwo
+    boolean isOne
   ) implements Expr {
   }
 
