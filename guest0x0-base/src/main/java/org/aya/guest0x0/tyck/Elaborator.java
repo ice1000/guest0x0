@@ -43,11 +43,22 @@ public record Elaborator(
             new Term.DT(false, new Term.Param(new LocalVar("_"), f.type), a.type));
         }
       }
+      case Expr.DT dt -> {
+        var param = param(dt.param());
+        var cod = synth(dt.cod());
+        yield new Synth(new Term.DT(dt.isPi(), param, cod.wellTyped), cod.type);
+      }
       default -> throw new IllegalArgumentException("Synthesis failed: " + expr);
     };
   }
 
+  @NotNull private Term.Param param(Expr.Param ppp) {
+    var param = synth(ppp.type());
+    env.put(ppp.x(), param.wellTyped);
+    return new Term.Param(ppp.x(), param.wellTyped);
+  }
+
   private void param(@NotNull Term.Param param) {
-     env.put(param.x(), param.type());
+    env.put(param.x(), param.type());
   }
 }
