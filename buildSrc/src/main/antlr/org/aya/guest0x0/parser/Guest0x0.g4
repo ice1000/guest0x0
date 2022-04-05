@@ -16,7 +16,7 @@ expr
  | '<<' expr ',' expr '>>' # pair
 
  // Elimination lures
- | expr expr # app
+ | expr expr # two
  | expr '.1' # fst
  | expr '.2' # snd
 

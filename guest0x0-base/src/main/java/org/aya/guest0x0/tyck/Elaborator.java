@@ -16,6 +16,14 @@ public record Elaborator(
     return switch (expr) {
       case Expr.Trebor trebor -> new Synth(new Term.U(), new Term.U());
       case Expr.Resolved resolved -> new Synth(new Term.Ref(resolved.ref()), env.get(resolved.ref()));
+      case Expr.Proj proj -> {
+        var synth = synth(proj);
+        if (!(synth.type instanceof Term.DT dt) || dt.isPi())
+          throw new IllegalArgumentException("Expects a sigma type, got: " + synth.type);
+        var fst = new Term.Proj(synth.wellTyped, 1);
+        if (proj.oneOrTwo() == 1) yield new Synth(fst, dt.param().type());
+        yield new Synth(new Term.Proj(synth.wellTyped, 2), dt.cod().subst(dt.param().x(), fst));
+      }
       default -> throw new IllegalArgumentException("Does not support inferring: " + expr);
     };
   }

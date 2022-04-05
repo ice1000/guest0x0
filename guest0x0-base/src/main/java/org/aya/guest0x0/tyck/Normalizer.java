@@ -18,7 +18,19 @@ public record Normalizer(@NotNull MutableMap<LocalVar, Term> rho) {
       case Term.U u -> u;
       case Term.Lam lam -> new Term.Lam(param(lam.param()), term(lam.body()));
       case Term.DT dt -> new Term.DT(dt.isPi(), param(dt.param()), term(dt.cod()));
-      case Term.App app -> throw new UnsupportedOperationException("TODO");
+      case Term.Two two -> {
+        var f = term(two.f());
+        var a = term(two.a());
+        // Either a tuple or a stuck term is preserved
+        if (!two.isApp() || !(f instanceof Term.Lam lam)) yield new Term.Two(two.isApp(), f, a);
+        rho.put(lam.param().x(), a);
+        yield term(lam.body());
+      }
+      case Term.Proj proj -> {
+        var t = term(proj.t());
+        if (!(t instanceof Term.Two tup)) yield new Term.Proj(t, proj.oneOrTwo());
+        yield proj.oneOrTwo() == 1 ? tup.f() : tup.a();
+      }
     };
   }
 
@@ -41,7 +53,8 @@ public record Normalizer(@NotNull MutableMap<LocalVar, Term> rho) {
           // Ditto
           yield new Term.DT(dt.isPi(), param, term(dt.cod()));
         }
-        case Term.App app -> new Term.App(term(app.f()), term(app.arg()));
+        case Term.Two two -> new Term.Two(two.isApp(), term(two.f()), term(two.a()));
+        case Term.Proj proj -> new Term.Proj(term(proj.t()), proj.oneOrTwo());
       };
     }
 
