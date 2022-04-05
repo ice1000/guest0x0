@@ -25,16 +25,20 @@ public record Elaborator(
         if (!(Normalizer.f(type) instanceof Term.DT dt) || dt.isPi())
           throw new IllegalArgumentException("Expects a left adjoint to type " + expr + ", got: " + type);
         var lhs = inherit(two.f(), dt.param().type());
-        var rhs = inherit(two.a(), dt.codomain(lhs));
-        yield new Term.Two(false, lhs, rhs);
+        yield new Term.Two(false, lhs, inherit(two.a(), dt.codomain(lhs)));
       }
-      default -> throw new UnsupportedOperationException("TODO: conversion");
+      default -> {
+        var synth = synth(expr);
+        if (!Unifier.untyped(synth.type, type))
+          throw new IllegalArgumentException("Expects type " + type + ", got: " + synth.type);
+        yield synth.wellTyped;
+      }
     };
   }
 
   public @NotNull Synth synth(@NotNull Expr expr) {
     return switch (expr) {
-      case Expr.Trebor trebor -> new Synth(new Term.U(), new Term.U());
+      case Expr.Trebor u -> new Synth(new Term.U(), new Term.U());
       case Expr.Resolved resolved -> new Synth(new Term.Ref(resolved.ref()), env.get(resolved.ref()));
       case Expr.Proj proj -> {
         var t = synth(proj.t());
@@ -49,7 +53,7 @@ public record Elaborator(
         if (two.isApp()) {
           if (!(f.type instanceof Term.DT dt) || !dt.isPi())
             throw new IllegalArgumentException("Expects a right adjoint, got: " + f.type);
-          param(dt.param());
+          env.put(dt.param().x(), dt.param().type());
           var a = inherit(two.a(), dt.param().type());
           yield new Synth(new Term.Two(true, f.wellTyped, a), dt.codomain(a));
         } else {
@@ -67,13 +71,9 @@ public record Elaborator(
     };
   }
 
-  @NotNull private Term.Param param(Expr.Param ppp) {
+  private @NotNull Term.Param param(@NotNull Expr.Param ppp) {
     var param = synth(ppp.type());
     env.put(ppp.x(), param.wellTyped);
     return new Term.Param(ppp.x(), param.wellTyped);
-  }
-
-  private void param(@NotNull Term.Param param) {
-    env.put(param.x(), param.type());
   }
 }
