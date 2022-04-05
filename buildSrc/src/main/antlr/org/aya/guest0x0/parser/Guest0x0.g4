@@ -5,20 +5,21 @@ decl : fnDecl;
 fnDecl : 'def' ID param* ':' expr '=>' expr;
 param : '(' ID ':' expr ')';
 expr
+ // Elimination lures
+ : expr expr # two
+ | expr '.1' # fst
+ | expr '.2' # snd
+
  // Type formers
- : 'Type' # trebor // McBride universe a la Trebor
+ | 'Type' # trebor // McBride universe a la Trebor
  | <assoc=right> expr '->' expr # simpFun
+ | <assoc=right> expr '**' expr # simpTup
  | 'Pi' param '->' expr # pi
  | 'Sig' param '**' expr # sig
 
  // Introduction lures
  | '\\' ID '.' expr # lam
  | '<<' expr ',' expr '>>' # pair
-
- // Elimination lures
- | expr expr # two
- | expr '.1' # fst
- | expr '.2' # snd
 
  // Others
  | ID # ref

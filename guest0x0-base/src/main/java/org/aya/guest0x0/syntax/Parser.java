@@ -11,7 +11,7 @@ public record Parser(@NotNull Either<SourceFile, SourcePos> source) {
   public @NotNull Expr expr(@NotNull Guest0x0Parser.ExprContext expr) {
     return switch (expr) {
       case Guest0x0Parser.ParenContext paren -> expr(paren.expr());
-      case Guest0x0Parser.AppContext app -> new Expr.Two(true, sourcePosOf(app), expr(app.expr(0)), expr(app.expr(1)));
+      case Guest0x0Parser.TwoContext app -> new Expr.Two(true, sourcePosOf(app), expr(app.expr(0)), expr(app.expr(1)));
       case Guest0x0Parser.PairContext p -> new Expr.Two(false, sourcePosOf(p), expr(p.expr(0)), expr(p.expr(1)));
       case Guest0x0Parser.FstContext fst -> new Expr.Proj(sourcePosOf(fst), expr(fst.expr()), true);
       case Guest0x0Parser.SndContext snd -> new Expr.Proj(sourcePosOf(snd), expr(snd.expr()), false);
@@ -20,14 +20,16 @@ public record Parser(@NotNull Either<SourceFile, SourcePos> source) {
         new Expr.Lam(sourcePosOf(lam), new LocalVar(lam.ID().getText()), expr(lam.expr()));
       case Guest0x0Parser.RefContext ref -> new Expr.Unresolved(sourcePosOf(ref), ref.ID().getText());
       case Guest0x0Parser.PiContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.param()), expr(pi.expr()));
-      case Guest0x0Parser.SigContext sig -> new Expr.DT(false, sourcePosOf(sig), param(sig.param()), expr(sig.expr()));
-      case Guest0x0Parser.SimpFunContext pi -> {
-        var paramExpr = pi.expr(0);
-        var param = new Expr.Param(sourcePosOf(paramExpr), new LocalVar("_"), expr(paramExpr));
-        yield new Expr.DT(true, sourcePosOf(pi), param, expr(pi.expr(1)));
-      }
+      case Guest0x0Parser.SigContext si -> new Expr.DT(false, sourcePosOf(si), param(si.param()), expr(si.expr()));
+      case Guest0x0Parser.SimpFunContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.expr(0)), expr(pi.expr(1)));
+      case Guest0x0Parser.SimpTupContext si -> new Expr.DT(false, sourcePosOf(si), param(si.expr(0)), expr(si.expr(1)));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
+  }
+
+  @NotNull private Expr.Param param(Guest0x0Parser.ExprContext paramExpr) {
+    var param = new Expr.Param(sourcePosOf(paramExpr), new LocalVar("_"), expr(paramExpr));
+    return param;
   }
 
   private Expr.Param param(Guest0x0Parser.ParamContext param) {

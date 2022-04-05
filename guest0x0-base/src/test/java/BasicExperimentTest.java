@@ -6,6 +6,7 @@ import org.aya.guest0x0.parser.Guest0x0Lexer;
 import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Parser;
+import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Resolver;
 import org.aya.util.error.SourceFile;
@@ -22,12 +23,22 @@ public class BasicExperimentTest {
   }
 
   @Test public void tyckId() {
-    var IdE = expr("Pi (A : Type) -> A -> A");
-    var id = expr("\\A. \\x. x");
-    var akJr = new Elaborator(MutableMap.create());
-    var Id = akJr.synth(IdE);
-    var artifact = akJr.inherit(id, Id.wellTyped());
+    var artifact = tyckExpr("\\A. \\x. x", "Pi (A : Type) -> A -> A");
     assertNotNull(artifact);
+  }
+
+  @Test public void tyckUncurry() {
+    var artifact = tyckExpr("\\A.\\B.\\C.\\t.\\f. f (t.1) (t.2)",
+      """
+        Pi (A : Type) -> Pi (B : Type) -> Pi (C : Type) ->
+          Pi (t : A ** B) -> Pi (f : A -> B -> C) -> C""");
+    assertNotNull(artifact);
+  }
+
+  private @NotNull Term tyckExpr(String term, String type) {
+    var akJr = new Elaborator(MutableMap.create());
+    var Id = akJr.synth(expr(type));
+    return akJr.inherit(expr(term), Id.wellTyped());
   }
 
   private @NotNull Expr expr(String s) {
