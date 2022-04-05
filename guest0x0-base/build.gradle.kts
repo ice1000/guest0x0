@@ -9,8 +9,10 @@ dependencies {
   testImplementation("org.hamcrest", "hamcrest", version = deps.getProperty("version.hamcrest"))
 }
 
+val genDir = "src/main/gen"
+sourceSets["main"].java.srcDir(file(genDir))
 idea.module {
-  sourceDirs.add(file("src/main/gen"))
+  sourceDirs.add(file(genDir))
 }
 
 tasks.named<Test>("test") {
