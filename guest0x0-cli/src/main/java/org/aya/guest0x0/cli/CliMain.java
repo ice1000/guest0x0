@@ -2,7 +2,6 @@ package org.aya.guest0x0.cli;
 
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
-import kala.control.Either;
 import kala.control.Option;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -36,7 +35,7 @@ public class CliMain {
   public static @NotNull ImmutableSeq<Def<Expr>> def(String s) {
     var decls = ImmutableSeq.from(parser(s).program().decl());
     var edj = new Resolver(MutableMap.create());
-    return decls.map(d -> edj.def(new Parser(Either.left(new SourceFile("<input>", Option.none(), s))).def(d)));
+    return decls.map(d -> edj.def(new Parser(new SourceFile("<input>", Option.none(), s)).def(d)));
   }
 
   public static @NotNull Elaborator tyck(String code, boolean verbose) {

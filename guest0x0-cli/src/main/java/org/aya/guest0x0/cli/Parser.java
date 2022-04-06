@@ -2,7 +2,6 @@ package org.aya.guest0x0.cli;
 
 import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
-import kala.control.Either;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.Def;
@@ -22,8 +21,8 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.FstContext fst -> new Expr.Proj(sourcePosOf(fst), expr(fst.expr()), true);
       case Guest0x0Parser.SndContext snd -> new Expr.Proj(sourcePosOf(snd), expr(snd.expr()), false);
       case Guest0x0Parser.TreborContext trebor -> new Expr.Trebor(sourcePosOf(trebor));
-      case Guest0x0Parser.LamContext lam ->
-        buildLam(sourcePosOf(lam), ImmutableSeq.from(lam.ID()).map(id -> new LocalVar(id.getText())), expr(lam.expr()));
+      case Guest0x0Parser.LamContext lam -> buildLam(sourcePosOf(lam),
+        ImmutableSeq.from(lam.ID()).view().map(id -> new LocalVar(id.getText())), expr(lam.expr()));
       case Guest0x0Parser.RefContext ref -> new Expr.Unresolved(sourcePosOf(ref), ref.ID().getText());
       case Guest0x0Parser.PiContext pi -> buildDT(true, sourcePosOf(pi), param(pi.param()), expr(pi.expr()));
       case Guest0x0Parser.SigContext si -> buildDT(false, sourcePosOf(si), param(si.param()), expr(si.expr()));
@@ -44,27 +43,28 @@ public record Parser(@NotNull SourceFile source) {
     };
   }
 
-  private static Expr buildDT(boolean isPi, SourcePos sourcePos, SeqView<Expr.Param> params, Expr body) {
+  private static Expr buildDT(boolean isPi, SourcePos sourcePos, SeqView<Param<Expr>> params, Expr body) {
     if (params.isEmpty()) return body;
     return new Expr.DT(isPi, sourcePos, params.first(),
       // TODO: sourcePosForSubExpr
-      buildDT(isPi, sourcePos, params.view().drop(1), body));
+      buildDT(isPi, sourcePos, params.drop(1), body));
   }
 
   private static Expr buildLam(SourcePos sourcePos, SeqView<LocalVar> params, Expr body) {
     if (params.isEmpty()) return body;
     return new Expr.Lam(sourcePos, params.first(),
       // TODO: sourcePosForSubExpr
-      buildLam(sourcePos, params.view().drop(1), body));
+      buildLam(sourcePos, params.drop(1), body));
   }
 
   private @NotNull Param<Expr> param(Guest0x0Parser.ExprContext paramExpr) {
     return new Param<>(new LocalVar("_"), expr(paramExpr));
   }
 
-  private ImmutableSeq<Param<Expr>> param(Guest0x0Parser.ParamContext param) {
+  private SeqView<Param<Expr>> param(Guest0x0Parser.ParamContext param) {
     var e = expr(param.expr());
-    return ImmutableSeq.from(param.ID()).map(id -> new Param<>(new LocalVar(id.getText()), e));
+    return ImmutableSeq.from(param.ID()).view()
+      .map(id -> new Param<>(new LocalVar(id.getText()), e));
   }
 
   // IN URGENT NEED OF AN ANTLR4 WRAPPER EXTRACTED FROM AYA

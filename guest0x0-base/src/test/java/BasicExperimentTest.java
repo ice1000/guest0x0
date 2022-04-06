@@ -1,5 +1,4 @@
 import kala.collection.mutable.MutableMap;
-import kala.control.Either;
 import org.aya.guest0x0.cli.CliMain;
 import org.aya.guest0x0.cli.Parser;
 import org.aya.guest0x0.syntax.Def;
@@ -73,6 +72,6 @@ public class BasicExperimentTest {
 
   private @NotNull Expr expr(String s) {
     return new Resolver(MutableMap.create())
-      .expr(new Parser(Either.left(SourceFile.NONE)).expr(CliMain.parser(s).expr()));
+      .expr(new Parser(SourceFile.NONE).expr(CliMain.parser(s).expr()));
   }
 }
