@@ -2,6 +2,7 @@ package org.aya.guest0x0.tyck;
 
 import kala.collection.mutable.DynamicArray;
 import kala.collection.mutable.MutableMap;
+import kala.tuple.Tuple;
 import org.aya.guest0x0.syntax.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -79,6 +80,23 @@ public record Elaborator(
         var x = dt.param().x();
         var cod = hof(x, param.wellTyped, () -> synth(dt.cod()));
         yield new Synth(new Term.DT(dt.isPi(), new Param<>(x, param.wellTyped), cod.wellTyped), cod.type);
+      }
+      case Expr.Path path -> {
+        var dims = path.data().dims();
+        for (var dim : dims) gamma.put(dim, new Term.UI(false));
+        var ty = inherit(path.data().ty(), new Term.UI(true));
+        var boundaries = DynamicArray.<Boundary<Term>>create(path.data().boundaries().size());
+        for (var boundary : path.data().boundaries()) {
+          if (!dims.sizeEquals(boundary.pats())) throw new SourcePosException(
+            path.pos(), "Expects " + dims.size() + " patterns, got: " + boundary.pats().size());
+          var jonSterling = new Normalizer(sigma, MutableMap.from(dims.view()
+            .zip(boundary.pats()).filter(p -> p._2 != Boundary.Case.VAR)
+            .map(p -> Tuple.of(p._1, new Term.End(p._2 == Boundary.Case.LEFT)))));
+          var term = inherit(boundary.body(), jonSterling.term(ty));
+          boundaries.append(new Boundary<>(boundary.pats(), term));
+        }
+        var data = new Boundary.Data<>(dims, ty, boundaries.toImmutableArray());
+        yield new Synth(new Term.Path(data), new Term.UI(true));
       }
       default -> throw new SourcePosException(expr.pos(), "Synthesis failed: " + expr);
     };

@@ -45,4 +45,7 @@ public sealed interface Term {
 
   record Path(@NotNull Boundary.Data<Term> data) implements Term {
   }
+
+  record End(boolean isLeft) implements Term {
+  }
 }

@@ -21,6 +21,7 @@ public interface Unifier {
       case Term.UI lu && r instanceof Term.UI ru -> lu.isU() == ru.isU();
       case Term.Call lcall && r instanceof Term.Call rcall -> lcall.fn() == rcall.fn()
         && lcall.args().sameElements(rcall.args(), true);
+      case Term.End lend && r instanceof Term.End rend -> lend.isLeft() == rend.isLeft();
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };
