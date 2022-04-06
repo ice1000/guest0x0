@@ -2,11 +2,20 @@
 
 ![image](https://user-images.githubusercontent.com/16398479/161549473-ef24de7c-3033-4874-8354-54a960b3f873.png)
 
-Experimenting with some basic programming in Java. "Basic programming" includes:
+Experimenting with some basic programming in Java 17 and see the following:
+
++ If Java competes with existing established independently typed languages for writing compilers, like Haskell
++ If capture-avoiding substitution is not too bad (because with nestable pattern matching, de-bruijn indices are too bad)
++ If my understanding of basic programming is appropriate
+
+"Basic programming" includes:
 
 + A "de Morgan flavored" cubical type theory with redtt flavored cubes (the so-called "extension types")
++ A ✨new syntax✨ for cofibration theory that is more convenient for confluence checking and hopefully is equivalent to existing ones
 + Inductive types with pattern matching (hopefully) and "simpler indices" (see my TyDe paper)
 + An equalizer of the first projection of evaluation and just the first projection :trollface:
+
+Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ## Milestones
 

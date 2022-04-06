@@ -20,7 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class CliMain {
-  public static void main(String... args) throws IOException {
+  public static void main(String @NotNull ... args) throws IOException {
     var ak = tyck(Files.readString(Paths.get(args[0])), true);
     System.out.println("Tycked " + ak.sigma().size() + " definitions, phew.");
   }
