@@ -21,12 +21,17 @@ public record Elaborator(
 
   public Term inherit(Expr expr, Term type) {
     return switch (expr) {
-      case Expr.Lam lam -> {
-        if (!(normalize(type) instanceof Term.DT dt) || !dt.isPi())
-          throw new SourcePosException(lam.pos(), "Expects a right adjoint to type " + expr + ", got: " + type);
-        var body = hof(lam.x(), dt.param().type(), () -> inherit(lam.a(), dt.codomain(new Term.Ref(lam.x()))));
-        yield new Term.Lam(new Param<>(lam.x(), dt.param().type()), body);
-      }
+      case Expr.Lam lam -> switch (normalize(type)) {
+        case Term.DT dt && dt.isPi() -> {
+          var body = hof(lam.x(), dt.param().type(), () -> inherit(lam.a(), dt.codomain(new Term.Ref(lam.x()))));
+          yield new Term.Lam(new Param<>(lam.x(), dt.param().type()), body);
+        }
+        // Overloaded lambda
+        case Term.Path path -> {
+          throw new UnsupportedOperationException("Not implemented");
+        }
+        default -> throw new SourcePosException(lam.pos(), "Expects a right adjoint for " + expr + ", got: " + type);
+      };
       case Expr.Two two && !two.isApp() -> {
         if (!(normalize(type) instanceof Term.DT dt) || dt.isPi())
           throw new SourcePosException(two.pos(), "Expects a left adjoint to type " + expr + ", got: " + type);
