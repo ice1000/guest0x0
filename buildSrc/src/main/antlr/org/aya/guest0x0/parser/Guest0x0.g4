@@ -1,8 +1,9 @@
 grammar Guest0x0;
 
 program : decl+;
-decl : fnDecl;
-fnDecl : 'def' ID param* ':' expr '=>' expr;
+decl
+ : 'def' ID param* ':' expr '=>' expr # fnDecl
+ ;
 param : '(' ID ':' expr ')';
 expr
  // Elimination lures

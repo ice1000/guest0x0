@@ -1,5 +1,6 @@
 package org.aya.guest0x0.syntax;
 
+import kala.collection.immutable.ImmutableSeq;
 import kala.control.Either;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.aya.guest0x0.parser.Guest0x0Parser;
@@ -24,6 +25,17 @@ public record Parser(@NotNull Either<SourceFile, SourcePos> source) {
       case Guest0x0Parser.SimpFunContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.expr(0)), expr(pi.expr(1)));
       case Guest0x0Parser.SimpTupContext si -> new Expr.DT(false, sourcePosOf(si), param(si.expr(0)), expr(si.expr(1)));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
+    };
+  }
+
+  public @NotNull Def<Expr> def(@NotNull Guest0x0Parser.DeclContext decl) {
+    return switch (decl) {
+      case Guest0x0Parser.FnDeclContext def -> new Def.Fn<>(
+        new LocalVar(def.ID().getText()),
+        ImmutableSeq.from(def.param()).map(this::param),
+        expr(def.expr(0)),
+        expr(def.expr(1)));
+      default -> throw new IllegalArgumentException("Unknown def: " + decl.getClass().getName());
     };
   }
 

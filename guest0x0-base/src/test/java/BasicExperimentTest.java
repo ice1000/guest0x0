@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.aya.guest0x0.parser.Guest0x0Lexer;
 import org.aya.guest0x0.parser.Guest0x0Parser;
+import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Parser;
 import org.aya.guest0x0.syntax.Term;
@@ -35,15 +36,32 @@ public class BasicExperimentTest {
     assertNotNull(artifact);
   }
 
+  @Test public void fnDef() {
+    var artifact = def("def uncurry (A : Type) (B : Type) (C : Type)" +
+      "(t : A ** B) (f : A -> B -> C) : C => f (t.1) (t.2)");
+    var tycked = andrasKovacs().def(artifact);
+    assertNotNull(tycked);
+  }
+
   private @NotNull Term tyckExpr(String term, String type) {
-    var akJr = new Elaborator(MutableMap.create());
+    var akJr = andrasKovacs();
     var Id = akJr.synth(expr(type));
+    assertEquals(1, akJr.gamma().size());
     return akJr.inherit(expr(term), Id.wellTyped());
+  }
+
+  private @NotNull Elaborator andrasKovacs() {
+    return new Elaborator(MutableMap.create(), MutableMap.create());
   }
 
   private @NotNull Expr expr(String s) {
     return new Resolver(MutableMap.create())
       .expr(new Parser(Either.left(SourceFile.NONE)).expr(parser(s).expr()));
+  }
+
+  private @NotNull Def<Expr> def(String s) {
+    return new Resolver(MutableMap.create())
+      .def(new Parser(Either.left(SourceFile.NONE)).def(parser(s).decl()));
   }
 
   private Guest0x0Parser parser(String s) {
