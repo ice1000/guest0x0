@@ -1,9 +1,13 @@
-package org.aya.guest0x0.syntax;
+package org.aya.guest0x0.cli;
 
 import kala.collection.immutable.ImmutableSeq;
 import kala.control.Either;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.aya.guest0x0.parser.Guest0x0Parser;
+import org.aya.guest0x0.syntax.Def;
+import org.aya.guest0x0.syntax.Expr;
+import org.aya.guest0x0.syntax.LocalVar;
+import org.aya.guest0x0.syntax.Param;
 import org.aya.util.error.SourceFile;
 import org.aya.util.error.SourcePos;
 import org.jetbrains.annotations.NotNull;

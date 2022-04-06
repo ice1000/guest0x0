@@ -11,7 +11,7 @@ plugins {
 repositories { mavenCentral() }
 
 val rootDir = projectDir.parentFile!!
-val genDir = rootDir.resolve("guest0x0-base/src/main/gen")
+val genDir = rootDir.resolve("guest0x0-cli/src/main/gen")
 
 tasks.withType<AntlrTask>().configureEach antlr@{
   outputDirectory = genDir

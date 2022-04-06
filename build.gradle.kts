@@ -98,7 +98,7 @@ subprojects {
   val proj = this@subprojects
   publishing.publications {
     create<MavenPublication>("maven") {
-      val githubUrl = "https://github.com/aya-prover/aya-dev"
+      val githubUrl = "https://github.com/ice1000/guest0x0"
       groupId = proj.group.toString()
       version = proj.version.toString()
       artifactId = proj.name

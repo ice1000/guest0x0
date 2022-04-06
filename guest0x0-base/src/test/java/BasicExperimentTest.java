@@ -3,11 +3,11 @@ import kala.collection.mutable.MutableMap;
 import kala.control.Either;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.aya.guest0x0.cli.Parser;
 import org.aya.guest0x0.parser.Guest0x0Lexer;
 import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Expr;
-import org.aya.guest0x0.syntax.Parser;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Resolver;
@@ -78,7 +78,6 @@ public class BasicExperimentTest {
   private @NotNull Term tyckExpr(String term, String type) {
     var akJr = andrasKovacs();
     var Id = akJr.synth(expr(type));
-    assertEquals(1, akJr.gamma().size());
     return akJr.inherit(expr(term), Id.wellTyped());
   }
 
