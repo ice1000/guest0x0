@@ -3,15 +3,15 @@ package org.aya.guest0x0.syntax;
 import kala.collection.immutable.ImmutableSeq;
 import org.jetbrains.annotations.NotNull;
 
-public sealed interface Def {
-  @NotNull ImmutableSeq<Term.Param> telescope();
+public sealed interface Def<Term> {
+  @NotNull ImmutableSeq<Param<Term>> telescope();
   @NotNull LocalVar name();
 
-  record Fn(
+  record Fn<Term>(
     @Override @NotNull LocalVar name,
-    @Override @NotNull ImmutableSeq<Term.Param> telescope,
+    @Override @NotNull ImmutableSeq<Param<Term>> telescope,
     @NotNull Term result,
     @NotNull Term body
-  ) implements Def {
+  ) implements Def<Term> {
   }
 }

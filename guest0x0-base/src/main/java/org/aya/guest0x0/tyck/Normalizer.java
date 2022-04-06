@@ -2,6 +2,7 @@ package org.aya.guest0x0.tyck;
 
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.syntax.LocalVar;
+import org.aya.guest0x0.syntax.Param;
 import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,11 +11,11 @@ public record Normalizer(@NotNull MutableMap<LocalVar, Term> rho) {
     return new Normalizer(MutableMap.create()).term(term);
   }
 
-  public @NotNull Term.Param param(@NotNull Term.Param param) {
-    return new Term.Param(param.x(), term(param.type()));
+  public Param<Term> param(Param<Term> param) {
+    return new Param<>(param.x(), term(param.type()));
   }
 
-  public @NotNull Term term(@NotNull Term term) {
+  public Term term(Term term) {
     return switch (term) {
       case Term.Ref ref -> rho.getOption(ref.var())
         .map(Renamer::f)
@@ -39,12 +40,12 @@ public record Normalizer(@NotNull MutableMap<LocalVar, Term> rho) {
     };
   }
 
-  record Renamer(@NotNull MutableMap<LocalVar, LocalVar> map) {
+  record Renamer(MutableMap<LocalVar, LocalVar> map) {
     public static @NotNull Term f(@NotNull Term term) {
       return new Renamer(MutableMap.create()).term(term);
     }
 
-    public @NotNull Term term(@NotNull Term term) {
+    public Term term(Term term) {
       return switch (term) {
         case Term.Lam lam -> {
           var param = param(lam.param());
@@ -63,10 +64,10 @@ public record Normalizer(@NotNull MutableMap<LocalVar, Term> rho) {
       };
     }
 
-    private @NotNull Term.Param param(Term.Param param) {
+    private Param<Term> param(Param<Term> param) {
       var var = new LocalVar(param.x().name());
       map.put(param.x(), var);
-      return new Term.Param(var, term(param.type()));
+      return new Param<>(var, term(param.type()));
     }
   }
 }

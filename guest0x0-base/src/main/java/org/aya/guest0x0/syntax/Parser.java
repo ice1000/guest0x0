@@ -27,13 +27,12 @@ public record Parser(@NotNull Either<SourceFile, SourcePos> source) {
     };
   }
 
-  @NotNull private Expr.Param param(Guest0x0Parser.ExprContext paramExpr) {
-    var param = new Expr.Param(sourcePosOf(paramExpr), new LocalVar("_"), expr(paramExpr));
-    return param;
+  private @NotNull Param<Expr> param(Guest0x0Parser.ExprContext paramExpr) {
+    return new Param<>(new LocalVar("_"), expr(paramExpr));
   }
 
-  private Expr.Param param(Guest0x0Parser.ParamContext param) {
-    return new Expr.Param(sourcePosOf(param), new LocalVar(param.ID().getText()), expr(param.expr()));
+  private Param<Expr> param(Guest0x0Parser.ParamContext param) {
+    return new Param<>(new LocalVar(param.ID().getText()), expr(param.expr()));
   }
 
   // IN URGENT NEED OF AN ANTLR4 WRAPPER EXTRACTED FROM AYA

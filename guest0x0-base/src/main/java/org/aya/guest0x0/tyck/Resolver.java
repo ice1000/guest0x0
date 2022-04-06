@@ -4,11 +4,12 @@ import kala.collection.mutable.MutableMap;
 import kala.control.Option;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.LocalVar;
+import org.aya.guest0x0.syntax.Param;
 import org.jetbrains.annotations.NotNull;
 
 public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
-  public @NotNull Expr.Param param(@NotNull Expr.Param param) {
-    return new Expr.Param(param.pos(), param.x(), expr(param.type()));
+  public @NotNull Param<Expr> param(@NotNull Param<Expr> param) {
+    return new Param<>(param.x(), expr(param.type()));
   }
 
   public @NotNull Expr expr(@NotNull Expr expr) {

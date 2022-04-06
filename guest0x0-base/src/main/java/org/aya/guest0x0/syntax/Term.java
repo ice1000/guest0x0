@@ -9,9 +9,6 @@ public sealed interface Term {
     return new Normalizer(MutableMap.of(x, t)).term(this);
   }
 
-  record Param(@NotNull LocalVar x, @NotNull Term type) {
-  }
-
   record Ref(@NotNull LocalVar var) implements Term {
   }
 
@@ -21,12 +18,12 @@ public sealed interface Term {
   record Proj(@NotNull Term t, boolean isOne) implements Term {
   }
 
-  record Lam(@NotNull Param param, @NotNull Term body) implements Term {
+  record Lam(@NotNull Param<Term> param, @NotNull Term body) implements Term {
   }
 
-  record DT(boolean isPi, @NotNull Param param, @NotNull Term cod) implements Term {
+  record DT(boolean isPi, @NotNull Param<Term> param, @NotNull Term cod) implements Term {
     public @NotNull Term codomain(@NotNull Term term) {
-      return cod.subst(param.x, term);
+      return cod.subst(param.x(), term);
     }
   }
 

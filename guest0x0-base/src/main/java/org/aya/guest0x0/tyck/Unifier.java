@@ -1,6 +1,7 @@
 package org.aya.guest0x0.tyck;
 
 import org.aya.guest0x0.syntax.LocalVar;
+import org.aya.guest0x0.syntax.Param;
 import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +23,7 @@ public interface Unifier {
     };
   }
 
-  private static @NotNull Term rhs(@NotNull Term body, @NotNull Term.Param param, @NotNull LocalVar x) {
+  private static @NotNull Term rhs(@NotNull Term body, @NotNull Param param, @NotNull LocalVar x) {
     return body.subst(x, new Term.Ref(param.x()));
   }
 }

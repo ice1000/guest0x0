@@ -7,18 +7,19 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Supplier;
 
 public record Elaborator(
-  @NotNull MutableMap<LocalVar, Term> gamma
+  MutableMap<LocalVar, Def<Term>> sigma,
+  MutableMap<LocalVar, Term> gamma
 ) {
-  public record Synth(@NotNull Term wellTyped, @NotNull Term type) {
+  public record Synth(Term wellTyped, Term type) {
   }
 
-  public @NotNull Term inherit(@NotNull Expr expr, @NotNull Term type) {
+  public Term inherit(Expr expr, Term type) {
     return switch (expr) {
       case Expr.Lam lam -> {
         if (!(Normalizer.f(type) instanceof Term.DT dt) || !dt.isPi())
           throw new IllegalArgumentException("Expects a right adjoint to type " + expr + ", got: " + type);
         var body = hof(lam.x(), dt.param().type(), () -> inherit(lam.a(), dt.codomain(new Term.Ref(lam.x()))));
-        yield new Term.Lam(new Term.Param(lam.x(), dt.param().type()), body);
+        yield new Term.Lam(new Param<>(lam.x(), dt.param().type()), body);
       }
       case Expr.Two two && !two.isApp() -> {
         if (!(Normalizer.f(type) instanceof Term.DT dt) || dt.isPi())
@@ -35,7 +36,7 @@ public record Elaborator(
     };
   }
 
-  public @NotNull Synth synth(@NotNull Expr expr) {
+  public Synth synth(Expr expr) {
     return switch (expr) {
       case Expr.Trebor u -> new Synth(new Term.U(), new Term.U());
       case Expr.Resolved resolved -> new Synth(new Term.Ref(resolved.ref()), gamma.get(resolved.ref()));
@@ -57,14 +58,14 @@ public record Elaborator(
         } else {
           var a = synth(two.a());
           yield new Synth(new Term.Two(false, f.wellTyped, a.wellTyped),
-            new Term.DT(false, new Term.Param(new LocalVar("_"), f.type), a.type));
+            new Term.DT(false, new Param<>(new LocalVar("_"), f.type), a.type));
         }
       }
       case Expr.DT dt -> {
         var param = synth(dt.param().type());
         var x = dt.param().x();
         var cod = hof(x, param.wellTyped, () -> synth(dt.cod()));
-        yield new Synth(new Term.DT(dt.isPi(), new Term.Param(x, param.wellTyped), cod.wellTyped), cod.type);
+        yield new Synth(new Term.DT(dt.isPi(), new Param<>(x, param.wellTyped), cod.wellTyped), cod.type);
       }
       default -> throw new IllegalArgumentException("Synthesis failed: " + expr);
     };
@@ -77,7 +78,7 @@ public record Elaborator(
     return ok;
   }
 
-  public @NotNull Def def(@NotNull Decl decl) {
+  public @NotNull Def<Term> def(@NotNull Def<Expr> def) {
     throw new UnsupportedOperationException("Not implemented");
   }
 }
