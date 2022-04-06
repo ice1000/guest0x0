@@ -1,14 +1,14 @@
 package org.aya.guest0x0.tyck;
 
 import kala.collection.mutable.MutableMap;
-import org.aya.guest0x0.syntax.Expr;
-import org.aya.guest0x0.syntax.LocalVar;
-import org.aya.guest0x0.syntax.Term;
+import org.aya.guest0x0.syntax.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public record Elaborator(@NotNull MutableMap<LocalVar, Term> env) {
+public record Elaborator(
+  @NotNull MutableMap<LocalVar, Term> gamma
+) {
   public record Synth(@NotNull Term wellTyped, @NotNull Term type) {
   }
 
@@ -38,7 +38,7 @@ public record Elaborator(@NotNull MutableMap<LocalVar, Term> env) {
   public @NotNull Synth synth(@NotNull Expr expr) {
     return switch (expr) {
       case Expr.Trebor u -> new Synth(new Term.U(), new Term.U());
-      case Expr.Resolved resolved -> new Synth(new Term.Ref(resolved.ref()), env.get(resolved.ref()));
+      case Expr.Resolved resolved -> new Synth(new Term.Ref(resolved.ref()), gamma.get(resolved.ref()));
       case Expr.Proj proj -> {
         var t = synth(proj.t());
         if (!(t.type instanceof Term.DT dt) || dt.isPi())
@@ -71,9 +71,13 @@ public record Elaborator(@NotNull MutableMap<LocalVar, Term> env) {
   }
 
   private <T> T hof(@NotNull LocalVar x, @NotNull Term type, @NotNull Supplier<T> t) {
-    env.put(x, type);
+    gamma.put(x, type);
     var ok = t.get();
-    env.remove(x);
+    gamma.remove(x);
     return ok;
+  }
+
+  public @NotNull Def def(@NotNull Decl decl) {
+    throw new UnsupportedOperationException("Not implemented");
   }
 }

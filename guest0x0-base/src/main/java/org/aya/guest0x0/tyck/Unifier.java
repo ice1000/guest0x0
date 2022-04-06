@@ -12,7 +12,8 @@ public interface Unifier {
       case Term.Ref lref && r instanceof Term.Ref rref -> lref == rref;
       case Term.Two lapp && r instanceof Term.Two rapp ->
         lapp.isApp() == rapp.isApp() && untyped(lapp.f(), rapp.f()) && untyped(lapp.a(), rapp.a());
-      case Term.DT ldt && r instanceof Term.DT rdt -> untyped(ldt.param().type(), rdt.param().type())
+      case Term.DT ldt && r instanceof Term.DT rdt -> ldt.isPi() == rdt.isPi()
+        && untyped(ldt.param().type(), rdt.param().type())
         && untyped(ldt.cod(), rhs(rdt.cod(), ldt.param(), rdt.param().x()));
       case Term.Proj lproj && r instanceof Term.Proj rproj ->
         lproj.isOne() == rproj.isOne() && untyped(lproj.t(), rproj.t());
