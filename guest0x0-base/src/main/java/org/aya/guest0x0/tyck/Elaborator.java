@@ -22,20 +22,20 @@ public record Elaborator(
     return switch (expr) {
       case Expr.Lam lam -> {
         if (!(normalize(type) instanceof Term.DT dt) || !dt.isPi())
-          throw new IllegalArgumentException("Expects a right adjoint to type " + expr + ", got: " + type);
+          throw new SourcePosException(lam.pos(), "Expects a right adjoint to type " + expr + ", got: " + type);
         var body = hof(lam.x(), dt.param().type(), () -> inherit(lam.a(), dt.codomain(new Term.Ref(lam.x()))));
         yield new Term.Lam(new Param<>(lam.x(), dt.param().type()), body);
       }
       case Expr.Two two && !two.isApp() -> {
         if (!(normalize(type) instanceof Term.DT dt) || dt.isPi())
-          throw new IllegalArgumentException("Expects a left adjoint to type " + expr + ", got: " + type);
+          throw new SourcePosException(two.pos(), "Expects a left adjoint to type " + expr + ", got: " + type);
         var lhs = inherit(two.f(), dt.param().type());
         yield new Term.Two(false, lhs, inherit(two.a(), dt.codomain(lhs)));
       }
       default -> {
         var synth = synth(expr);
         if (!Unifier.untyped(normalize(synth.type), normalize(type)))
-          throw new IllegalArgumentException("Expects type " + type + ", got: " + synth.type);
+          throw new SourcePosException(expr.pos(), "Expects type " + type + ", got: " + synth.type);
         yield synth.wellTyped;
       }
     };
@@ -56,7 +56,7 @@ public record Elaborator(
       case Expr.Proj proj -> {
         var t = synth(proj.t());
         if (!(t.type instanceof Term.DT dt) || dt.isPi())
-          throw new IllegalArgumentException("Expects a left adjoint, got: " + t.type);
+          throw new SourcePosException(proj.pos(), "Expects a left adjoint, got: " + t.type);
         var fst = new Term.Proj(t.wellTyped, true);
         if (proj.isOne()) yield new Synth(fst, dt.param().type());
         yield new Synth(new Term.Proj(t.wellTyped, false), dt.codomain(fst));
@@ -65,7 +65,7 @@ public record Elaborator(
         var f = synth(two.f());
         if (two.isApp()) {
           if (!(normalize(f.type) instanceof Term.DT dt) || !dt.isPi())
-            throw new IllegalArgumentException("Expects a right adjoint, got: " + f.type);
+            throw new SourcePosException(two.pos(), "Expects a right adjoint, got: " + f.type);
           var a = hof(dt.param().x(), dt.param().type(), () -> inherit(two.a(), dt.param().type()));
           yield new Synth(new Term.Two(true, f.wellTyped, a), dt.codomain(a));
         } else {
@@ -80,7 +80,7 @@ public record Elaborator(
         var cod = hof(x, param.wellTyped, () -> synth(dt.cod()));
         yield new Synth(new Term.DT(dt.isPi(), new Param<>(x, param.wellTyped), cod.wellTyped), cod.type);
       }
-      default -> throw new IllegalArgumentException("Synthesis failed: " + expr);
+      default -> throw new SourcePosException(expr.pos(), "Synthesis failed: " + expr);
     };
   }
 

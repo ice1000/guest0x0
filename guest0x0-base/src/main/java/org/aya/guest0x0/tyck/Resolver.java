@@ -1,6 +1,5 @@
 package org.aya.guest0x0.tyck;
 
-import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.DynamicArray;
 import kala.collection.mutable.MutableMap;
 import kala.control.Option;
@@ -46,7 +45,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
       case Expr.Trebor trebor -> trebor;
       case Expr.Unresolved unresolved -> env.getOption(unresolved.name())
         .map(x -> new Expr.Resolved(unresolved.pos(), x))
-        .getOrThrow(() -> new RuntimeException("unresolved: " + unresolved.name()));
+        .getOrThrow(() -> new SourcePosException(unresolved.pos(), "unresolved: " + unresolved.name()));
       case Expr.Resolved resolved -> resolved;
       case Expr.Proj proj -> new Expr.Proj(proj.pos(), expr(proj.t()), proj.isOne());
     };
