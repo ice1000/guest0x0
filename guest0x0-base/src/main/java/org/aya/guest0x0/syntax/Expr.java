@@ -22,7 +22,8 @@ public sealed interface Expr {
   record Proj(@Override @NotNull SourcePos pos, @NotNull Expr t, boolean isOne) implements Expr {
   }
 
-  record Trebor(@Override @NotNull SourcePos pos) implements Expr {
+  /** @param isU it's the interval type if false */
+  record UI(@Override @NotNull SourcePos pos, boolean isU) implements Expr {
   }
 
   /** @param isPi it's a sigma if false */

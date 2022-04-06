@@ -20,7 +20,8 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.PairContext p -> new Expr.Two(false, sourcePosOf(p), expr(p.expr(0)), expr(p.expr(1)));
       case Guest0x0Parser.FstContext fst -> new Expr.Proj(sourcePosOf(fst), expr(fst.expr()), true);
       case Guest0x0Parser.SndContext snd -> new Expr.Proj(sourcePosOf(snd), expr(snd.expr()), false);
-      case Guest0x0Parser.TreborContext trebor -> new Expr.Trebor(sourcePosOf(trebor));
+      case Guest0x0Parser.TreborContext trebor -> new Expr.UI(sourcePosOf(trebor), true);
+      case Guest0x0Parser.IntervalContext interval -> new Expr.UI(sourcePosOf(interval), false);
       case Guest0x0Parser.LamContext lam -> buildLam(sourcePosOf(lam),
         ImmutableSeq.from(lam.ID()).view().map(id -> new LocalVar(id.getText())), expr(lam.expr()));
       case Guest0x0Parser.RefContext ref -> new Expr.Unresolved(sourcePosOf(ref), ref.ID().getText());

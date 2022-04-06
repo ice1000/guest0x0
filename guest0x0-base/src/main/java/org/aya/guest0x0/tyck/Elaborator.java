@@ -43,7 +43,7 @@ public record Elaborator(
 
   public Synth synth(Expr expr) {
     return switch (expr) {
-      case Expr.Trebor u -> new Synth(Term.U, Term.U);
+      case Expr.UI u -> new Synth(new Term.UI(u.isU()), new Term.UI(true));
       case Expr.Resolved resolved -> {
         var type = gamma.getOrNull(resolved.ref());
         if (type != null) yield new Synth(new Term.Ref(resolved.ref()), type);
@@ -96,11 +96,11 @@ public record Elaborator(
       case Def.Fn<Expr> fn -> {
         var telescope = DynamicArray.<Param<Term>>create(fn.telescope().size());
         for (var param : def.telescope()) {
-          var ty = inherit(param.type(), Term.U);
+          var ty = inherit(param.type(), new Term.UI(true));
           telescope.append(new Param<>(param.x(), ty));
           gamma.put(param.x(), ty);
         }
-        var result = inherit(fn.result(), Term.U);
+        var result = inherit(fn.result(), new Term.UI(true));
         var body = inherit(fn.body(), result);
         telescope.forEach(key -> gamma.remove(key.x()));
         yield new Def.Fn<>(def.name(), telescope.toImmutableArray(), result, body);

@@ -12,7 +12,8 @@ expr
  | expr '.2' # snd
 
  // Type formers
- | 'Type' # trebor // McBride universe a la Trebor
+ | 'U' # trebor // McBride universe a la Trebor
+ | 'I' # interval
  | <assoc=right> expr '->' expr # simpFun
  | <assoc=right> expr '**' expr # simpTup
  | 'Pi' param '->' expr # pi

@@ -17,7 +17,7 @@ public record Normalizer(
       case Term.Ref ref -> rho.getOption(ref.var())
         .map(Renamer::f)
         .map(this::term).getOrDefault(ref);
-      case Term.U u -> u;
+      case Term.UI u -> u;
       case Term.Lam lam -> new Term.Lam(param(lam.param()), term(lam.body()));
       case Term.DT dt -> new Term.DT(dt.isPi(), param(dt.param()), term(dt.cod()));
       case Term.Two two -> {
@@ -56,7 +56,7 @@ public record Normalizer(
           // Make sure to param before bodying
           yield new Term.Lam(param, term(lam.body()));
         }
-        case Term.U u -> u;
+        case Term.UI u -> u;
         case Term.Ref ref -> map.getOption(ref.var()).map(Term.Ref::new).getOrDefault(ref);
         case Term.DT dt -> {
           var param = param(dt.param());

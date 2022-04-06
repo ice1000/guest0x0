@@ -18,7 +18,7 @@ public interface Unifier {
         && untyped(ldt.cod(), rhs(rdt.cod(), ldt.param(), rdt.param().x()));
       case Term.Proj lproj && r instanceof Term.Proj rproj ->
         lproj.isOne() == rproj.isOne() && untyped(lproj.t(), rproj.t());
-      case Term.U lu && r instanceof Term.U ru -> true;
+      case Term.UI lu && r instanceof Term.UI ru -> lu.isU() == ru.isU();
       case Term.Call lcall && r instanceof Term.Call rcall -> lcall.fn() == rcall.fn()
         && lcall.args().sameElements(rcall.args(), true);
       // Cubical subtyping?? Are we ever gonna unify cubes?

@@ -40,15 +40,7 @@ public sealed interface Term {
     return telescope.view().foldRight(body, (param, term) -> new DT(true, param, term));
   }
 
-  @NotNull U U = new U();
-
-  final class U implements Term {
-    private U() {
-    }
-
-    @Override public String toString() {
-      return "U";
-    }
+  record UI(boolean isU) implements Term {
   }
 
   record Path(@NotNull Boundary.Data<Term> data) implements Term {
