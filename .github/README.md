@@ -13,8 +13,8 @@ Experimenting with some basic programming in Java. "Basic programming" includes:
 ### v0.1
 
 Minimal type checker with definitions, pi, sigma, and universe.
-484 lines of Java code (including comments and blank lines), comparable to Mini-TT
-(Main.hs and Core/Abs.hs, 358 + 46 = 404 lines in Haskell).
+484 lines of Java code (including comments and blank lines and `import` statements in many files),
+comparable to Mini-TT (Main.hs and Core/Abs.hs, 358 + 46 = 404 lines in Haskell).
 But Mini-TT supports (a cursed version of) sum types.
 
 ```

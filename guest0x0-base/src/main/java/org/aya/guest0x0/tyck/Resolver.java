@@ -10,6 +10,23 @@ import org.aya.guest0x0.syntax.Param;
 import org.jetbrains.annotations.NotNull;
 
 public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
+  private @NotNull TeleCache mkCache(int initialCapacity) {
+    return new TeleCache(this, DynamicArray.create(initialCapacity), DynamicArray.create(initialCapacity));
+  }
+
+  private record TeleCache(Resolver ctx, DynamicArray<LocalVar> recover, DynamicArray<LocalVar> remove) {
+    private void add(@NotNull LocalVar var) {
+      var put = ctx.put(var);
+      if (put.isDefined()) recover.append(put.get());
+      else remove.append(var);
+    }
+
+    private void purge() {
+      remove.forEach(key -> ctx.env.remove(key.name()));
+      recover.forEach(ctx::put);
+    }
+  }
+
   public @NotNull Param<Expr> param(@NotNull Param<Expr> param) {
     return new Param<>(param.x(), expr(param.type()));
   }
@@ -18,20 +35,16 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
     return switch (def) {
       case Def.Fn<Expr> fn -> {
         var telescope = DynamicArray.<Param<Expr>>create(fn.telescope().size());
-        var toRecover = DynamicArray.<LocalVar>create(fn.telescope().size());
-        var toRemove = DynamicArray.<LocalVar>create(fn.telescope().size());
-        for (var param : def.telescope()) {
+        var cache = mkCache(fn.telescope().size());
+        for (var param : fn.telescope()) {
           var ty = expr(param.type());
           telescope.append(new Param<>(param.x(), ty));
-          var put = put(param.x());
-          if (put.isDefined()) toRecover.append(put.get());
-          else toRemove.append(param.x());
+          cache.add(param.x());
         }
         var result = expr(fn.result());
         put(fn.name());
         var body = expr(fn.body());
-        toRemove.forEach(key -> env.remove(key.name()));
-        toRecover.forEach(this::put);
+        cache.purge();
         yield new Def.Fn<>(fn.name(), telescope.toImmutableArray(), result, body);
       }
     };
@@ -48,6 +61,12 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
         .getOrThrow(() -> new SourcePosException(unresolved.pos(), "unresolved: " + unresolved.name()));
       case Expr.Resolved resolved -> resolved;
       case Expr.Proj proj -> new Expr.Proj(proj.pos(), expr(proj.t()), proj.isOne());
+      case Expr.Path path -> {
+        var dims = path.data().dims();
+        var state = mkCache(dims.size());
+        dims.forEach(state::add);
+        yield new Expr.Path(path.pos(), path.data().fmap(this::expr, dims));
+      }
     };
   }
 
