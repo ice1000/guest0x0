@@ -10,7 +10,7 @@ public interface Unifier {
     return switch (l) {
       case Term.Lam lam && r instanceof Term.Lam ram ->
         untyped(lam.body(), rhs(ram.body(), lam.param(), ram.param().x()));
-      case Term.Ref lref && r instanceof Term.Ref rref -> lref == rref;
+      case Term.Ref lref && r instanceof Term.Ref rref -> lref.var() == rref.var();
       case Term.Two lapp && r instanceof Term.Two rapp ->
         lapp.isApp() == rapp.isApp() && untyped(lapp.f(), rapp.f()) && untyped(lapp.a(), rapp.a());
       case Term.DT ldt && r instanceof Term.DT rdt -> ldt.isPi() == rdt.isPi()
@@ -23,7 +23,7 @@ public interface Unifier {
     };
   }
 
-  private static @NotNull Term rhs(@NotNull Term body, @NotNull Param param, @NotNull LocalVar x) {
+  private static @NotNull Term rhs(Term body, Param<Term> param, LocalVar x) {
     return body.subst(x, new Term.Ref(param.x()));
   }
 }
