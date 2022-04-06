@@ -3,6 +3,7 @@ package org.aya.guest0x0.cli;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
 import kala.control.Either;
+import kala.control.Option;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.aya.guest0x0.parser.Guest0x0Lexer;
@@ -20,7 +21,7 @@ import java.nio.file.Paths;
 
 public class CliMain {
   public static void main(String... args) throws IOException {
-    var ak = tyck(Files.readString(Paths.get(args[0])));
+    var ak = tyck(Files.readString(Paths.get(args[0])), true);
     System.out.println("Tycked " + ak.sigma().size() + " definitions, phew.");
   }
 
@@ -35,15 +36,16 @@ public class CliMain {
   public static @NotNull ImmutableSeq<Def<Expr>> def(String s) {
     var decls = ImmutableSeq.from(parser(s).program().decl());
     var edj = new Resolver(MutableMap.create());
-    return decls.map(d -> edj.def(new Parser(Either.left(SourceFile.NONE)).def(d)));
+    return decls.map(d -> edj.def(new Parser(Either.left(new SourceFile("<input>", Option.none(), s))).def(d)));
   }
 
-  public static @NotNull Elaborator tyck(String code) {
+  public static @NotNull Elaborator tyck(String code, boolean verbose) {
     var artifact = def(code);
     var akJr = andrasKovacs();
     for (var def : artifact) {
       var tycked = akJr.def(def);
       akJr.sigma().put(tycked.name(), tycked);
+      if (verbose) System.out.println(tycked.name());
     }
     return akJr;
   }

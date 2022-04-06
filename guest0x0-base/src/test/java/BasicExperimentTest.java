@@ -5,6 +5,7 @@ import org.aya.guest0x0.cli.Parser;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Term;
+import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Resolver;
 import org.aya.util.error.SourceFile;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +41,7 @@ public class BasicExperimentTest {
   }
 
   @Test public void dontSayLazy() {
-    var akJr = CliMain.tyck("""
+    var akJr = tyck("""
       def uncurry (A : Type) (B : Type) (C : Type)
         (t : A ** B) (f : A -> B -> C) : C => f (t.1) (t.2)
       def uncurry' (A : Type) (t : A ** A) (f : A -> A -> A) : A => uncurry A A A t f
@@ -52,7 +53,7 @@ public class BasicExperimentTest {
   }
 
   @Test public void leibniz() {
-    var akJr = CliMain.tyck("""
+    var akJr = tyck("""
       def Eq (A : Type) (a : A) (b : A) : Type => Pi (P : A -> Type) -> P a -> P b
       def refl (A : Type) (a : A) : Eq A a a => \\P. \\pa. pa
       def sym (A : Type) (a : A) (b : A) (e : Eq A a b) : Eq A b a => e (\\b. Eq A b a) (refl A a)
@@ -64,6 +65,10 @@ public class BasicExperimentTest {
     var akJr = CliMain.andrasKovacs();
     var Id = akJr.synth(expr(type));
     return akJr.inherit(expr(term), Id.wellTyped());
+  }
+
+  private @NotNull Elaborator tyck(String s) {
+    return CliMain.tyck(s, false);
   }
 
   private @NotNull Expr expr(String s) {
