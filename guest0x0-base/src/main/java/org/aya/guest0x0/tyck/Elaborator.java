@@ -80,10 +80,6 @@ public record Elaborator(
     return ok;
   }
 
-  public void file(ImmutableSeq<Def<Expr>> defs) {
-    for (var def : defs) sigma.put(def.name(), def(def));
-  }
-
   public Def<Term> def(Def<Expr> def) {
     return switch (def) {
       case Def.Fn<Expr> fn -> {
@@ -94,7 +90,9 @@ public record Elaborator(
           gamma.put(param.x(), ty);
         }
         var result = inherit(fn.result(), Term.U);
-        yield new Def.Fn<>(def.name(), telescope.toImmutableArray(), result, inherit(fn.body(), result));
+        var body = inherit(fn.body(), result);
+        telescope.forEach(key -> gamma.remove(key.x()));
+        yield new Def.Fn<>(def.name(), telescope.toImmutableArray(), result, body);
       }
     };
   }
