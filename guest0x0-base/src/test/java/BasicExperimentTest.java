@@ -1,3 +1,4 @@
+import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
 import kala.control.Either;
 import org.antlr.v4.runtime.CharStreams;
@@ -38,9 +39,25 @@ public class BasicExperimentTest {
 
   @Test public void fnDef() {
     var artifact = def("def uncurry (A : Type) (B : Type) (C : Type)" +
-      "(t : A ** B) (f : A -> B -> C) : C => f (t.1) (t.2)");
+      "(t : A ** B) (f : A -> B -> C) : C => f (t.1) (t.2)").first();
     var tycked = andrasKovacs().def(artifact);
     assertNotNull(tycked);
+  }
+
+  @Test public void dontSayLazy() {
+    var artifact = def("""
+      def uncurry (A : Type) (B : Type) (C : Type)
+        (t : A ** B) (f : A -> B -> C) : C => f (t.1) (t.2)
+      def uncurry' (A : Type) (t : A ** A) (f : A -> A -> A) : A => uncurry A A A t f
+      """);
+    var akJr = andrasKovacs();
+    for (var def : artifact) {
+      var tycked = akJr.def(def);
+      akJr.sigma().put(tycked.name(), tycked);
+      assertNotNull(tycked);
+      var body = ((Def.Fn<Term>) tycked).body();
+      assertTrue(akJr.normalize(body) instanceof Term.Two two && two.isApp());
+    }
   }
 
   private @NotNull Term tyckExpr(String term, String type) {
@@ -59,9 +76,10 @@ public class BasicExperimentTest {
       .expr(new Parser(Either.left(SourceFile.NONE)).expr(parser(s).expr()));
   }
 
-  private @NotNull Def<Expr> def(String s) {
-    return new Resolver(MutableMap.create())
-      .def(new Parser(Either.left(SourceFile.NONE)).def(parser(s).decl()));
+  private @NotNull ImmutableSeq<Def<Expr>> def(String s) {
+    var decls = ImmutableSeq.from(parser(s).program().decl());
+    var edj = new Resolver(MutableMap.create());
+    return decls.map(d -> edj.def(new Parser(Either.left(SourceFile.NONE)).def(d)));
   }
 
   private Guest0x0Parser parser(String s) {

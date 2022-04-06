@@ -11,7 +11,7 @@ public record Elaborator(
   MutableMap<LocalVar, Def<Term>> sigma,
   MutableMap<LocalVar, Term> gamma
 ) {
-  private @NotNull Term normalize(@NotNull Term term) {
+  @NotNull public Term normalize(@NotNull Term term) {
     return new Normalizer(sigma, MutableMap.create()).term(term);
   }
 
