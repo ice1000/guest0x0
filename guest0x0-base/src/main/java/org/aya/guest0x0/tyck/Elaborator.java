@@ -8,9 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public record Elaborator(
-  @NotNull MutableMap<LocalVar, Term> env
-) {
+public record Elaborator(@NotNull MutableMap<LocalVar, Term> env) {
   public record Synth(@NotNull Term wellTyped, @NotNull Term type) {
   }
 
