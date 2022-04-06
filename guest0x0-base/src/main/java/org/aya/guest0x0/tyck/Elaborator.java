@@ -1,6 +1,5 @@
 package org.aya.guest0x0.tyck;
 
-import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.DynamicArray;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.syntax.*;
@@ -12,26 +11,30 @@ public record Elaborator(
   MutableMap<LocalVar, Def<Term>> sigma,
   MutableMap<LocalVar, Term> gamma
 ) {
-  public record Synth(Term wellTyped, Term type) {
+  private @NotNull Term normalize(@NotNull Term term) {
+    return new Normalizer(sigma, MutableMap.create()).term(term);
+  }
+
+  public record Synth(@NotNull Term wellTyped, @NotNull Term type) {
   }
 
   public Term inherit(Expr expr, Term type) {
     return switch (expr) {
       case Expr.Lam lam -> {
-        if (!(Normalizer.f(type) instanceof Term.DT dt) || !dt.isPi())
+        if (!(normalize(type) instanceof Term.DT dt) || !dt.isPi())
           throw new IllegalArgumentException("Expects a right adjoint to type " + expr + ", got: " + type);
         var body = hof(lam.x(), dt.param().type(), () -> inherit(lam.a(), dt.codomain(new Term.Ref(lam.x()))));
         yield new Term.Lam(new Param<>(lam.x(), dt.param().type()), body);
       }
       case Expr.Two two && !two.isApp() -> {
-        if (!(Normalizer.f(type) instanceof Term.DT dt) || dt.isPi())
+        if (!(normalize(type) instanceof Term.DT dt) || dt.isPi())
           throw new IllegalArgumentException("Expects a left adjoint to type " + expr + ", got: " + type);
         var lhs = inherit(two.f(), dt.param().type());
         yield new Term.Two(false, lhs, inherit(two.a(), dt.codomain(lhs)));
       }
       default -> {
         var synth = synth(expr);
-        if (!Unifier.untyped(synth.type, type))
+        if (!Unifier.untyped(normalize(synth.type), normalize(type)))
           throw new IllegalArgumentException("Expects type " + type + ", got: " + synth.type);
         yield synth.wellTyped;
       }
@@ -41,7 +44,15 @@ public record Elaborator(
   public Synth synth(Expr expr) {
     return switch (expr) {
       case Expr.Trebor u -> new Synth(Term.U, Term.U);
-      case Expr.Resolved resolved -> new Synth(new Term.Ref(resolved.ref()), gamma.get(resolved.ref()));
+      case Expr.Resolved resolved -> {
+        var type = gamma.getOrNull(resolved.ref());
+        if (type != null) yield new Synth(new Term.Ref(resolved.ref()), type);
+        var def = sigma.get(resolved.ref());
+        var pi = Term.mkPi(def.telescope(), def.result());
+        yield switch (def) {
+          case Def.Fn<Term> fn -> new Synth(Term.mkLam(fn.telescope(), fn.body()), pi);
+        };
+      }
       case Expr.Proj proj -> {
         var t = synth(proj.t());
         if (!(t.type instanceof Term.DT dt) || dt.isPi())

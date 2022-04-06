@@ -19,6 +19,8 @@ public interface Unifier {
       case Term.Proj lproj && r instanceof Term.Proj rproj ->
         lproj.isOne() == rproj.isOne() && untyped(lproj.t(), rproj.t());
       case Term.U lu && r instanceof Term.U ru -> true;
+      case Term.Call lcall && r instanceof Term.Call rcall -> lcall.fn() == rcall.fn()
+        && lcall.args().sameElements(rcall.args(), true);
       default -> false;
     };
   }

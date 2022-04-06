@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 public sealed interface Def<Term> {
   @NotNull ImmutableSeq<Param<Term>> telescope();
   @NotNull LocalVar name();
+  @NotNull Term result();
 
   record Fn<Term>(
     @Override @NotNull LocalVar name,

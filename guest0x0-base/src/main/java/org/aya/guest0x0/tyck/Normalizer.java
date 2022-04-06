@@ -1,16 +1,16 @@
 package org.aya.guest0x0.tyck;
 
 import kala.collection.mutable.MutableMap;
+import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.LocalVar;
 import org.aya.guest0x0.syntax.Param;
 import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
 
-public record Normalizer(@NotNull MutableMap<LocalVar, Term> rho) {
-  public static @NotNull Term f(@NotNull Term term) {
-    return new Normalizer(MutableMap.create()).term(term);
-  }
-
+public record Normalizer(
+  @NotNull MutableMap<LocalVar, Def<Term>> sigma,
+  @NotNull MutableMap<LocalVar, Term> rho
+) {
   public Param<Term> param(Param<Term> param) {
     return new Param<>(param.x(), term(param.type()));
   }
@@ -37,6 +37,12 @@ public record Normalizer(@NotNull MutableMap<LocalVar, Term> rho) {
         assert !tup.isApp();
         yield proj.isOne() ? tup.f() : tup.a();
       }
+      case Term.Call call -> {
+        var prefn = sigma.getOption(call.fn());
+        if (!(prefn.getOrNull() instanceof Def.Fn<Term> fn)) yield call;
+        fn.telescope().zip(call.args()).forEach(zip -> rho.put(zip._1.x(), term(zip._2)));
+        yield term(fn.body());
+      }
     };
   }
 
@@ -61,6 +67,7 @@ public record Normalizer(@NotNull MutableMap<LocalVar, Term> rho) {
         }
         case Term.Two two -> new Term.Two(two.isApp(), term(two.f()), term(two.a()));
         case Term.Proj proj -> new Term.Proj(term(proj.t()), proj.isOne());
+        case Term.Call call -> new Term.Call(call.fn(), call.args().map(this::term));
       };
     }
 
