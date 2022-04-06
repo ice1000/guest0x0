@@ -4,7 +4,7 @@ program : decl+;
 decl
  : 'def' ID param* ':' expr '=>' expr # fnDecl
  ;
-param : '(' ID ':' expr ')';
+param : '(' ID+ ':' expr ')';
 expr
  // Elimination lures
  : expr expr # two
@@ -19,7 +19,7 @@ expr
  | 'Sig' param '**' expr # sig
 
  // Introduction lures
- | '\\' ID '.' expr # lam
+ | '\\' ID+ '.' expr # lam
  | '<<' expr ',' expr '>>' # pair
 
  // Others
