@@ -1,15 +1,10 @@
-import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
 import kala.control.Either;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
+import org.aya.guest0x0.cli.CliMain;
 import org.aya.guest0x0.cli.Parser;
-import org.aya.guest0x0.parser.Guest0x0Lexer;
-import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Term;
-import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Resolver;
 import org.aya.util.error.SourceFile;
 import org.jetbrains.annotations.NotNull;
@@ -38,14 +33,14 @@ public class BasicExperimentTest {
   }
 
   @Test public void fnDef() {
-    var artifact = def("def uncurry (A : Type) (B : Type) (C : Type)" +
+    var artifact = CliMain.def("def uncurry (A : Type) (B : Type) (C : Type)" +
       "(t : A ** B) (f : A -> B -> C) : C => f (t.1) (t.2)").first();
-    var tycked = andrasKovacs().def(artifact);
+    var tycked = CliMain.andrasKovacs().def(artifact);
     assertNotNull(tycked);
   }
 
   @Test public void dontSayLazy() {
-    var akJr = tyck("""
+    var akJr = CliMain.tyck("""
       def uncurry (A : Type) (B : Type) (C : Type)
         (t : A ** B) (f : A -> B -> C) : C => f (t.1) (t.2)
       def uncurry' (A : Type) (t : A ** A) (f : A -> A -> A) : A => uncurry A A A t f
@@ -57,7 +52,7 @@ public class BasicExperimentTest {
   }
 
   @Test public void leibniz() {
-    var akJr = tyck("""
+    var akJr = CliMain.tyck("""
       def Eq (A : Type) (a : A) (b : A) : Type => Pi (P : A -> Type) -> P a -> P b
       def refl (A : Type) (a : A) : Eq A a a => \\P. \\pa. pa
       def sym (A : Type) (a : A) (b : A) (e : Eq A a b) : Eq A b a => e (\\b. Eq A b a) (refl A a)
@@ -65,38 +60,14 @@ public class BasicExperimentTest {
     assertEquals(3, akJr.sigma().size());
   }
 
-  private @NotNull Elaborator tyck(String code) {
-    var artifact = def(code);
-    var akJr = andrasKovacs();
-    for (var def : artifact) {
-      var tycked = akJr.def(def);
-      akJr.sigma().put(tycked.name(), tycked);
-    }
-    return akJr;
-  }
-
   private @NotNull Term tyckExpr(String term, String type) {
-    var akJr = andrasKovacs();
+    var akJr = CliMain.andrasKovacs();
     var Id = akJr.synth(expr(type));
     return akJr.inherit(expr(term), Id.wellTyped());
   }
 
-  private @NotNull Elaborator andrasKovacs() {
-    return new Elaborator(MutableMap.create(), MutableMap.create());
-  }
-
   private @NotNull Expr expr(String s) {
     return new Resolver(MutableMap.create())
-      .expr(new Parser(Either.left(SourceFile.NONE)).expr(parser(s).expr()));
-  }
-
-  private @NotNull ImmutableSeq<Def<Expr>> def(String s) {
-    var decls = ImmutableSeq.from(parser(s).program().decl());
-    var edj = new Resolver(MutableMap.create());
-    return decls.map(d -> edj.def(new Parser(Either.left(SourceFile.NONE)).def(d)));
-  }
-
-  private Guest0x0Parser parser(String s) {
-    return new Guest0x0Parser(new CommonTokenStream(new Guest0x0Lexer(CharStreams.fromString(s))));
+      .expr(new Parser(Either.left(SourceFile.NONE)).expr(CliMain.parser(s).expr()));
   }
 }
