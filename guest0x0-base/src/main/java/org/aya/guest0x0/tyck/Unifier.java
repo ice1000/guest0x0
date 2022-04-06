@@ -21,6 +21,7 @@ public interface Unifier {
       case Term.U lu && r instanceof Term.U ru -> true;
       case Term.Call lcall && r instanceof Term.Call rcall -> lcall.fn() == rcall.fn()
         && lcall.args().sameElements(rcall.args(), true);
+      // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };
   }

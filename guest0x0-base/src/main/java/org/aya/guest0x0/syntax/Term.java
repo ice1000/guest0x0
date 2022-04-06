@@ -50,4 +50,7 @@ public sealed interface Term {
       return "U";
     }
   }
+
+  record Path(@NotNull Boundary.Data<Term> data) implements Term {
+  }
 }

@@ -22,6 +22,10 @@ public record Boundary<E>(@NotNull ImmutableSeq<Case> pats, @NotNull E body) {
     public <T> @NotNull Data<T> fmap(@NotNull Function<E, T> f, @NotNull ImmutableSeq<LocalVar> newDims) {
       return new Data<>(newDims, f.apply(ty), boundaries.map(b -> b.fmap(f)));
     }
+
+    public <T> @NotNull Data<T> fmap(@NotNull Function<E, T> f) {
+      return fmap(f, dims);
+    }
   }
 }
 

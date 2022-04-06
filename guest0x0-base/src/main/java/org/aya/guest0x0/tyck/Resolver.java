@@ -65,7 +65,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
         var dims = path.data().dims();
         var state = mkCache(dims.size());
         dims.forEach(state::add);
-        yield new Expr.Path(path.pos(), path.data().fmap(this::expr, dims));
+        yield new Expr.Path(path.pos(), path.data().fmap(this::expr));
       }
     };
   }

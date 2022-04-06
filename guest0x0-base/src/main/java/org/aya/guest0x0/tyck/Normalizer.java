@@ -1,10 +1,7 @@
 package org.aya.guest0x0.tyck;
 
 import kala.collection.mutable.MutableMap;
-import org.aya.guest0x0.syntax.Def;
-import org.aya.guest0x0.syntax.LocalVar;
-import org.aya.guest0x0.syntax.Param;
-import org.aya.guest0x0.syntax.Term;
+import org.aya.guest0x0.syntax.*;
 import org.jetbrains.annotations.NotNull;
 
 public record Normalizer(
@@ -43,6 +40,7 @@ public record Normalizer(
         fn.telescope().zip(call.args()).forEach(zip -> rho.put(zip._1.x(), term(zip._2)));
         yield term(fn.body());
       }
+      case Term.Path path -> new Term.Path(path.data().fmap(this::term));
     };
   }
 
@@ -68,13 +66,19 @@ public record Normalizer(
         case Term.Two two -> new Term.Two(two.isApp(), term(two.f()), term(two.a()));
         case Term.Proj proj -> new Term.Proj(term(proj.t()), proj.isOne());
         case Term.Call call -> new Term.Call(call.fn(), call.args().map(this::term));
+        case Term.Path path -> new Term.Path(path.data().fmap(this::term,
+          path.data().dims().map(this::param)));
       };
     }
 
     private Param<Term> param(Param<Term> param) {
-      var var = new LocalVar(param.x().name());
-      map.put(param.x(), var);
-      return new Param<>(var, term(param.type()));
+      return new Param<>(param(param.x()), term(param.type()));
+    }
+
+    private LocalVar param(LocalVar param) {
+      var var = new LocalVar(param.name());
+      map.put(param, var);
+      return var;
     }
   }
 }
