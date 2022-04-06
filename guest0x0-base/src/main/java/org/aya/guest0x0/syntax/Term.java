@@ -27,6 +27,10 @@ public sealed interface Term {
     }
   }
 
-  record U() implements Term {
+  @NotNull U U = new U();
+
+  final class U implements Term {
+    private U() {
+    }
   }
 }

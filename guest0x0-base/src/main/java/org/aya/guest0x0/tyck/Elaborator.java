@@ -1,5 +1,7 @@
 package org.aya.guest0x0.tyck;
 
+import kala.collection.immutable.ImmutableSeq;
+import kala.collection.mutable.DynamicArray;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.syntax.*;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +40,7 @@ public record Elaborator(
 
   public Synth synth(Expr expr) {
     return switch (expr) {
-      case Expr.Trebor u -> new Synth(new Term.U(), new Term.U());
+      case Expr.Trebor u -> new Synth(Term.U, Term.U);
       case Expr.Resolved resolved -> new Synth(new Term.Ref(resolved.ref()), gamma.get(resolved.ref()));
       case Expr.Proj proj -> {
         var t = synth(proj.t());
@@ -78,7 +80,22 @@ public record Elaborator(
     return ok;
   }
 
-  public @NotNull Def<Term> def(@NotNull Def<Expr> def) {
-    throw new UnsupportedOperationException("Not implemented");
+  public void file(ImmutableSeq<Def<Expr>> defs) {
+    for (var def : defs) sigma.put(def.name(), def(def));
+  }
+
+  public Def<Term> def(Def<Expr> def) {
+    return switch (def) {
+      case Def.Fn<Expr> fn -> {
+        var telescope = DynamicArray.<Param<Term>>create(fn.telescope().size());
+        for (var param : def.telescope()) {
+          var ty = inherit(param.type(), Term.U);
+          telescope.append(new Param<>(param.x(), ty));
+          gamma.put(param.x(), ty);
+        }
+        var result = inherit(fn.result(), Term.U);
+        yield new Def.Fn<>(def.name(), telescope.toImmutableArray(), result, inherit(fn.body(), result));
+      }
+    };
   }
 }
