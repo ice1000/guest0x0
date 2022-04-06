@@ -25,8 +25,16 @@ expr
  // Others
  | ID # ref
  | '(' expr ')' # paren
+
+ // Cubical features
+ | '[|' ID+ '|]' '{' boundary* '}' # cube
  ;
 
+iPat : LEFT | RIGHT | ID;
+boundary : '|' iPat+ '=>' expr;
+
+RIGHT : '1';
+LEFT : '0';
 
 // Below are copy-and-paste from Aya. Plagiarism!! LOL
 
