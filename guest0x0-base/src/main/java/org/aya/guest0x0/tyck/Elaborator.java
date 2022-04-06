@@ -64,7 +64,7 @@ public record Elaborator(
       case Expr.Two two -> {
         var f = synth(two.f());
         if (two.isApp()) {
-          if (!(f.type instanceof Term.DT dt) || !dt.isPi())
+          if (!(normalize(f.type) instanceof Term.DT dt) || !dt.isPi())
             throw new IllegalArgumentException("Expects a right adjoint, got: " + f.type);
           var a = hof(dt.param().x(), dt.param().type(), () -> inherit(two.a(), dt.param().type()));
           yield new Synth(new Term.Two(true, f.wellTyped, a), dt.codomain(a));

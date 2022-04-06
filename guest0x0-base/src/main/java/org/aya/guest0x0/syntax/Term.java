@@ -45,5 +45,9 @@ public sealed interface Term {
   final class U implements Term {
     private U() {
     }
+
+    @Override public String toString() {
+      return "U";
+    }
   }
 }

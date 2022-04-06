@@ -45,19 +45,34 @@ public class BasicExperimentTest {
   }
 
   @Test public void dontSayLazy() {
-    var artifact = def("""
+    var akJr = tyck("""
       def uncurry (A : Type) (B : Type) (C : Type)
         (t : A ** B) (f : A -> B -> C) : C => f (t.1) (t.2)
       def uncurry' (A : Type) (t : A ** A) (f : A -> A -> A) : A => uncurry A A A t f
       """);
+    akJr.sigma().valuesView().forEach(tycked -> {
+      var body = ((Def.Fn<Term>) tycked).body();
+      assertTrue(akJr.normalize(body) instanceof Term.Two two && two.isApp());
+    });
+  }
+
+  @Test public void leibniz() {
+    var akJr = tyck("""
+      def Eq (A : Type) (a : A) (b : A) : Type => Pi (P : A -> Type) -> P a -> P b
+      def refl (A : Type) (a : A) : Eq A a a => \\P. \\pa. pa
+      def sym (A : Type) (a : A) (b : A) (e : Eq A a b) : Eq A b a => e (\\b. Eq A b a) (refl A a)
+      """);
+    assertEquals(3, akJr.sigma().size());
+  }
+
+  private @NotNull Elaborator tyck(String code) {
+    var artifact = def(code);
     var akJr = andrasKovacs();
     for (var def : artifact) {
       var tycked = akJr.def(def);
       akJr.sigma().put(tycked.name(), tycked);
-      assertNotNull(tycked);
-      var body = ((Def.Fn<Term>) tycked).body();
-      assertTrue(akJr.normalize(body) instanceof Term.Two two && two.isApp());
     }
+    return akJr;
   }
 
   private @NotNull Term tyckExpr(String term, String type) {
