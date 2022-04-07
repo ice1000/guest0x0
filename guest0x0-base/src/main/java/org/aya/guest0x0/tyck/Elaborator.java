@@ -28,6 +28,15 @@ public record Elaborator(
         }
         // Overloaded lambda
         case Term.Path path -> {
+          var tyDims = path.data().dims();
+          var lamDims = DynamicArray.<LocalVar>create(tyDims.size());
+          var unlam = Expr.unlam(lamDims, tyDims.size(), lam);
+          lamDims.forEach(t -> gamma.put(t, Term.I));
+          var ty = new Normalizer(sigma, MutableMap.from(
+            lamDims.view().zip(tyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
+          )).term(path.data().ty());
+          var core = inherit(unlam, ty);
+          // TODO: unify w/ boundaries
           throw new UnsupportedOperationException("Not implemented");
         }
         default -> throw new SourcePosException(lam.pos(), "Expects a right adjoint for " + expr + ", got: " + type);
@@ -49,7 +58,7 @@ public record Elaborator(
 
   public Synth synth(Expr expr) {
     return switch (expr) {
-      case Expr.UI u -> new Synth(new Term.UI(u.isU()), new Term.UI(true));
+      case Expr.UI u -> new Synth(new Term.UI(u.isU()), Term.U);
       case Expr.Resolved resolved -> {
         var type = gamma.getOrNull(resolved.ref());
         if (type != null) yield new Synth(new Term.Ref(resolved.ref()), type);
@@ -88,7 +97,7 @@ public record Elaborator(
       }
       case Expr.Path path -> {
         var dims = path.data().dims();
-        for (var dim : dims) gamma.put(dim, new Term.UI(false));
+        for (var dim : dims) gamma.put(dim, Term.I);
         var ty = inherit(path.data().ty(), new Term.UI(true));
         var boundaries = DynamicArray.<Boundary<Term>>create(path.data().boundaries().size());
         for (var boundary : path.data().boundaries()) {
@@ -101,7 +110,7 @@ public record Elaborator(
           boundaries.append(new Boundary<>(boundary.pats(), term));
         }
         var data = new Boundary.Data<>(dims, ty, boundaries.toImmutableArray());
-        yield new Synth(new Term.Path(data), new Term.UI(true));
+        yield new Synth(new Term.Path(data), Term.U);
       }
       default -> throw new SourcePosException(expr.pos(), "Synthesis failed: " + expr);
     };
@@ -119,11 +128,11 @@ public record Elaborator(
       case Def.Fn<Expr> fn -> {
         var telescope = DynamicArray.<Param<Term>>create(fn.telescope().size());
         for (var param : def.telescope()) {
-          var ty = inherit(param.type(), new Term.UI(true));
+          var ty = inherit(param.type(), Term.U);
           telescope.append(new Param<>(param.x(), ty));
           gamma.put(param.x(), ty);
         }
-        var result = inherit(fn.result(), new Term.UI(true));
+        var result = inherit(fn.result(), Term.U);
         var body = inherit(fn.body(), result);
         telescope.forEach(key -> gamma.remove(key.x()));
         yield new Def.Fn<>(def.name(), telescope.toImmutableArray(), result, body);

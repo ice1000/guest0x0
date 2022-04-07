@@ -40,6 +40,8 @@ public sealed interface Term {
     return telescope.view().foldRight(body, (param, term) -> new DT(true, param, term));
   }
 
+  @NotNull Term U = new UI(true), I = new UI(false);
+
   record UI(boolean isU) implements Term {
   }
 
