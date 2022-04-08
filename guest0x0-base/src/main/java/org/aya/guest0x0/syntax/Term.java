@@ -33,7 +33,6 @@ public sealed interface Term {
     public @NotNull Term codomain(@NotNull Term term) {
       return cod.subst(param.x(), term);
     }
-
   }
 
   static @NotNull Term mkPi(@NotNull ImmutableSeq<Param<Term>> telescope, @NotNull Term body) {
