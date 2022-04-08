@@ -31,7 +31,7 @@ expr
  | '[|' ID+ '|]' expr '{' boundary* '}' # cube
  ;
 
-iPat : LEFT | RIGHT | ID;
+iPat : LEFT | RIGHT | '_';
 boundary : '|' iPat+ '=>' expr;
 
 RIGHT : '1';

@@ -37,8 +37,11 @@ public record Elaborator(
             lamDims.view().zip(tyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
           )).term(path.data().ty());
           var core = inherit(unlam, ty);
-          for (var boundary : path.data().boundaries())
-            Unifier.untyped(boundary.body(), jonSterling(tyDims, boundary).term(core));
+          for (var boundary : path.data().boundaries()) {
+            var jon = jonSterling(tyDims, boundary).term(core);
+            if (!Unifier.untyped(boundary.body(), jon))
+              throw new SourcePosException(unlam.pos(), "Boundary mismatch, expect " + boundary.body() + " got " + jon);
+          }
           yield new Term.PLam(lamDims.toImmutableArray(), core);
         }
         default -> throw new SourcePosException(lam.pos(), "Expects a right adjoint for " + expr + ", got: " + type);

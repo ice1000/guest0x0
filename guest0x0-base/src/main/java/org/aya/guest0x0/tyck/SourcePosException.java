@@ -8,7 +8,7 @@ public class SourcePosException extends RuntimeException {
   public final @NotNull SourcePos pos;
 
   public SourcePosException(@NotNull SourcePos pos, @NotNull String message) {
-    super(message + "\nsource pos: " + pos.toSpan().normalize(PrettyErrorConfig.DEFAULT));
+    super("\n" + message + "\nsource pos: " + pos.toSpan().normalize(PrettyErrorConfig.DEFAULT));
     this.pos = pos;
   }
 }

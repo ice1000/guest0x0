@@ -35,12 +35,9 @@ public record Parser(@NotNull SourceFile source) {
   }
 
   private @NotNull Boundary<Expr> boundary(Guest0x0Parser.BoundaryContext boundary) {
-    return new Boundary<>(ImmutableSeq.from(boundary.iPat()).map(i -> switch (i.getText()) {
-      case "0" -> Boundary.Case.LEFT;
-      case "1" -> Boundary.Case.RIGHT;
-      case "_" -> Boundary.Case.VAR;
-      case String s -> throw new IllegalArgumentException("Unknown boundary: " + s);
-    }), expr(boundary.expr()));
+    return new Boundary<>(ImmutableSeq.from(boundary.iPat()).map(i ->
+      i.LEFT() != null ? Boundary.Case.LEFT : i.RIGHT() != null
+        ? Boundary.Case.RIGHT : Boundary.Case.VAR), expr(boundary.expr()));
   }
 
   public @NotNull Def<Expr> def(@NotNull Guest0x0Parser.DeclContext decl) {
