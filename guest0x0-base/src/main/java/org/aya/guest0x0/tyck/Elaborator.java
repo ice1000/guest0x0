@@ -1,5 +1,6 @@
 package org.aya.guest0x0.tyck;
 
+import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.DynamicArray;
 import kala.collection.mutable.MutableMap;
 import kala.tuple.Tuple;
@@ -36,8 +37,9 @@ public record Elaborator(
             lamDims.view().zip(tyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
           )).term(path.data().ty());
           var core = inherit(unlam, ty);
-          // TODO: unify w/ boundaries
-          throw new UnsupportedOperationException("Not implemented");
+          for (var boundary : path.data().boundaries())
+            Unifier.untyped(boundary.body(), jonSterling(tyDims, boundary).term(core));
+          yield new Term.PLam(lamDims.toImmutableArray(), core);
         }
         default -> throw new SourcePosException(lam.pos(), "Expects a right adjoint for " + expr + ", got: " + type);
       };
@@ -103,10 +105,7 @@ public record Elaborator(
         for (var boundary : path.data().boundaries()) {
           if (!dims.sizeEquals(boundary.pats())) throw new SourcePosException(
             path.pos(), "Expects " + dims.size() + " patterns, got: " + boundary.pats().size());
-          var jonSterling = new Normalizer(sigma, MutableMap.from(dims.view()
-            .zip(boundary.pats()).filter(p -> p._2 != Boundary.Case.VAR)
-            .map(p -> Tuple.of(p._1, new Term.End(p._2 == Boundary.Case.LEFT)))));
-          var term = inherit(boundary.body(), jonSterling.term(ty));
+          var term = inherit(boundary.body(), jonSterling(dims, boundary).term(ty));
           boundaries.append(new Boundary<>(boundary.pats(), term));
         }
         var data = new Boundary.Data<>(dims, ty, boundaries.toImmutableArray());
@@ -114,6 +113,12 @@ public record Elaborator(
       }
       default -> throw new SourcePosException(expr.pos(), "Synthesis failed: " + expr);
     };
+  }
+
+  @NotNull private Normalizer jonSterling(ImmutableSeq<LocalVar> dims, Boundary<?> boundary) {
+    return new Normalizer(sigma, MutableMap.from(dims.view()
+      .zip(boundary.pats()).filter(p -> p._2 != Boundary.Case.VAR)
+      .map(p -> Tuple.of(p._1, new Term.End(p._2 == Boundary.Case.LEFT)))));
   }
 
   private <T> T hof(@NotNull LocalVar x, @NotNull Term type, @NotNull Supplier<T> t) {
