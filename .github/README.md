@@ -1,6 +1,6 @@
 # Guest0x0
 
-![maven]
+[![maven]](https://repo1.maven.org/maven2/org/aya-prover/guest0x0-base/)
 
 ![image](https://user-images.githubusercontent.com/16398479/162101384-cebf6e0f-c0c4-4044-8dcc-291f86a0bc09.png)
 
