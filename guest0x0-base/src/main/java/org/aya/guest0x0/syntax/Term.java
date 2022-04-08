@@ -34,5 +34,5 @@ public sealed interface Term {
   record Path(@NotNull Boundary.Data<Term> data) implements Term {}
   record End(boolean isLeft) implements Term {}
   record PLam(@NotNull ImmutableSeq<LocalVar> dims, @NotNull Term fill) implements Term {}
-  record PApp(@NotNull Term f, @NotNull Term iArg, @NotNull Boundary.Ends<Term> ends) implements Term {}
+  record PApp(@NotNull Term p, @NotNull Term i, @NotNull Boundary.Ends<Term> ends) implements Term {}
 }

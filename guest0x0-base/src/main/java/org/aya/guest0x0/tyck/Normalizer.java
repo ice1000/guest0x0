@@ -43,6 +43,20 @@ public record Normalizer(
       }
       case Term.Path path -> new Term.Path(path.data().fmap(this::term));
       case Term.PLam pLam -> new Term.PLam(pLam.dims(), term(pLam.fill()));
+      case Term.PApp pApp -> {
+        var p = term(pApp.p());
+        var i = term(pApp.i());
+        if (p instanceof Term.PLam pLam) {
+          rho.put(pLam.dims().first(), i);
+          var fill = term(pLam.fill());
+          yield pLam.dims().sizeEquals(1) ? fill : new Term.PLam(pLam.dims().drop(1), fill);
+        }
+        if (i instanceof Term.End end) {
+          var knownEnd = pApp.ends().choose(end.isLeft()).map(this::term);
+          if (knownEnd.isDefined()) yield knownEnd.get();
+        }
+        yield new Term.PApp(p, i, pApp.ends());
+      }
     };
   }
 
@@ -74,6 +88,7 @@ public record Normalizer(
           var params = pLam.dims().map(this::param);
           yield new Term.PLam(params, term(pLam.fill()));
         }
+        case Term.PApp pApp -> new Term.PApp(term(pApp.p()), term(pApp.i()), pApp.ends().fmap(this::term));
       };
     }
 

@@ -33,6 +33,10 @@ public record Boundary<E>(@NotNull ImmutableSeq<Case> pats, @NotNull E body) {
     public @NotNull Option<T> choose(boolean isLeft) {
       return isLeft ? left : right;
     }
+
+    public <E> @NotNull Ends<E> fmap(@NotNull Function<T, E> f) {
+      return new Ends<>(left.map(f), right.map(f));
+    }
   }
 }
 
