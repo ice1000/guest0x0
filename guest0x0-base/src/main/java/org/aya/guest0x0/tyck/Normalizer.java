@@ -55,7 +55,7 @@ public record Normalizer(
           var knownEnd = pApp.ends().choose(end.isLeft()).map(this::term);
           if (knownEnd.isDefined()) yield knownEnd.get();
         }
-        yield new Term.PApp(p, i, pApp.ends());
+        yield new Term.PApp(p, i, pApp.ends().fmap(this::term));
       }
     };
   }

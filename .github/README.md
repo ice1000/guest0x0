@@ -23,6 +23,24 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ## Milestones
 
+### v0.2
+
+Lambdas are overloaded as paths, and paths reduce according to the boundaries.
+Total lines of Java code: 580, including blank/comments.
+
++ Confluence check (boundaries need to agree)
++ Interval connections and endpoints (no parsing yet)
++ Higher-dimensional extension types (unhandled case in elaborator)
+
+```
+def Eq (A : U) (a b : A) : U =>
+  [| j |] A { | 0 => a | 1 => b }
+def refl (A : U) (a : A) : Eq A a a => \i. a
+def funExt (A B : U) (f g : A -> B)
+           (p : Pi (a : A) -> Eq B (f a) (g a))
+    : Eq (A -> B) f g => \i a. p a i
+```
+
 ### v0.1
 
 Minimal type checker with definitions, pi, sigma, and universe.

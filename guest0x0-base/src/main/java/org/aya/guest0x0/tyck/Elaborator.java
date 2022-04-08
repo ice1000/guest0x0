@@ -1,5 +1,7 @@
 package org.aya.guest0x0.tyck;
 
+import kala.collection.SeqLike;
+import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.DynamicArray;
 import kala.collection.mutable.MutableMap;
@@ -38,7 +40,7 @@ public record Elaborator(
           )).term(path.data().ty());
           var core = inherit(unlam, ty);
           for (var boundary : path.data().boundaries()) {
-            var jon = jonSterling(tyDims, boundary).term(core);
+            var jon = jonSterling(lamDims.view(), boundary).term(core);
             if (!Unifier.untyped(boundary.body(), jon))
               throw new SourcePosException(unlam.pos(), "Boundary mismatch, expect " + boundary.body() + " got " + jon);
           }
@@ -128,7 +130,7 @@ public record Elaborator(
         for (var boundary : path.data().boundaries()) {
           if (!dims.sizeEquals(boundary.pats())) throw new SourcePosException(
             path.pos(), "Expects " + dims.size() + " patterns, got: " + boundary.pats().size());
-          var term = inherit(boundary.body(), jonSterling(dims, boundary).term(ty));
+          var term = inherit(boundary.body(), jonSterling(dims.view(), boundary).term(ty));
           boundaries.append(new Boundary<>(boundary.pats(), term));
         }
         var data = new Boundary.Data<>(dims, ty, boundaries.toImmutableArray());
@@ -146,8 +148,8 @@ public record Elaborator(
     ) : Option.none();
   }
 
-  private @NotNull Normalizer jonSterling(ImmutableSeq<LocalVar> dims, Boundary<?> boundary) {
-    return new Normalizer(sigma, MutableMap.from(dims.view()
+  private @NotNull Normalizer jonSterling(SeqView<LocalVar> dims, Boundary<?> boundary) {
+    return new Normalizer(sigma, MutableMap.from(dims
       .zip(boundary.pats()).filter(p -> p._2 != Boundary.Case.VAR)
       .map(p -> Tuple.of(p._1, new Term.End(p._2 == Boundary.Case.LEFT)))));
   }

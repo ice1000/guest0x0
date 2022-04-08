@@ -58,6 +58,18 @@ public class BasicExperimentTest {
     assertEquals(3, akJr.sigma().size());
   }
 
+  @Test public void funExt() {
+    var jon = tyck("""
+      def Eq (A : U) (a b : A) : U =>
+        [| j |] A { | 0 => a | 1 => b }
+      def refl (A : U) (a : A) : Eq A a a => \\i. a
+      def funExt (A B : U) (f g : A -> B)
+                 (p : Pi (a : A) -> Eq B (f a) (g a))
+          : Eq (A -> B) f g => \\i a. p a i
+      """);
+    assertEquals(3, jon.sigma().size());
+  }
+
   private @NotNull Term tyckExpr(String term, String type) {
     var akJr = CliMain.andrasKovacs();
     var Id = akJr.synth(expr(type));
