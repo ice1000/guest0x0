@@ -3,6 +3,7 @@ package org.aya.guest0x0.tyck;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.DynamicArray;
 import kala.collection.mutable.MutableMap;
+import kala.control.Option;
 import kala.tuple.Tuple;
 import org.aya.guest0x0.syntax.*;
 import org.jetbrains.annotations.NotNull;
@@ -86,10 +87,21 @@ public record Elaborator(
           }
           case Term.Path path -> {
             var dims = path.data().dims();
-            var iArg = hof(dims.first(), Term.I, () -> inherit(two.a(), Term.I));
-            if (dims.sizeEquals(1)) {
+            var i = dims.first();
+            var iArg = hof(i, Term.I, () -> inherit(two.a(), Term.I));
+            var ty = path.data().ty().subst(i, iArg);
+            var boundaries = path.data().boundaries();
+            var l = boundaries.view().flatMap(b -> boundaryAt(b, Boundary.Case.LEFT, i, true))
+              .concat(boundaries.view().flatMap(b -> boundaryAt(b, Boundary.Case.VAR, i, true)))
+              .firstOption();
+            var r = boundaries.view().flatMap(b -> boundaryAt(b, Boundary.Case.RIGHT, i, false))
+              .concat(boundaries.view().flatMap(b -> boundaryAt(b, Boundary.Case.VAR, i, false)))
+              .firstOption();
+            if (dims.sizeEquals(1)) { // Implies l.pats.isEmpty() && r.pats.isEmpty()
+              var ends = new Boundary.Ends<>(l.map(Boundary::body), r.map(Boundary::body));
+              yield new Synth(new Term.PApp(f.wellTyped, iArg, ends), ty);
             }
-            throw new UnsupportedOperationException("TODO");
+            throw new UnsupportedOperationException("Generate paths");
           }
           default -> throw new SourcePosException(two.pos(), "Expects a right adjoint, got: " + f.type);
         }
@@ -123,7 +135,15 @@ public record Elaborator(
     };
   }
 
-  @NotNull private Normalizer jonSterling(ImmutableSeq<LocalVar> dims, Boundary<?> boundary) {
+  /** I'm working on the "isLeft" boundary, and I'm looking for the "endpoint" boundary */
+  private @NotNull Option<Boundary<Term>> boundaryAt(Boundary<Term> b, Boundary.Case endpoint, LocalVar i, boolean isLeft) {
+    return b.pats().first() == endpoint
+      ? Option.some(new Boundary<>(b.pats().drop(1), endpoint != Boundary.Case.VAR
+      ? b.body() : b.body().subst(i, new Term.End(isLeft)))
+    ) : Option.none();
+  }
+
+  private @NotNull Normalizer jonSterling(ImmutableSeq<LocalVar> dims, Boundary<?> boundary) {
     return new Normalizer(sigma, MutableMap.from(dims.view()
       .zip(boundary.pats()).filter(p -> p._2 != Boundary.Case.VAR)
       .map(p -> Tuple.of(p._1, new Term.End(p._2 == Boundary.Case.LEFT)))));

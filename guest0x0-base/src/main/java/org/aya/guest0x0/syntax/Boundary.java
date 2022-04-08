@@ -1,6 +1,7 @@
 package org.aya.guest0x0.syntax;
 
 import kala.collection.immutable.ImmutableSeq;
+import kala.control.Option;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
@@ -25,6 +26,12 @@ public record Boundary<E>(@NotNull ImmutableSeq<Case> pats, @NotNull E body) {
 
     public <T> @NotNull Data<T> fmap(@NotNull Function<E, T> f) {
       return fmap(f, dims);
+    }
+  }
+
+  public record Ends<T>(@NotNull Option<T> left, @NotNull Option<T> right) {
+    public @NotNull Option<T> choose(boolean isLeft) {
+      return isLeft ? left : right;
     }
   }
 }
