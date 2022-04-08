@@ -10,6 +10,7 @@ Experimenting with some basic programming in Java 17 and see the following:
 
 + If Java competes with existing established independently typed languages for writing compilers, like Haskell
 + If capture-avoiding substitution is not too bad (because with nestable pattern matching, de-bruijn indices are too bad)
+  + Cody [told me](https://twitter.com/codydroux/status/1512204955641389056) that locally nameless is survivable, hmm
 + If my understanding of basic programming is appropriate
 
 "Basic programming" includes:
@@ -26,11 +27,12 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 ### v0.2
 
 Lambdas are overloaded as paths, and paths reduce according to the boundaries.
-Total lines of Java code: 580, including blank/comments.
+Total lines of Java code: 580, including blank/comments. The following are missing:
 
-+ Confluence check (boundaries need to agree)
++ Confluence check (boundaries need to agree to be a well-formed cube)
 + Interval connections and endpoints (no parsing yet)
 + Higher-dimensional extension types (unhandled case in elaborator)
++ Type-directed eta conversion/expansion (currently hacked in the unifier)
 
 ```
 def Eq (A : U) (a b : A) : U =>
