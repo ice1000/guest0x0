@@ -4,10 +4,7 @@ import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.aya.guest0x0.parser.Guest0x0Parser;
-import org.aya.guest0x0.syntax.Def;
-import org.aya.guest0x0.syntax.Expr;
-import org.aya.guest0x0.syntax.LocalVar;
-import org.aya.guest0x0.syntax.Param;
+import org.aya.guest0x0.syntax.*;
 import org.aya.util.error.SourceFile;
 import org.aya.util.error.SourcePos;
 import org.jetbrains.annotations.NotNull;
@@ -29,8 +26,21 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SigContext si -> buildDT(false, sourcePosOf(si), param(si.param()), expr(si.expr()));
       case Guest0x0Parser.SimpFunContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.expr(0)), expr(pi.expr(1)));
       case Guest0x0Parser.SimpTupContext si -> new Expr.DT(false, sourcePosOf(si), param(si.expr(0)), expr(si.expr(1)));
+      case Guest0x0Parser.CubeContext cube -> new Expr.Path(sourcePosOf(cube), new Boundary.Data<>(
+        ImmutableSeq.from(cube.ID()).map(id -> new LocalVar(id.getText())),
+        expr(cube.expr()),
+        ImmutableSeq.from(cube.boundary()).map(this::boundary)));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
+  }
+
+  private @NotNull Boundary<Expr> boundary(Guest0x0Parser.BoundaryContext boundary) {
+    return new Boundary<>(ImmutableSeq.from(boundary.iPat()).map(i -> switch (i.getText()) {
+      case "0" -> Boundary.Case.LEFT;
+      case "1" -> Boundary.Case.RIGHT;
+      case "_" -> Boundary.Case.VAR;
+      case String s -> throw new IllegalArgumentException("Unknown boundary: " + s);
+    }), expr(boundary.expr()));
   }
 
   public @NotNull Def<Expr> def(@NotNull Guest0x0Parser.DeclContext decl) {

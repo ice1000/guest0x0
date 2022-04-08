@@ -28,7 +28,7 @@ expr
  | '(' expr ')' # paren
 
  // Cubical features
- | '[|' ID+ '|]' '{' boundary* '}' # cube
+ | '[|' ID+ '|]' expr '{' boundary* '}' # cube
  ;
 
 iPat : LEFT | RIGHT | ID;
