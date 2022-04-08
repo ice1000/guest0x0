@@ -42,6 +42,7 @@ public record Normalizer(
         yield term(fn.body());
       }
       case Term.Path path -> new Term.Path(path.data().fmap(this::term));
+      case Term.PLam pLam -> new Term.PLam(pLam.dims(), term(pLam.fill()));
     };
   }
 
@@ -50,11 +51,11 @@ public record Normalizer(
       return new Renamer(MutableMap.create()).term(term);
     }
 
+    /** @implNote Make sure to rename param before bodying */
     public Term term(Term term) {
       return switch (term) {
         case Term.Lam lam -> {
           var param = param(lam.param());
-          // Make sure to param before bodying
           yield new Term.Lam(param, term(lam.body()));
         }
         case Term.UI u -> u;
@@ -62,7 +63,6 @@ public record Normalizer(
         case Term.Ref ref -> map.getOption(ref.var()).map(Term.Ref::new).getOrDefault(ref);
         case Term.DT dt -> {
           var param = param(dt.param());
-          // Ditto
           yield new Term.DT(dt.isPi(), param, term(dt.cod()));
         }
         case Term.Two two -> new Term.Two(two.isApp(), term(two.f()), term(two.a()));
@@ -70,6 +70,10 @@ public record Normalizer(
         case Term.Call call -> new Term.Call(call.fn(), call.args().map(this::term));
         case Term.Path path -> new Term.Path(path.data().fmap(this::term,
           path.data().dims().map(this::param)));
+        case Term.PLam pLam -> {
+          var params = pLam.dims().map(this::param);
+          yield new Term.PLam(params, term(pLam.fill()));
+        }
       };
     }
 

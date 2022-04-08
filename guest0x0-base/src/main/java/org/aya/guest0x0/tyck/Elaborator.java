@@ -17,8 +17,7 @@ public record Elaborator(
     return new Normalizer(sigma, MutableMap.create()).term(term);
   }
 
-  public record Synth(@NotNull Term wellTyped, @NotNull Term type) {
-  }
+  public record Synth(@NotNull Term wellTyped, @NotNull Term type) {}
 
   public Term inherit(Expr expr, Term type) {
     return switch (expr) {

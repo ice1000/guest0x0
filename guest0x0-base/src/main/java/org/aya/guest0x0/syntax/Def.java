@@ -13,6 +13,5 @@ public sealed interface Def<Term> {
     @Override @NotNull ImmutableSeq<Param<Term>> telescope,
     @NotNull Term result,
     @NotNull Term body
-  ) implements Def<Term> {
-  }
+  ) implements Def<Term> {}
 }

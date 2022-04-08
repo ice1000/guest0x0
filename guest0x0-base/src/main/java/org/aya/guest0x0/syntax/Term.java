@@ -33,5 +33,5 @@ public sealed interface Term {
   record UI(boolean isU) implements Term {}
   record Path(@NotNull Boundary.Data<Term> data) implements Term {}
   record End(boolean isLeft) implements Term {}
-  record PLam(@NotNull ImmutableSeq<LocalVar> dims, @NotNull Term core) implements Term {}
+  record PLam(@NotNull ImmutableSeq<LocalVar> dims, @NotNull Term fill) implements Term {}
 }
