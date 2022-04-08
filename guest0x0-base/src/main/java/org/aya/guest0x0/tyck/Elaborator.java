@@ -80,12 +80,21 @@ public record Elaborator(
       }
       case Expr.Two two -> {
         var f = synth(two.f());
-        if (two.isApp()) {
-          if (!(normalize(f.type) instanceof Term.DT dt) || !dt.isPi())
-            throw new SourcePosException(two.pos(), "Expects a right adjoint, got: " + f.type);
-          var a = hof(dt.param().x(), dt.param().type(), () -> inherit(two.a(), dt.param().type()));
-          yield new Synth(new Term.Two(true, f.wellTyped, a), dt.codomain(a));
-        } else {
+        if (two.isApp()) switch (normalize(f.type)) {
+          case Term.DT dt && dt.isPi() -> {
+            var a = hof(dt.param().x(), dt.param().type(), () -> inherit(two.a(), dt.param().type()));
+            yield new Synth(new Term.Two(true, f.wellTyped, a), dt.codomain(a));
+          }
+          case Term.Path path -> {
+            var dims = path.data().dims();
+            var iArg = hof(dims.first(), Term.I, () -> inherit(two.a(), Term.I));
+            if (dims.sizeEquals(1)) {
+            }
+            throw new UnsupportedOperationException("TODO");
+          }
+          default -> throw new SourcePosException(two.pos(), "Expects a right adjoint, got: " + f.type);
+        }
+        else {
           var a = synth(two.a());
           yield new Synth(new Term.Two(false, f.wellTyped, a.wellTyped),
             new Term.DT(false, new Param<>(new LocalVar("_"), f.type), a.type));
