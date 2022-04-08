@@ -1,7 +1,7 @@
 package org.aya.guest0x0.syntax;
 
 import kala.collection.mutable.MutableList;
-import org.aya.guest0x0.tyck.SourcePosException;
+import org.aya.guest0x0.tyck.SPE;
 import org.aya.util.error.SourcePos;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +19,7 @@ public sealed interface Expr {
     if (body instanceof Lam lam) {
       binds.append(lam.x);
       return unlam(binds, n - 1, lam.a);
-    } else throw new SourcePosException(body.pos(), "Expected (path) lambda");
+    } else throw new SPE(body.pos(), "Expected (path) lambda");
   }
 
   /** @param isOne it's a second projection if false */

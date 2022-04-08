@@ -55,7 +55,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
       case Expr.UI ui -> ui;
       case Expr.Unresolved unresolved -> env.getOption(unresolved.name())
         .map(x -> new Expr.Resolved(unresolved.pos(), x))
-        .getOrThrow(() -> new SourcePosException(unresolved.pos(), "unresolved: " + unresolved.name()));
+        .getOrThrow(() -> new SPE(unresolved.pos(), "unresolved: " + unresolved.name()));
       case Expr.Resolved resolved -> resolved;
       case Expr.Proj proj -> new Expr.Proj(proj.pos(), expr(proj.t()), proj.isOne());
       case Expr.Path path -> {
