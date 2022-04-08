@@ -1,9 +1,8 @@
 package org.aya.guest0x0.tyck;
 
-import kala.collection.SeqLike;
 import kala.collection.SeqView;
-import kala.collection.immutable.ImmutableSeq;
-import kala.collection.mutable.DynamicArray;
+import kala.collection.mutable.MutableArrayList;
+import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import kala.control.Option;
 import kala.tuple.Tuple;
@@ -13,8 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Supplier;
 
 public record Elaborator(
-  MutableMap<LocalVar, Def<Term>> sigma,
-  MutableMap<LocalVar, Term> gamma
+  @NotNull MutableMap<LocalVar, Def<Term>> sigma,
+  @NotNull MutableMap<LocalVar, Term> gamma
 ) {
   @NotNull public Term normalize(@NotNull Term term) {
     return new Normalizer(sigma, MutableMap.create()).term(term);
@@ -32,7 +31,7 @@ public record Elaborator(
         // Overloaded lambda
         case Term.Path path -> {
           var tyDims = path.data().dims();
-          var lamDims = DynamicArray.<LocalVar>create(tyDims.size());
+          var lamDims = MutableArrayList.<LocalVar>create(tyDims.size());
           var unlam = Expr.unlam(lamDims, tyDims.size(), lam);
           lamDims.forEach(t -> gamma.put(t, Term.I));
           var ty = new Normalizer(sigma, MutableMap.from(
@@ -126,7 +125,7 @@ public record Elaborator(
         var dims = path.data().dims();
         for (var dim : dims) gamma.put(dim, Term.I);
         var ty = inherit(path.data().ty(), new Term.UI(true));
-        var boundaries = DynamicArray.<Boundary<Term>>create(path.data().boundaries().size());
+        var boundaries = MutableArrayList.<Boundary<Term>>create(path.data().boundaries().size());
         for (var boundary : path.data().boundaries()) {
           if (!dims.sizeEquals(boundary.pats())) throw new SourcePosException(
             path.pos(), "Expects " + dims.size() + " patterns, got: " + boundary.pats().size());
@@ -164,7 +163,7 @@ public record Elaborator(
   public Def<Term> def(Def<Expr> def) {
     return switch (def) {
       case Def.Fn<Expr> fn -> {
-        var telescope = DynamicArray.<Param<Term>>create(fn.telescope().size());
+        var telescope = MutableArrayList.<Param<Term>>create(fn.telescope().size());
         for (var param : def.telescope()) {
           var ty = inherit(param.type(), Term.U);
           telescope.append(new Param<>(param.x(), ty));

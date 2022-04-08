@@ -5,8 +5,10 @@ import kala.collection.immutable.ImmutableSeq;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.*;
+import org.aya.repl.antlr.AntlrUtil;
 import org.aya.util.error.SourceFile;
 import org.aya.util.error.SourcePos;
+import org.aya.util.error.WithPos;
 import org.jetbrains.annotations.NotNull;
 
 public record Parser(@NotNull SourceFile source) {
@@ -19,8 +21,8 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SndContext snd -> new Expr.Proj(sourcePosOf(snd), expr(snd.expr()), false);
       case Guest0x0Parser.TreborContext trebor -> new Expr.UI(sourcePosOf(trebor), true);
       case Guest0x0Parser.IntervalContext interval -> new Expr.UI(sourcePosOf(interval), false);
-      case Guest0x0Parser.LamContext lam -> buildLam(sourcePosOf(lam),
-        ImmutableSeq.from(lam.ID()).view().map(id -> new LocalVar(id.getText())), expr(lam.expr()));
+      case Guest0x0Parser.LamContext lam -> buildLam(sourcePosOf(lam), ImmutableSeq.from(lam.ID()).view()
+        .map(id -> new WithPos<>(AntlrUtil.sourcePosOf(id, source), new LocalVar(id.getText()))), expr(lam.expr()));
       case Guest0x0Parser.RefContext ref -> new Expr.Unresolved(sourcePosOf(ref), ref.ID().getText());
       case Guest0x0Parser.PiContext pi -> buildDT(true, sourcePosOf(pi), param(pi.param()), expr(pi.expr()));
       case Guest0x0Parser.SigContext si -> buildDT(false, sourcePosOf(si), param(si.param()), expr(si.expr()));
@@ -51,18 +53,18 @@ public record Parser(@NotNull SourceFile source) {
     };
   }
 
-  private static Expr buildDT(boolean isPi, SourcePos sourcePos, SeqView<Param<Expr>> params, Expr body) {
+  private Expr buildDT(boolean isPi, SourcePos pos, SeqView<Param<Expr>> params, Expr body) {
     if (params.isEmpty()) return body;
-    return new Expr.DT(isPi, sourcePos, params.first(),
-      // TODO: sourcePosForSubExpr
-      buildDT(isPi, sourcePos, params.drop(1), body));
+    var drop = params.drop(1);
+    return new Expr.DT(isPi, pos, params.first(), buildDT(isPi,
+      AntlrUtil.sourcePosForSubExpr(source, drop.map(x -> x.type().pos()), body.pos()), drop, body));
   }
 
-  private static Expr buildLam(SourcePos sourcePos, SeqView<LocalVar> params, Expr body) {
+  private Expr buildLam(SourcePos pos, SeqView<WithPos<LocalVar>> params, Expr body) {
     if (params.isEmpty()) return body;
-    return new Expr.Lam(sourcePos, params.first(),
-      // TODO: sourcePosForSubExpr
-      buildLam(sourcePos, params.drop(1), body));
+    var drop = params.drop(1);
+    return new Expr.Lam(pos, params.first().data(), buildLam(
+      AntlrUtil.sourcePosForSubExpr(source, drop.map(WithPos::sourcePos), body.pos()), drop, body));
   }
 
   private @NotNull Param<Expr> param(Guest0x0Parser.ExprContext paramExpr) {
@@ -75,19 +77,7 @@ public record Parser(@NotNull SourceFile source) {
       .map(id -> new Param<>(new LocalVar(id.getText()), e));
   }
 
-  // IN URGENT NEED OF AN ANTLR4 WRAPPER EXTRACTED FROM AYA
-
   private @NotNull SourcePos sourcePosOf(ParserRuleContext ctx) {
-    var start = ctx.getStart();
-    var end = ctx.getStop();
-    return new SourcePos(
-      source,
-      start.getStartIndex(),
-      end.getStopIndex(),
-      start.getLine(),
-      start.getCharPositionInLine(),
-      end.getLine(),
-      end.getCharPositionInLine() + end.getText().length() - 1
-    );
+    return AntlrUtil.sourcePosOf(ctx, source);
   }
 }

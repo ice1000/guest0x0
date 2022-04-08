@@ -1,6 +1,6 @@
 package org.aya.guest0x0.tyck;
 
-import kala.collection.mutable.DynamicArray;
+import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import kala.control.Option;
 import org.aya.guest0x0.syntax.*;
@@ -8,10 +8,10 @@ import org.jetbrains.annotations.NotNull;
 
 public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
   private @NotNull TeleCache mkCache(int initialCapacity) {
-    return new TeleCache(this, DynamicArray.create(initialCapacity), DynamicArray.create(initialCapacity));
+    return new TeleCache(this, MutableArrayList.create(initialCapacity), MutableArrayList.create(initialCapacity));
   }
 
-  private record TeleCache(Resolver ctx, DynamicArray<LocalVar> recover, DynamicArray<LocalVar> remove) {
+  private record TeleCache(Resolver ctx, MutableArrayList<LocalVar> recover, MutableArrayList<LocalVar> remove) {
     private void add(@NotNull LocalVar var) {
       var put = ctx.put(var);
       if (put.isDefined()) recover.append(put.get());
@@ -31,7 +31,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
   public @NotNull Def<Expr> def(@NotNull Def<Expr> def) {
     return switch (def) {
       case Def.Fn<Expr> fn -> {
-        var telescope = DynamicArray.<Param<Expr>>create(fn.telescope().size());
+        var telescope = MutableArrayList.<Param<Expr>>create(fn.telescope().size());
         var cache = mkCache(fn.telescope().size());
         for (var param : fn.telescope()) {
           var ty = expr(param.type());

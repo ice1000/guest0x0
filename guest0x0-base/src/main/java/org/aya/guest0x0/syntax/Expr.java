@@ -1,6 +1,6 @@
 package org.aya.guest0x0.syntax;
 
-import kala.collection.mutable.DynamicSeq;
+import kala.collection.mutable.MutableList;
 import org.aya.guest0x0.tyck.SourcePosException;
 import org.aya.util.error.SourcePos;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,7 @@ public sealed interface Expr {
   record Two(boolean isApp, @Override @NotNull SourcePos pos, Expr f, Expr a) implements Expr {}
   record Lam(@Override @NotNull SourcePos pos, LocalVar x, Expr a) implements Expr {}
 
-  static @NotNull Expr unlam(@NotNull DynamicSeq<LocalVar> binds, int n, @NotNull Expr body) {
+  static @NotNull Expr unlam(@NotNull MutableList<LocalVar> binds, int n, @NotNull Expr body) {
     if (n == 0) return body;
     if (body instanceof Lam lam) {
       binds.append(lam.x);
