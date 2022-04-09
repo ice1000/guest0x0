@@ -2,7 +2,6 @@ package org.aya.guest0x0.syntax;
 
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableList;
-import kala.control.Option;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
@@ -46,16 +45,6 @@ public record Boundary<E>(@NotNull ImmutableSeq<Case> pats, @NotNull E body) {
         zesen.append(b.body().toDoc());
         return Doc.sep(zesen);
       })));
-    }
-  }
-
-  public record Ends<T>(@NotNull Option<T> left, @NotNull Option<T> right) {
-    public @NotNull Option<T> choose(boolean isLeft) {
-      return isLeft ? left : right;
-    }
-
-    public <E> @NotNull Ends<E> fmap(@NotNull Function<T, E> f) {
-      return new Ends<>(left.map(f), right.map(f));
     }
   }
 }

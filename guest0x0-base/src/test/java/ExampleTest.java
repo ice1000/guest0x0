@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BasicExperimentTest {
+public class ExampleTest {
   @Test public void resolveId() {
     var e = (Expr.Lam) expr("\\x. x");
     assertNotNull(e);
@@ -69,6 +69,20 @@ public class BasicExperimentTest {
           : Eq (A -> B) f g => \\i a. p a i
       def pmap (A B : U) (f : A -> B) (a b : A) (p : Eq A a b)
           : Eq B (f a) (f b) => \\i. f (p i)
+      """);
+  }
+
+  @Test public void square() {
+    tyck("""
+      def Eq (A : U) (a b : A) : U =>
+        [| j |] A { | 0 => a | 1 => b }
+      def EqP (A : I -> U) (a : A 0) (b : A 1) : U =>
+        [| j |] A j { | 0 => a | 1 => b }
+      def Sq (A : U) (a b c d : A) (ab : Eq A a b) (cd : Eq A c d) : U =>
+        [| i j |] A { | 0 _ => ab j | 1 _ => cd j }
+      def refl (A : U) (a : A) : Eq A a a => \\i. a
+      def SqExm (A : U) (a b c d : A) (ab : Eq A a b) (cd : Eq A c d)
+           (sq : Sq A a b c d ab cd) : Eq A a (sq 0 0) => refl A a
       """);
   }
 

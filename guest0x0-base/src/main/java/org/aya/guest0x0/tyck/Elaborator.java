@@ -4,7 +4,6 @@ import kala.collection.SeqView;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
-import kala.control.Option;
 import kala.tuple.Tuple;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.SPE;
@@ -174,14 +173,6 @@ public record Elaborator(
         new Term.PCall(synth.wellTyped, path.data().dims().map(Term.Ref::new), path.data()))),
         Term.mkPi(binds, path.data().type()));
     } else return new Synth(synth.wellTyped, type);
-  }
-
-  /** I'm working on the "isLeft" boundary, and I'm looking for the "endpoint" boundary */
-  private @NotNull Option<Boundary<Term>> boundaryAt(Boundary<Term> b, Boundary.Case endpoint, LocalVar i, boolean isLeft) {
-    return b.pats().first() == endpoint
-      ? Option.some(new Boundary<>(b.pats().drop(1), endpoint != Boundary.Case.VAR
-      ? b.body() : b.body().subst(i, new Term.End(isLeft)))
-    ) : Option.none();
   }
 
   private @NotNull Normalizer jonSterling(SeqView<LocalVar> dims, Boundary<?> boundary) {
