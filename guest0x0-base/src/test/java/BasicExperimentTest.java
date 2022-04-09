@@ -7,6 +7,7 @@ import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Resolver;
 import org.aya.util.error.SourceFile;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -50,16 +51,16 @@ public class BasicExperimentTest {
   }
 
   @Test public void leibniz() {
-    var akJr = tyck("""
+    tyck("""
       def Eq (A : U) (a b : A) : U => Pi (P : A -> U) -> P a -> P b
       def refl (A : U) (a : A) : Eq A a a => \\P pa. pa
-      def sym (A : U) (a b : A) (e : Eq A a b) : Eq A b a => e (\\b. Eq A b a) (refl A a)
+      def sym (A : U) (a b : A) (e : Eq A a b) : Eq A b a =>
+          e (\\b. Eq A b a) (refl A a)
       """);
-    assertEquals(3, akJr.sigma().size());
   }
 
   @Test public void funExt() {
-    var jon = tyck("""
+    tyck("""
       def Eq (A : U) (a b : A) : U =>
         [| j |] A { | 0 => a | 1 => b }
       def refl (A : U) (a : A) : Eq A a a => \\i. a
@@ -69,7 +70,6 @@ public class BasicExperimentTest {
       def pmap (A B : U) (f : A -> B) (a b : A) (p : Eq A a b)
           : Eq B (f a) (f b) => \\i. f (p i)
       """);
-    assertEquals(3, jon.sigma().size());
   }
 
   private @NotNull Term tyckExpr(String term, String type) {
@@ -78,7 +78,7 @@ public class BasicExperimentTest {
     return akJr.inherit(expr(term), Id.wellTyped());
   }
 
-  private @NotNull Elaborator tyck(String s) {
+  private @NotNull Elaborator tyck(@Language("TEXT") String s) {
     return CliMain.tyck(s, false);
   }
 
