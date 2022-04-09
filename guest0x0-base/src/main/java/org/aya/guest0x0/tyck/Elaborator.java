@@ -2,6 +2,7 @@ package org.aya.guest0x0.tyck;
 
 import kala.collection.SeqView;
 import kala.collection.mutable.MutableArrayList;
+import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
 import kala.control.Option;
 import kala.tuple.Tuple;
@@ -55,6 +56,15 @@ public record Elaborator(
         var lhs = inherit(two.f(), dt.param().type());
         yield new Term.Two(false, lhs, inherit(two.a(), dt.codomain(lhs)));
       }
+      case Expr.Hole hole -> {
+        var docs = MutableList.<Doc>create();
+        gamma.forEach((k, v) -> docs.append(Doc.sep(Doc.plain(k.name()), Doc.symbol(":"), normalize(v).toDoc())));
+        docs.append(Doc.plain("----------------------------------"));
+        docs.append(type.toDoc());
+        docs.append(Doc.symbol("|->"));
+        docs.append(normalize(type).toDoc());
+        throw new SPE(hole.pos(), Doc.vcat(docs));
+      }
       default -> {
         var synth = synth(expr);
         if (!Unifier.untyped(normalize(synth.type), normalize(type)))
@@ -67,6 +77,7 @@ public record Elaborator(
   public Synth synth(Expr expr) {
     return switch (expr) {
       case Expr.UI u -> new Synth(new Term.UI(u.isU()), Term.U);
+      case Expr.End lr -> new Synth(new Term.End(lr.isLeft()), Term.I);
       case Expr.Resolved resolved -> {
         var type = gamma.getOrNull(resolved.ref());
         if (type != null) yield new Synth(new Term.Ref(resolved.ref()), type);

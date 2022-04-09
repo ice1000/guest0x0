@@ -54,7 +54,8 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
       case Expr.Two two -> new Expr.Two(two.isApp(), two.pos(), expr(two.f()), expr(two.a()));
       case Expr.Lam lam -> new Expr.Lam(lam.pos(), lam.x(), bodied(lam.x(), lam.a()));
       case Expr.UI ui -> ui;
-      case Expr.LR lr -> lr;
+      case Expr.End lr -> lr;
+      case Expr.Hole hole -> hole;
       case Expr.Unresolved unresolved -> env.getOption(unresolved.name())
         .map(x -> new Expr.Resolved(unresolved.pos(), x))
         .getOrThrow(() -> new SPE(unresolved.pos(), Doc.english("Unresolved: " + unresolved.name())));

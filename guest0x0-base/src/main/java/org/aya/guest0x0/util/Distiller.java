@@ -34,6 +34,8 @@ public interface Distiller {
         var doc = dependentType(dt.isPi(), dt.param(), expr(dt.cod(), CODOMAIN));
         yield envPrec > CODOMAIN ? Doc.parened(doc) : doc;
       }
+      case Expr.Hole hole -> Doc.symbol("_");
+      case Expr.End end -> Doc.symbol(end.isLeft() ? "0" : "1");
     };
   }
   private static @NotNull Doc dependentType(boolean isPi, Param<?> param, Docile cod) {

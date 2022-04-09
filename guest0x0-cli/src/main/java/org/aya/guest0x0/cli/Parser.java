@@ -28,12 +28,19 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SigContext si -> buildDT(false, sourcePosOf(si), param(si.param()), expr(si.expr()));
       case Guest0x0Parser.SimpFunContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.expr(0)), expr(pi.expr(1)));
       case Guest0x0Parser.SimpTupContext si -> new Expr.DT(false, sourcePosOf(si), param(si.expr(0)), expr(si.expr(1)));
+      case Guest0x0Parser.ILitContext il -> iPat(il.iPat());
       case Guest0x0Parser.CubeContext cube -> new Expr.Path(sourcePosOf(cube), new Boundary.Data<>(
         ImmutableSeq.from(cube.ID()).map(id -> new LocalVar(id.getText())),
         expr(cube.expr()),
         ImmutableSeq.from(cube.boundary()).map(this::boundary)));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
+  }
+
+  private @NotNull Expr iPat(Guest0x0Parser.IPatContext iPat) {
+    var pos = sourcePosOf(iPat);
+    return iPat.LEFT() != null ? new Expr.End(pos, true)
+      : iPat.RIGHT() != null ? new Expr.End(pos, false) : new Expr.Hole(pos);
   }
 
   private @NotNull Boundary<Expr> boundary(Guest0x0Parser.BoundaryContext boundary) {

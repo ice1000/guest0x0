@@ -25,6 +25,43 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ## Milestones
 
+### v0.3
+
+Added some cosmetics features like pretty printing with precedence, one more conversion rule,
+JPMS support, interval terms, a bunch of helper methods, and unicode keyword.
+I wish to keep the project small, but with that we have 736 lines of Java now. That's a lot more.
+Just one more theorem we can define:
+
+```
+def pmap (A B : U) (f : A -> B) (a b : A) (p : Eq A a b)
+    : Eq B (f a) (f b) => \i. f (p i)
+```
+
+This is what Guest0x0 says about the `funExt` function body:
+
+```
+f : Pi (_ : A) → B
+i : I
+p : Pi (a : A) → [| j |] B {
+  | 0 ⇒ f a
+  | 1 ⇒ g a
+}
+B : U
+j : I
+g : Pi (_ : A) → B
+A : U
+----------------------------------
+(\A. \a. \b. [| j |] A {
+  | 0 ⇒ a
+  | 1 ⇒ b
+}) (Pi (_ : A) → B) f g
+|→
+[| j |] Pi (_ : A) → B {
+  | 0 ⇒ f
+  | 1 ⇒ g
+}
+```
+
 ### v0.2
 
 Lambdas are overloaded as paths, and paths reduce according to the boundaries.
@@ -33,11 +70,10 @@ Total lines of Java code: 580, including blank/comments. The following are missi
 + Confluence check (boundaries need to agree to be a well-formed cube)
 + Interval connections and endpoints (no parsing yet)
 + Higher-dimensional extension types (unhandled case in elaborator)
-+ Type-directed eta conversion/expansion (currently hacked in the unifier)
++ Type-directed eta conversion/expansion (currently term-directed in the unifier)
 
 ```
-def Eq (A : U) (a b : A) : U =>
-  [| j |] A { | 0 => a | 1 => b }
+def Eq (A : U) (a b : A) : U => [| j |] A { | 0 => a | 1 => b }
 def refl (A : U) (a : A) : Eq A a a => \i. a
 def funExt (A B : U) (f g : A -> B)
            (p : Pi (a : A) -> Eq B (f a) (g a))
