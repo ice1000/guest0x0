@@ -2,7 +2,7 @@ grammar Guest0x0;
 
 program : decl+;
 decl
- : 'def' ID param* ':' expr '=>' expr # fnDecl
+ : 'def' ID param* ':' expr ARROW2 expr # fnDecl
  ;
 param : '(' ID+ ':' expr ')';
 expr
@@ -14,13 +14,13 @@ expr
  // Type formers
  | 'U' # trebor // McBride universe a la Trebor
  | 'I' # interval
- | <assoc=right> expr '->' expr # simpFun
- | <assoc=right> expr '**' expr # simpTup
- | 'Pi' param '->' expr # pi
- | 'Sig' param '**' expr # sig
+ | <assoc=right> expr ARROW expr # simpFun
+ | <assoc=right> expr TIMES expr # simpTup
+ | PI param ARROW expr # pi
+ | SIG param TIMES expr # sig
 
  // Introduction lures
- | '\\' ID+ '.' expr # lam
+ | LAM ID+ '.' expr # lam
  | '<<' expr ',' expr '>>' # pair
 
  // Others
@@ -32,8 +32,14 @@ expr
  ;
 
 iPat : LEFT | RIGHT | '_';
-boundary : '|' iPat+ '=>' expr;
+boundary : '|' iPat+ ARROW2 expr;
 
+ARROW : '->' | '\u2192';
+ARROW2 : '=>' | '\u21D2';
+TIMES : '**' | '\u00D7';
+SIG : 'Sig' | '\u03A3';
+LAM : '\\' | '\u03BB';
+PI : 'Pi' | '\u03A0';
 RIGHT : '1';
 LEFT : '0';
 

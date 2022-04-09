@@ -36,8 +36,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
         var telescope = MutableArrayList.<Param<Expr>>create(fn.telescope().size());
         var cache = mkCache(fn.telescope().size());
         for (var param : fn.telescope()) {
-          var ty = expr(param.type());
-          telescope.append(new Param<>(param.x(), ty));
+          telescope.append(new Param<>(param.x(), expr(param.type())));
           cache.add(param.x());
         }
         var result = expr(fn.result());
