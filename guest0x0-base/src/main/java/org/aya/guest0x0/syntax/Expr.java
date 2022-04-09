@@ -33,6 +33,7 @@ public sealed interface Expr extends Docile {
 
   /** @param isU it's the interval type if false */
   record UI(@Override @NotNull SourcePos pos, boolean isU) implements Expr {}
+  record LR(@Override @NotNull SourcePos pos, boolean isLeft) implements Expr {}
 
   /** @param isPi it's a sigma if false */
   record DT(boolean isPi, @Override @NotNull SourcePos pos, Param<Expr> param, Expr cod) implements Expr {}

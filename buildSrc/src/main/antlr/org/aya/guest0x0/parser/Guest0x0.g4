@@ -22,6 +22,7 @@ expr
  // Introduction lures
  | LAM ID+ '.' expr # lam
  | '<<' expr ',' expr '>>' # pair
+ | iPat # iLit
 
  // Others
  | ID # ref
