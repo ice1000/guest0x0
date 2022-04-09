@@ -3,9 +3,15 @@ package org.aya.guest0x0.syntax;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.tyck.Normalizer;
+import org.aya.guest0x0.util.Distiller;
+import org.aya.pretty.doc.Doc;
+import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
 
-public sealed interface Term {
+public sealed interface Term extends Docile {
+  @Override default @NotNull Doc toDoc() {
+    return Distiller.term(this);
+  }
   default @NotNull Term subst(@NotNull LocalVar x, @NotNull Term t) {
     return new Normalizer(MutableMap.create(), MutableMap.of(x, t)).term(this);
   }

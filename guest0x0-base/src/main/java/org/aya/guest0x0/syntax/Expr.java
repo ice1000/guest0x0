@@ -2,11 +2,17 @@ package org.aya.guest0x0.syntax;
 
 import kala.collection.mutable.MutableList;
 import org.aya.guest0x0.tyck.SPE;
+import org.aya.guest0x0.util.Distiller;
+import org.aya.pretty.doc.Doc;
+import org.aya.pretty.doc.Docile;
 import org.aya.util.error.SourcePos;
 import org.jetbrains.annotations.NotNull;
 
-public sealed interface Expr {
+public sealed interface Expr extends Docile {
   @NotNull SourcePos pos();
+  @Override default @NotNull Doc toDoc() {
+    return Distiller.expr(this);
+  }
   record Unresolved(@Override @NotNull SourcePos pos, String name) implements Expr {}
   record Resolved(@Override @NotNull SourcePos pos, LocalVar ref) implements Expr {}
 
