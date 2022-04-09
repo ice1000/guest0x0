@@ -75,26 +75,16 @@ public record Elaborator(
   }
 
   public Synth synth(Expr expr) {
-    return switch (expr) {
+    var synth = switch (expr) {
       case Expr.UI u -> new Synth(new Term.UI(u.isU()), Term.U);
       case Expr.End lr -> new Synth(new Term.End(lr.isLeft()), Term.I);
       case Expr.Resolved resolved -> {
         var type = gamma.getOrNull(resolved.ref());
-        yield switch (type) {
-          case Term.Path path -> {
-            var binds = path.data().dims().map(x -> new Param<>(x, Term.I));
-            yield new Synth(Normalizer.rename(Term.mkLam(binds,
-              new Term.PCall(resolved.ref(), path.data().dims().map(Term.Ref::new), path.data()))),
-              Term.mkPi(binds, path.data().type()));
-          }
-          case null -> {
-            var def = sigma.get(resolved.ref());
-            var pi = Term.mkPi(def.telescope(), def.result());
-            yield switch (def) {
-              case Def.Fn<Term> fn -> new Synth(Term.mkLam(fn.telescope(), fn.body()), pi);
-            };
-          }
-          default -> new Synth(new Term.Ref(resolved.ref()), type);
+        if (type != null) yield new Synth(new Term.Ref(resolved.ref()), type);
+        var def = sigma.get(resolved.ref());
+        var pi = Term.mkPi(def.telescope(), def.result());
+        yield switch (def) {
+          case Def.Fn<Term> fn -> new Synth(Term.mkLam(fn.telescope(), fn.body()), pi);
         };
       }
       case Expr.Proj proj -> {
@@ -140,6 +130,12 @@ public record Elaborator(
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };
+    if (synth.type instanceof Term.Path path) {
+      var binds = path.data().dims().map(x -> new Param<>(x, Term.I));
+      return new Synth(Normalizer.rename(Term.mkLam(binds,
+        new Term.PCall(synth.wellTyped, path.data().dims().map(Term.Ref::new), path.data()))),
+        Term.mkPi(binds, path.data().type()));
+    } else return synth;
   }
 
   /** I'm working on the "isLeft" boundary, and I'm looking for the "endpoint" boundary */

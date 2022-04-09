@@ -46,5 +46,5 @@ public sealed interface Term extends Docile {
   record Path(@NotNull Boundary.Data<Term> data) implements Term {}
   record End(boolean isLeft) implements Term {}
   record PLam(@NotNull ImmutableSeq<LocalVar> dims, @NotNull Term fill) implements Term {}
-  record PCall(@NotNull LocalVar p, @NotNull ImmutableSeq<Term> i, @NotNull Boundary.Data<Term> b) implements Term {}
+  record PCall(@NotNull Term p, @NotNull ImmutableSeq<Term> i, @NotNull Boundary.Data<Term> b) implements Term {}
 }

@@ -70,7 +70,11 @@ public interface Distiller {
           .map(t -> term(t, APP_SPINE)).prepended(Doc.plain(call.fn().name())));
         yield envPrec > APP_HEAD ? Doc.parened(doc) : doc;
       }
-      case Term.PCall call -> term(new Term.Call(call.p(), call.i()), envPrec);
+      case Term.PCall call -> {
+        var doc = Doc.sep(call.i().view()
+          .map(t -> term(t, APP_SPINE)).prepended(term(call.p(), APP_HEAD)));
+        yield envPrec > APP_HEAD ? Doc.parened(doc) : doc;
+      }
       case Term.PLam pLam -> {
         var docs = MutableList.of(Doc.plain("\\"));
         pLam.dims().forEach(d -> docs.append(Doc.symbol(d.name())));

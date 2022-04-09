@@ -51,19 +51,14 @@ public record Normalizer(
       case Term.PLam pLam -> new Term.PLam(pLam.dims(), term(pLam.fill()));
       case Term.PCall pApp -> {
         var i = pApp.i().map(this::term);
-        yield switch (rho.getOrNull(pApp.p())) {
-          case Term.PLam pLam -> {
-            pLam.dims().zipView(i).forEach(rho::put);
-            var fill = term(pLam.fill());
-            yield pLam.dims().sizeEquals(1) ? fill : new Term.PLam(pLam.dims().drop(1), fill);
-          }
-          case Term.Ref ref -> new Term.PCall(ref.var(), i, pApp.b().fmap(this::term));
-          case null -> {
-            var heaven = piper(pApp.b(), i); // Important: use unnormalized pApp.b()
-            yield heaven == null ? heaven : new Term.PCall(pApp.p(), i, pApp.b().fmap(this::term));
-          }
-          default -> throw new AssertionError("Should be unreachable due to tycking");
-        };
+        var p = term(pApp.p());
+        if (p instanceof Term.PLam pLam) {
+          pLam.dims().zipView(i).forEach(rho::put);
+          var fill = term(pLam.fill());
+          yield pLam.dims().sizeEquals(1) ? fill : new Term.PLam(pLam.dims().drop(1), fill);
+        }
+        var heaven = piper(pApp.b(), i); // Important: use unnormalized pApp.b()
+        yield heaven != null ? heaven : new Term.PCall(p, i, pApp.b().fmap(this::term));
       }
     };
   }
@@ -71,14 +66,15 @@ public record Normalizer(
   /** A piper that will lead us to reason. */
   private @Nullable Term piper(
     @NotNull Boundary.Data<Term> thoughts,
-    @NotNull ImmutableSeq<Term> word // With a word she can get what she came fpr.
+    @NotNull ImmutableSeq<Term> word // With a word she can get what she came for.
   ) {
     assert word.sizeEquals(thoughts.dims().size());
+    meaning:
     for (var thought : thoughts.boundaries()) {
       var sign = new Normalizer(sigma, MutableMap.from(rho));
       for (var ct : thought.pats().zipView(thoughts.dims().zipView(word))) {
         if (ct._1 == Boundary.Case.VAR) sign.rho.put(ct._2);
-        else if (!(ct._2._2 instanceof Term.End end && end.isLeft() == (ct._1 == Boundary.Case.LEFT))) break;
+        else if (!(ct._2._2 instanceof Term.End end && end.isLeft() == (ct._1 == Boundary.Case.LEFT))) continue meaning;
       }
       return sign.term(thought.body());
     }
@@ -108,8 +104,7 @@ public record Normalizer(
           var params = pLam.dims().map(this::param);
           yield new Term.PLam(params, term(pLam.fill()));
         }
-        case Term.PCall pApp -> new Term.PCall(map.getOrDefault(pApp.p(), pApp.p()),
-          pApp.i().map(this::term), boundaries(pApp.b()));
+        case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
       };
     }
 
