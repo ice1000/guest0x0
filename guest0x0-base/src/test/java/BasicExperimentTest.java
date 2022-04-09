@@ -66,6 +66,8 @@ public class BasicExperimentTest {
       def funExt (A B : U) (f g : A -> B)
                  (p : Pi (a : A) -> Eq B (f a) (g a))
           : Eq (A -> B) f g => \\i a. p a i
+      def pmap (A B : U) (f : A -> B) (a b : A) (p : Eq A a b)
+          : Eq B (f a) (f b) => \\i. f (p i)
       """);
     assertEquals(3, jon.sigma().size());
   }

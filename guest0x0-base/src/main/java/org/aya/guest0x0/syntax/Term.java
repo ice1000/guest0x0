@@ -13,7 +13,10 @@ public sealed interface Term extends Docile {
     return Distiller.term(this, Distiller.FREE);
   }
   default @NotNull Term subst(@NotNull LocalVar x, @NotNull Term t) {
-    return new Normalizer(MutableMap.create(), MutableMap.of(x, t)).term(this);
+    return subst(MutableMap.of(x, t));
+  }
+  default @NotNull Term subst(@NotNull MutableMap<LocalVar, Term> map) {
+    return new Normalizer(MutableMap.create(), map).term(this);
   }
 
   record Ref(@NotNull LocalVar var) implements Term {}
