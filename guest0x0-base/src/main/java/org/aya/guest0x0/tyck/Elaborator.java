@@ -9,6 +9,8 @@ import kala.tuple.Tuple;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.SPE;
 import org.aya.pretty.doc.Doc;
+import org.aya.pretty.doc.Docile;
+import org.aya.util.error.SourcePos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -35,17 +37,11 @@ public record Elaborator(
           var tyDims = path.data().dims();
           var lamDims = MutableArrayList.<LocalVar>create(tyDims.size());
           var unlam = Expr.unlam(lamDims, tyDims.size(), lam);
-          lamDims.forEach(t -> gamma.put(t, Term.I));
-          var ty = new Normalizer(sigma, MutableMap.from(
-            lamDims.view().zip(tyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
-          )).term(path.data().type());
-          var core = inherit(unlam, ty);
-          for (var boundary : path.data().boundaries()) {
-            var jon = jonSterling(lamDims.view(), boundary).term(core);
-            if (!Unifier.untyped(boundary.body(), jon)) throw new SPE(unlam.pos(),
-              Doc.english("Boundary mismatch, expect"), boundary.body(), Doc.plain("got"), jon);
-          }
-          yield new Term.PLam(lamDims.toImmutableArray(), core);
+          yield boundaries(lamDims, () -> inherit(unlam,
+            new Normalizer(sigma, MutableMap.from(
+              lamDims.zipView(tyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
+            )).term(path.data().type()) // The expected type if the lambda body
+          ), unlam.pos(), path.data());
         }
         default -> throw new SPE(lam.pos(),
           Doc.english("Expects a right adjoint for"), expr, Doc.plain("got"), type);
@@ -67,11 +63,36 @@ public record Elaborator(
       }
       default -> {
         var synth = synth(expr);
-        if (!Unifier.untyped(normalize(synth.type), normalize(type)))
-          throw new SPE(expr.pos(), Doc.plain("Expects type"), type, Doc.plain("got"), synth.type);
-        yield synth.wellTyped;
+        yield switch (normalize(type)) {
+          case Term ty -> {
+            unify(ty, synth.wellTyped, synth.type, expr.pos());
+            yield synth.wellTyped;
+          }
+        };
       }
     };
+  }
+
+  private void unify(Term ty, Docile on, @NotNull Term actual, SourcePos pos) {
+    if (!Unifier.untyped(actual, ty))
+      throw new SPE(pos, Doc.plain("Expects type"), ty, Doc.plain("got"),
+        actual, Doc.english("on"), on);
+  }
+
+  private @NotNull Term boundaries(
+    @NotNull MutableList<LocalVar> lamDims,
+    @NotNull Supplier<Term> coreSupplier,
+    SourcePos pos, Boundary.Data<Term> data
+  ) {
+    lamDims.forEach(t -> gamma.put(t, Term.I));
+    var core = coreSupplier.get();
+    for (var boundary : data.boundaries()) {
+      var jon = jonSterling(lamDims.view(), boundary).term(core);
+      if (!Unifier.untyped(boundary.body(), jon)) throw new SPE(pos,
+        Doc.english("Boundary mismatch, expect"), boundary.body(), Doc.plain("got"), jon);
+    }
+    lamDims.forEach(gamma::remove);
+    return new Term.PLam(lamDims.toImmutableArray(), core);
   }
 
   public Synth synth(Expr expr) {
@@ -130,12 +151,13 @@ public record Elaborator(
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };
-    if (synth.type instanceof Term.Path path) {
+    var type = normalize(synth.type);
+    if (type instanceof Term.Path path) {
       var binds = path.data().dims().map(x -> new Param<>(x, Term.I));
       return new Synth(Normalizer.rename(Term.mkLam(binds,
         new Term.PCall(synth.wellTyped, path.data().dims().map(Term.Ref::new), path.data()))),
         Term.mkPi(binds, path.data().type()));
-    } else return synth;
+    } else return new Synth(synth.wellTyped, type);
   }
 
   /** I'm working on the "isLeft" boundary, and I'm looking for the "endpoint" boundary */
