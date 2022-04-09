@@ -10,6 +10,10 @@ public record Normalizer(
   @NotNull MutableMap<LocalVar, Def<Term>> sigma,
   @NotNull MutableMap<LocalVar, Term> rho
 ) {
+  public static @NotNull Term rename(@NotNull Term term) {
+    return new Renamer(MutableMap.create()).term(term);
+  }
+
   public Param<Term> param(Param<Term> param) {
     return new Param<>(param.x(), term(param.type()));
   }
@@ -17,7 +21,7 @@ public record Normalizer(
   public Term term(Term term) {
     return switch (term) {
       case Term.Ref ref -> rho.getOption(ref.var())
-        .map(Renamer::f)
+        .map(Normalizer::rename)
         .map(this::term).getOrDefault(ref);
       case Term.UI u -> u;
       case Term.End end -> end;
@@ -46,24 +50,26 @@ public record Normalizer(
       case Term.Path path -> new Term.Path(path.data().fmap(this::term));
       case Term.PLam pLam -> new Term.PLam(pLam.dims(), term(pLam.fill()));
       case Term.PCall pApp -> {
-        var p = term(pApp.p());
-        var i = term(pApp.i());
-        if (p instanceof Term.PLam pLam) {
-          rho.put(pLam.dims().first(), i);
-          var fill = term(pLam.fill());
-          yield pLam.dims().sizeEquals(1) ? fill : new Term.PLam(pLam.dims().drop(1), fill);
-        }
-        if (i instanceof Term.End end) {
-          var knownEnd = pApp.ends().choose(end.isLeft()).map(this::term);
-          if (knownEnd.isDefined()) yield knownEnd.get();
-        }
-        yield new Term.PCall(p, i, pApp.ends().fmap(this::term));
+        var i = pApp.i().map(this::term);
+        yield switch (rho.getOrNull(pApp.p())) {
+          case Term.PLam pLam -> {
+            pLam.dims().zipView(i).forEach(rho::put);
+            var fill = term(pLam.fill());
+            yield pLam.dims().sizeEquals(1) ? fill : new Term.PLam(pLam.dims().drop(1), fill);
+          }
+          case Term.Ref ref -> new Term.PCall(ref.var(), i, pApp.b().fmap(this::term));
+          case null -> {
+            var heaven = piper(pApp.b(), i); // Important: use unnormalized pApp.b()
+            yield heaven == null ? heaven : new Term.PCall(pApp.p(), i, pApp.b().fmap(this::term));
+          }
+          default -> throw new AssertionError("Should be unreachable due to tycking");
+        };
       }
     };
   }
 
   /** A piper that will lead us to reason. */
-  public @Nullable Term piper(
+  private @Nullable Term piper(
     @NotNull Boundary.Data<Term> thoughts,
     @NotNull ImmutableSeq<Term> word // With a word she can get what she came fpr.
   ) {
@@ -80,10 +86,6 @@ public record Normalizer(
   }
 
   record Renamer(MutableMap<LocalVar, LocalVar> map) {
-    public static @NotNull Term f(@NotNull Term term) {
-      return new Renamer(MutableMap.create()).term(term);
-    }
-
     /** @implNote Make sure to rename param before bodying */
     public Term term(Term term) {
       return switch (term) {
@@ -101,14 +103,18 @@ public record Normalizer(
         case Term.Two two -> new Term.Two(two.isApp(), term(two.f()), term(two.a()));
         case Term.Proj proj -> new Term.Proj(term(proj.t()), proj.isOne());
         case Term.Call call -> new Term.Call(call.fn(), call.args().map(this::term));
-        case Term.Path path -> new Term.Path(path.data().fmap(this::term,
-          path.data().dims().map(this::param)));
+        case Term.Path path -> new Term.Path(boundaries(path.data()));
         case Term.PLam pLam -> {
           var params = pLam.dims().map(this::param);
           yield new Term.PLam(params, term(pLam.fill()));
         }
-        case Term.PCall pApp -> new Term.PCall(term(pApp.p()), term(pApp.i()), pApp.ends().fmap(this::term));
+        case Term.PCall pApp -> new Term.PCall(map.getOrDefault(pApp.p(), pApp.p()),
+          pApp.i().map(this::term), boundaries(pApp.b()));
       };
+    }
+
+    private @NotNull Boundary.Data<Term> boundaries(Boundary.@NotNull Data<Term> data) {
+      return data.fmap(this::term, data.dims().map(this::param));
     }
 
     private Param<Term> param(Param<Term> param) {

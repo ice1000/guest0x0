@@ -66,11 +66,11 @@ public interface Distiller {
       case Term.Two two /*&& !two.isApp()*/ -> Doc.wrap("<<", ">>",
         Doc.commaList(Seq.of(term(two.f(), FREE), term(two.a(), FREE))));
       case Term.Call call -> {
-        var doc = Doc.parened(Doc.sep(call.args().view()
-          .map(t -> term(t, APP_SPINE)).prepended(Doc.plain(call.fn().name()))));
+        var doc = Doc.sep(call.args().view()
+          .map(t -> term(t, APP_SPINE)).prepended(Doc.plain(call.fn().name())));
         yield envPrec > APP_HEAD ? Doc.parened(doc) : doc;
       }
-      case Term.PCall pApp -> term(Term.mkApp(pApp.p(), pApp.i()), envPrec);
+      case Term.PCall call -> term(new Term.Call(call.p(), call.i()), envPrec);
       case Term.PLam pLam -> {
         var docs = MutableList.of(Doc.plain("\\"));
         pLam.dims().forEach(d -> docs.append(Doc.symbol(d.name())));

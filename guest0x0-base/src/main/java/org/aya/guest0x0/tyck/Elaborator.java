@@ -80,11 +80,21 @@ public record Elaborator(
       case Expr.End lr -> new Synth(new Term.End(lr.isLeft()), Term.I);
       case Expr.Resolved resolved -> {
         var type = gamma.getOrNull(resolved.ref());
-        if (type != null) yield new Synth(new Term.Ref(resolved.ref()), type);
-        var def = sigma.get(resolved.ref());
-        var pi = Term.mkPi(def.telescope(), def.result());
-        yield switch (def) {
-          case Def.Fn<Term> fn -> new Synth(Term.mkLam(fn.telescope(), fn.body()), pi);
+        yield switch (type) {
+          case Term.Path path -> {
+            var binds = path.data().dims().map(x -> new Param<>(x, Term.I));
+            yield new Synth(Normalizer.rename(Term.mkLam(binds,
+              new Term.PCall(resolved.ref(), path.data().dims().map(Term.Ref::new), path.data()))),
+              Term.mkPi(binds, path.data().type()));
+          }
+          case null -> {
+            var def = sigma.get(resolved.ref());
+            var pi = Term.mkPi(def.telescope(), def.result());
+            yield switch (def) {
+              case Def.Fn<Term> fn -> new Synth(Term.mkLam(fn.telescope(), fn.body()), pi);
+            };
+          }
+          default -> new Synth(new Term.Ref(resolved.ref()), type);
         };
       }
       case Expr.Proj proj -> {
@@ -97,32 +107,12 @@ public record Elaborator(
       }
       case Expr.Two two -> {
         var f = synth(two.f());
-        if (two.isApp()) switch (normalize(f.type)) {
-          case Term.DT dt && dt.isPi() -> {
-            var a = hof(dt.param().x(), dt.param().type(), () -> inherit(two.a(), dt.param().type()));
-            yield new Synth(Term.mkApp(f.wellTyped, a), dt.codomain(a));
-          }
-          case Term.Path path -> {
-            var dims = path.data().dims();
-            var i = dims.first();
-            var iArg = hof(i, Term.I, () -> inherit(two.a(), Term.I));
-            var ty = path.data().type().subst(i, iArg);
-            var boundaries = path.data().boundaries();
-            var l = boundaries.view().flatMap(b -> boundaryAt(b, Boundary.Case.LEFT, i, true))
-              .concat(boundaries.view().flatMap(b -> boundaryAt(b, Boundary.Case.VAR, i, true)))
-              .firstOption();
-            var r = boundaries.view().flatMap(b -> boundaryAt(b, Boundary.Case.RIGHT, i, false))
-              .concat(boundaries.view().flatMap(b -> boundaryAt(b, Boundary.Case.VAR, i, false)))
-              .firstOption();
-            if (dims.sizeEquals(1)) { // Implies l.pats.isEmpty() && r.pats.isEmpty()
-              var ends = new Boundary.Ends<>(l.map(Boundary::body), r.map(Boundary::body));
-              yield new Synth(new Term.PCall(f.wellTyped, iArg, ends), ty);
-            }
-            throw new UnsupportedOperationException("Generate paths");
-          }
-          default -> throw new SPE(two.pos(), Doc.english("Expects a right adjoint, got"), f.type);
-        }
-        else {
+        if (two.isApp()) {
+          if (!(normalize(f.type) instanceof Term.DT dt) || !dt.isPi())
+            throw new SPE(two.pos(), Doc.english("Expects pi, got"), f.type, Doc.plain("when checking"), two);
+          var a = hof(dt.param().x(), dt.param().type(), () -> inherit(two.a(), dt.param().type()));
+          yield new Synth(new Term.Two(true, f.wellTyped, a), dt.codomain(a));
+        } else {
           var a = synth(two.a());
           yield new Synth(new Term.Two(false, f.wellTyped, a.wellTyped),
             new Term.DT(false, new Param<>(new LocalVar("_"), f.type), a.type));
