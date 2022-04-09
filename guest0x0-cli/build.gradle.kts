@@ -1,3 +1,6 @@
+plugins { application }
+application.mainClass.set("org.aya.guest0x0.cli.CliMain")
+
 dependencies {
   val deps: java.util.Properties by rootProject.ext
   api("org.antlr", "antlr4-runtime", version = deps.getProperty("version.antlr"))
