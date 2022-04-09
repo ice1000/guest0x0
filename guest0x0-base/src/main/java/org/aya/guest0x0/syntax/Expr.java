@@ -8,6 +8,7 @@ import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.aya.util.error.SourcePos;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public sealed interface Expr extends Docile {
   @NotNull SourcePos pos();
@@ -21,12 +22,12 @@ public sealed interface Expr extends Docile {
   record Two(boolean isApp, @Override @NotNull SourcePos pos, Expr f, Expr a) implements Expr {}
   record Lam(@Override @NotNull SourcePos pos, LocalVar x, Expr a) implements Expr {}
 
-  static @NotNull Expr unlam(@NotNull MutableList<LocalVar> binds, int n, @NotNull Expr body) {
+  static @Nullable Expr unlam(MutableList<LocalVar> binds, int n, Expr body) {
     if (n == 0) return body;
     if (body instanceof Lam lam) {
       binds.append(lam.x);
       return unlam(binds, n - 1, lam.a);
-    } else throw new SPE(body.pos(), Doc.english("Expected (path) lambda"));
+    } else return null;
   }
 
   /** @param isOne it's a second projection if false */

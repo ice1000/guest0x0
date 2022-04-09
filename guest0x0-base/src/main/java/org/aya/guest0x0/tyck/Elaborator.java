@@ -37,6 +37,7 @@ public record Elaborator(
           var tyDims = path.data().dims();
           var lamDims = MutableArrayList.<LocalVar>create(tyDims.size());
           var unlam = Expr.unlam(lamDims, tyDims.size(), lam);
+          if (unlam == null) throw new SPE(lam.pos(), Doc.english("Expected (path) lambda"));
           yield boundaries(lamDims, () -> inherit(unlam,
             new Normalizer(sigma, MutableMap.from(
               lamDims.zipView(tyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
@@ -67,6 +68,18 @@ public record Elaborator(
       default -> {
         var synth = synth(expr);
         yield switch (normalize(type)) {
+          case Term.Path path -> {
+            var exTyDims = path.data().dims();
+            var lamDims = MutableArrayList.<LocalVar>create(exTyDims.size());
+            var unlam = Term.unlam(lamDims, synth.wellTyped, exTyDims.size());
+            var acTyDims = MutableArrayList.<LocalVar>create(exTyDims.size());
+            var unpi = Term.unpi(acTyDims, synth.type, exTyDims.size());
+            if (unlam == null || unpi == null) throw new SPE(expr.pos(), Doc.english("Expected (path) lambda"));
+            unify(unpi, unlam, new Normalizer(sigma, MutableMap.from(
+              exTyDims.zipView(acTyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
+            )).term(path.data().type()), expr.pos());
+            yield boundaries(lamDims, () -> synth.wellTyped, expr.pos(), path.data());
+          }
           case Term ty -> {
             unify(ty, synth.wellTyped, synth.type, expr.pos());
             yield synth.wellTyped;
