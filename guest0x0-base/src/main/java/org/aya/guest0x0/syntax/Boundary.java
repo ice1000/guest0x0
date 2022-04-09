@@ -20,11 +20,11 @@ public record Boundary<E>(@NotNull ImmutableSeq<Case> pats, @NotNull E body) {
 
   public record Data<E extends Docile>(
     @NotNull ImmutableSeq<LocalVar> dims,
-    @NotNull E ty,
+    @NotNull E type,
     @NotNull ImmutableSeq<Boundary<E>> boundaries
   ) implements Docile {
     public @NotNull Data<E> fmap(@NotNull Function<E, E> f, @NotNull ImmutableSeq<LocalVar> newDims) {
-      return new Data<>(newDims, f.apply(ty), boundaries.map(b -> b.fmap(f)));
+      return new Data<>(newDims, f.apply(type), boundaries.map(b -> b.fmap(f)));
     }
 
     public @NotNull Data<E> fmap(@NotNull Function<E, E> f) {
@@ -34,7 +34,7 @@ public record Boundary<E>(@NotNull ImmutableSeq<Case> pats, @NotNull E body) {
     @Override public @NotNull Doc toDoc() {
       var head = MutableList.of(Doc.symbol("[|"));
       dims.forEach(d -> head.append(Doc.symbol(d.name())));
-      head.appendAll(new Doc[]{Doc.symbol("|]"), ty.toDoc()});
+      head.appendAll(new Doc[]{Doc.symbol("|]"), type.toDoc()});
       return Doc.cblock(Doc.sep(head), 2, Doc.vcat(boundaries.map(b -> {
         var zesen = MutableList.of(Doc.symbol("|"));
         b.pats().forEach(d -> zesen.append(Doc.symbol(switch (d) {

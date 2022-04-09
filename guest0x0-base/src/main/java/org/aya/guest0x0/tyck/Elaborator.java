@@ -38,7 +38,7 @@ public record Elaborator(
           lamDims.forEach(t -> gamma.put(t, Term.I));
           var ty = new Normalizer(sigma, MutableMap.from(
             lamDims.view().zip(tyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
-          )).term(path.data().ty());
+          )).term(path.data().type());
           var core = inherit(unlam, ty);
           for (var boundary : path.data().boundaries()) {
             var jon = jonSterling(lamDims.view(), boundary).term(core);
@@ -106,7 +106,7 @@ public record Elaborator(
             var dims = path.data().dims();
             var i = dims.first();
             var iArg = hof(i, Term.I, () -> inherit(two.a(), Term.I));
-            var ty = path.data().ty().subst(i, iArg);
+            var ty = path.data().type().subst(i, iArg);
             var boundaries = path.data().boundaries();
             var l = boundaries.view().flatMap(b -> boundaryAt(b, Boundary.Case.LEFT, i, true))
               .concat(boundaries.view().flatMap(b -> boundaryAt(b, Boundary.Case.VAR, i, true)))
@@ -116,7 +116,7 @@ public record Elaborator(
               .firstOption();
             if (dims.sizeEquals(1)) { // Implies l.pats.isEmpty() && r.pats.isEmpty()
               var ends = new Boundary.Ends<>(l.map(Boundary::body), r.map(Boundary::body));
-              yield new Synth(new Term.PApp(f.wellTyped, iArg, ends), ty);
+              yield new Synth(new Term.PCall(f.wellTyped, iArg, ends), ty);
             }
             throw new UnsupportedOperationException("Generate paths");
           }
@@ -137,7 +137,7 @@ public record Elaborator(
       case Expr.Path path -> {
         var dims = path.data().dims();
         for (var dim : dims) gamma.put(dim, Term.I);
-        var ty = inherit(path.data().ty(), new Term.UI(true));
+        var ty = inherit(path.data().type(), new Term.UI(true));
         var boundaries = MutableArrayList.<Boundary<Term>>create(path.data().boundaries().size());
         for (var boundary : path.data().boundaries()) {
           if (!dims.sizeEquals(boundary.pats())) throw new SPE(path.pos(),

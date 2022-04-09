@@ -1,8 +1,10 @@
 package org.aya.guest0x0.tyck;
 
+import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.syntax.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public record Normalizer(
   @NotNull MutableMap<LocalVar, Def<Term>> sigma,
@@ -43,7 +45,7 @@ public record Normalizer(
       }
       case Term.Path path -> new Term.Path(path.data().fmap(this::term));
       case Term.PLam pLam -> new Term.PLam(pLam.dims(), term(pLam.fill()));
-      case Term.PApp pApp -> {
+      case Term.PCall pApp -> {
         var p = term(pApp.p());
         var i = term(pApp.i());
         if (p instanceof Term.PLam pLam) {
@@ -55,9 +57,26 @@ public record Normalizer(
           var knownEnd = pApp.ends().choose(end.isLeft()).map(this::term);
           if (knownEnd.isDefined()) yield knownEnd.get();
         }
-        yield new Term.PApp(p, i, pApp.ends().fmap(this::term));
+        yield new Term.PCall(p, i, pApp.ends().fmap(this::term));
       }
     };
+  }
+
+  /** A piper that will lead us to reason. */
+  public @Nullable Term piper(
+    @NotNull Boundary.Data<Term> thoughts,
+    @NotNull ImmutableSeq<Term> word // With a word she can get what she came fpr.
+  ) {
+    assert word.sizeEquals(thoughts.dims().size());
+    for (var thought : thoughts.boundaries()) {
+      var sign = new Normalizer(sigma, MutableMap.from(rho));
+      for (var ct : thought.pats().zipView(thoughts.dims().zipView(word))) {
+        if (ct._1 == Boundary.Case.VAR) sign.rho.put(ct._2);
+        else if (!(ct._2._2 instanceof Term.End end && end.isLeft() == (ct._1 == Boundary.Case.LEFT))) break;
+      }
+      return sign.term(thought.body());
+    }
+    return null; // Sometimes all of our thoughts are misgiven.
   }
 
   record Renamer(MutableMap<LocalVar, LocalVar> map) {
@@ -88,7 +107,7 @@ public record Normalizer(
           var params = pLam.dims().map(this::param);
           yield new Term.PLam(params, term(pLam.fill()));
         }
-        case Term.PApp pApp -> new Term.PApp(term(pApp.p()), term(pApp.i()), pApp.ends().fmap(this::term));
+        case Term.PCall pApp -> new Term.PCall(term(pApp.p()), term(pApp.i()), pApp.ends().fmap(this::term));
       };
     }
 
