@@ -2,7 +2,6 @@ package org.aya.guest0x0.util;
 
 import kala.collection.Seq;
 import kala.collection.mutable.MutableList;
-import org.aya.guest0x0.syntax.Boundary;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Param;
 import org.aya.guest0x0.syntax.Term;
@@ -10,26 +9,7 @@ import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
-
 public interface Distiller {
-  static <T> @NotNull Doc boundaryData(@NotNull Boundary.Data<T> data, Function<T, Doc> f) {
-    var head = MutableList.of(Doc.symbol("[|"));
-    data.dims().forEach(d -> head.append(Doc.symbol(d.name())));
-    head.appendAll(new Doc[]{Doc.symbol("|]"), f.apply(data.ty())});
-    return Doc.cblock(Doc.sep(head), 2, Doc.vcat(data.boundaries().map(b -> {
-      var zesen = MutableList.of(Doc.symbol("|"));
-      b.pats().forEach(d -> zesen.append(Doc.symbol(switch (d) {
-        case LEFT -> "0";
-        case RIGHT -> "1";
-        case VAR -> "_";
-      })));
-      zesen.append(Doc.symbol("=>"));
-      zesen.append(f.apply(b.body()));
-      return Doc.sep(zesen);
-    })));
-  }
-
   static @NotNull Doc expr(@NotNull Expr expr) {
     return switch (expr) {
       case Expr.UI u -> Doc.plain(u.isU() ? "U" : "I");
@@ -39,7 +19,7 @@ public interface Distiller {
       case Expr.Lam lam -> Doc.parened(Doc.sep(Doc.cat(
         Doc.plain("\\"), Doc.symbol(lam.x().name()), Doc.plain(".")), expr(lam.a())));
       case Expr.Resolved resolved -> Doc.plain(resolved.ref().name());
-      case Expr.Path path -> boundaryData(path.data(), Distiller::expr);
+      case Expr.Path path -> path.data().toDoc();
       case Expr.Unresolved unresolved -> Doc.plain(unresolved.name());
       case Expr.Proj proj -> Doc.cat(expr(proj.t()), Doc.plain("." + (proj.isOne() ? 1 : 2)));
       case Expr.DT dt -> dependentType(dt.isPi(), dt.param(), dt.cod());
@@ -55,7 +35,7 @@ public interface Distiller {
       case Term.DT dt -> dependentType(dt.isPi(), dt.param(), dt.cod());
       case Term.UI ui -> Doc.plain(ui.isU() ? "U" : "I");
       case Term.Ref ref -> Doc.plain(ref.var().name());
-      case Term.Path path -> boundaryData(path.data(), Distiller::term);
+      case Term.Path path -> path.data().toDoc();
       case Term.Lam lam -> Doc.parened(Doc.sep(Doc.cat(Doc.plain("\\"),
         Doc.symbol(lam.param().x().name()), Doc.plain(".")), term(lam.body())));
       case Term.Proj proj -> Doc.cat(term(proj.t()), Doc.plain("." + (proj.isOne() ? 1 : 2)));
