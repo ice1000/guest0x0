@@ -6,6 +6,8 @@ import kala.collection.mutable.MutableMap;
 import kala.control.Option;
 import kala.tuple.Tuple;
 import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.util.SPE;
+import org.aya.pretty.doc.Doc;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -39,23 +41,24 @@ public record Elaborator(
           var core = inherit(unlam, ty);
           for (var boundary : path.data().boundaries()) {
             var jon = jonSterling(lamDims.view(), boundary).term(core);
-            if (!Unifier.untyped(boundary.body(), jon))
-              throw new SPE(unlam.pos(), "Boundary mismatch, expect " + boundary.body() + " got " + jon);
+            if (!Unifier.untyped(boundary.body(), jon)) throw new SPE(unlam.pos(),
+              Doc.english("Boundary mismatch, expect"), boundary.body(), Doc.plain("got"), jon);
           }
           yield new Term.PLam(lamDims.toImmutableArray(), core);
         }
-        default -> throw new SPE(lam.pos(), "Expects a right adjoint for " + expr + ", got: " + type);
+        default -> throw new SPE(lam.pos(),
+          Doc.english("Expects a right adjoint for"), expr, Doc.plain("got"), type);
       };
       case Expr.Two two && !two.isApp() -> {
-        if (!(normalize(type) instanceof Term.DT dt) || dt.isPi())
-          throw new SPE(two.pos(), "Expects a left adjoint to type " + expr + ", got: " + type);
+        if (!(normalize(type) instanceof Term.DT dt) || dt.isPi()) throw new SPE(two.pos(),
+          Doc.english("Expects a left adjoint for"), expr, Doc.plain("got"), type);
         var lhs = inherit(two.f(), dt.param().type());
         yield new Term.Two(false, lhs, inherit(two.a(), dt.codomain(lhs)));
       }
       default -> {
         var synth = synth(expr);
         if (!Unifier.untyped(normalize(synth.type), normalize(type)))
-          throw new SPE(expr.pos(), "Expects type " + type + ", got: " + synth.type);
+          throw new SPE(expr.pos(), Doc.plain("Expects type"), type, Doc.plain("got"), synth.type);
         yield synth.wellTyped;
       }
     };
@@ -76,7 +79,7 @@ public record Elaborator(
       case Expr.Proj proj -> {
         var t = synth(proj.t());
         if (!(t.type instanceof Term.DT dt) || dt.isPi())
-          throw new SPE(proj.pos(), "Expects a left adjoint, got: " + t.type);
+          throw new SPE(proj.pos(), Doc.english("Expects a left adjoint, got"), t.type);
         var fst = new Term.Proj(t.wellTyped, true);
         if (proj.isOne()) yield new Synth(fst, dt.param().type());
         yield new Synth(new Term.Proj(t.wellTyped, false), dt.codomain(fst));
@@ -106,7 +109,7 @@ public record Elaborator(
             }
             throw new UnsupportedOperationException("Generate paths");
           }
-          default -> throw new SPE(two.pos(), "Expects a right adjoint, got: " + f.type);
+          default -> throw new SPE(two.pos(), Doc.english("Expects a right adjoint, got"), f.type);
         }
         else {
           var a = synth(two.a());
@@ -126,15 +129,15 @@ public record Elaborator(
         var ty = inherit(path.data().ty(), new Term.UI(true));
         var boundaries = MutableArrayList.<Boundary<Term>>create(path.data().boundaries().size());
         for (var boundary : path.data().boundaries()) {
-          if (!dims.sizeEquals(boundary.pats())) throw new SPE(
-            path.pos(), "Expects " + dims.size() + " patterns, got: " + boundary.pats().size());
+          if (!dims.sizeEquals(boundary.pats())) throw new SPE(path.pos(),
+            Doc.english("Expects " + dims.size() + " patterns, got: " + boundary.pats().size()));
           var term = inherit(boundary.body(), jonSterling(dims.view(), boundary).term(ty));
           boundaries.append(new Boundary<>(boundary.pats(), term));
         }
         var data = new Boundary.Data<>(dims, ty, boundaries.toImmutableArray());
         yield new Synth(new Term.Path(data), Term.U);
       }
-      default -> throw new SPE(expr.pos(), "Synthesis failed: " + expr);
+      default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };
   }
 

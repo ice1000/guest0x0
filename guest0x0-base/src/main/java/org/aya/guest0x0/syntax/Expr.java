@@ -1,8 +1,8 @@
 package org.aya.guest0x0.syntax;
 
 import kala.collection.mutable.MutableList;
-import org.aya.guest0x0.tyck.SPE;
 import org.aya.guest0x0.util.Distiller;
+import org.aya.guest0x0.util.SPE;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.aya.util.error.SourcePos;
@@ -25,7 +25,7 @@ public sealed interface Expr extends Docile {
     if (body instanceof Lam lam) {
       binds.append(lam.x);
       return unlam(binds, n - 1, lam.a);
-    } else throw new SPE(body.pos(), "Expected (path) lambda");
+    } else throw new SPE(body.pos(), Doc.english("Expected (path) lambda"));
   }
 
   /** @param isOne it's a second projection if false */

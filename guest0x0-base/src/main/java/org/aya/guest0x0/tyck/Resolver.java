@@ -4,6 +4,8 @@ import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import kala.control.Option;
 import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.util.SPE;
+import org.aya.pretty.doc.Doc;
 import org.jetbrains.annotations.NotNull;
 
 public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
@@ -55,7 +57,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
       case Expr.UI ui -> ui;
       case Expr.Unresolved unresolved -> env.getOption(unresolved.name())
         .map(x -> new Expr.Resolved(unresolved.pos(), x))
-        .getOrThrow(() -> new SPE(unresolved.pos(), "unresolved: " + unresolved.name()));
+        .getOrThrow(() -> new SPE(unresolved.pos(), Doc.english("Unresolved: " + unresolved.name())));
       case Expr.Resolved resolved -> resolved;
       case Expr.Proj proj -> new Expr.Proj(proj.pos(), expr(proj.t()), proj.isOne());
       case Expr.Path path -> {
