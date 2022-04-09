@@ -100,7 +100,7 @@ public record Elaborator(
         if (two.isApp()) switch (normalize(f.type)) {
           case Term.DT dt && dt.isPi() -> {
             var a = hof(dt.param().x(), dt.param().type(), () -> inherit(two.a(), dt.param().type()));
-            yield new Synth(new Term.Two(true, f.wellTyped, a), dt.codomain(a));
+            yield new Synth(Term.mkApp(f.wellTyped, a), dt.codomain(a));
           }
           case Term.Path path -> {
             var dims = path.data().dims();

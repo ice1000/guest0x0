@@ -28,6 +28,9 @@ public sealed interface Term extends Docile {
   static @NotNull Term mkLam(@NotNull ImmutableSeq<Param<Term>> telescope, @NotNull Term body) {
     return telescope.view().foldRight(body, Lam::new);
   }
+  static @NotNull Term mkApp(@NotNull Term f, @NotNull Term a) {
+    return f instanceof Lam lam ? lam.body.subst(lam.param.x(), a) : new Two(true, f, a);
+  }
 
   record DT(boolean isPi, @NotNull Param<Term> param, @NotNull Term cod) implements Term {
     public @NotNull Term codomain(@NotNull Term term) {

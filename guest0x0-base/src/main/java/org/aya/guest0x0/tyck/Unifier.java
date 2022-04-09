@@ -34,7 +34,7 @@ public interface Unifier {
     };
   }
   private static boolean eta(@NotNull Term r, Term.Lam lam) {
-    return untyped(lam.body(), new Term.Two(true, r, new Term.Ref(lam.param().x())));
+    return untyped(lam.body(), Term.mkApp(r, new Term.Ref(lam.param().x())));
   }
 
   private static @NotNull Term rhs(Term body, LocalVar x, Param<Term> param) {
