@@ -78,7 +78,7 @@ public record Elaborator(
             unify(unpi, unlam, new Normalizer(sigma, MutableMap.from(
               exTyDims.zipView(acTyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
             )).term(path.data().type()), expr.pos());
-            yield boundaries(lamDims, () -> synth.wellTyped, expr.pos(), path.data());
+            yield boundaries(lamDims, () -> unlam, expr.pos(), path.data());
           }
           case Term ty -> {
             unify(ty, synth.wellTyped, synth.type, expr.pos());
@@ -121,7 +121,7 @@ public record Elaborator(
         var def = sigma.get(resolved.ref());
         var pi = Term.mkPi(def.telescope(), def.result());
         yield switch (def) {
-          case Def.Fn<Term> fn -> new Synth(Term.mkLam(fn.telescope(), fn.body()), pi);
+          case Def.Fn<Term> fn -> new Synth(Normalizer.rename(Term.mkLam(fn.telescope(), fn.body())), pi);
         };
       }
       case Expr.Proj proj -> {
@@ -135,10 +135,10 @@ public record Elaborator(
       case Expr.Two two -> {
         var f = synth(two.f());
         if (two.isApp()) {
-          if (!(normalize(f.type) instanceof Term.DT dt) || !dt.isPi())
+          if (!(f.type instanceof Term.DT dt) || !dt.isPi())
             throw new SPE(two.pos(), Doc.english("Expects pi, got"), f.type, Doc.plain("when checking"), two);
           var a = hof(dt.param().x(), dt.param().type(), () -> inherit(two.a(), dt.param().type()));
-          yield new Synth(new Term.Two(true, f.wellTyped, a), dt.codomain(a));
+          yield new Synth(Term.mkApp(f.wellTyped, a), dt.codomain(a));
         } else {
           var a = synth(two.a());
           yield new Synth(new Term.Two(false, f.wellTyped, a.wellTyped),
