@@ -40,7 +40,7 @@ public record Parser(@NotNull SourceFile source) {
   private @NotNull Expr iPat(Guest0x0Parser.IPatContext iPat) {
     var pos = sourcePosOf(iPat);
     return iPat.LEFT() != null ? new Expr.End(pos, true)
-      : iPat.RIGHT() != null ? new Expr.End(pos, false) : new Expr.Hole(pos);
+      : iPat.RIGHT() != null ? new Expr.End(pos, false) : new Expr.Hole(pos, ImmutableSeq.empty());
   }
 
   private @NotNull Boundary<Expr> boundary(Guest0x0Parser.BoundaryContext boundary) {
