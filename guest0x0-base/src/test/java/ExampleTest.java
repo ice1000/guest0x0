@@ -6,6 +6,7 @@ import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Resolver;
+import org.aya.guest0x0.util.SPE;
 import org.aya.util.error.SourceFile;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
@@ -70,6 +71,11 @@ public class ExampleTest {
       def pmap (A B : U) (f : A -> B) (a b : A) (p : Eq A a b)
           : Eq B (f a) (f b) => \\i. f (p i)
       """);
+  }
+
+  @Test public void confluence() {
+    assertThrowsExactly(SPE.class, () -> tyck(
+      "def feizhu (A : U) (a b : A) : U => [| i j |] A { | 0 _ => a | _ 1 => b }"));
   }
 
   @Test public void square() {

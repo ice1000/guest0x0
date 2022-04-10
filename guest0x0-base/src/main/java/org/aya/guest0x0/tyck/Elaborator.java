@@ -163,6 +163,7 @@ public record Elaborator(
           boundaries.append(new Boundary<>(boundary.pats(), term));
         }
         var data = new Boundary.Data<>(dims, ty, boundaries.toImmutableArray());
+        YouTrack.jesperCockx(data, path.pos());
         yield new Synth(new Term.Path(data), Term.U);
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
