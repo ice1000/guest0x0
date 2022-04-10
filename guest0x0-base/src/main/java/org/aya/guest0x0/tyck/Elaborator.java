@@ -56,7 +56,7 @@ public record Elaborator(
         var docs = MutableList.<Doc>create();
         gamma.forEach((k, v) -> {
           var list = MutableList.of(Doc.plain(k.name()), Doc.symbol(":"), normalize(v).toDoc());
-          if (!hole.accessible().contains(k)) list.append(Doc.english("(hidden)"));
+          if (!hole.accessible().contains(k)) list.append(Doc.english("(out of scope)"));
           docs.append(Doc.sep(list));
         });
         docs.append(Doc.plain("----------------------------------"));

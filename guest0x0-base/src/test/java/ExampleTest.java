@@ -78,6 +78,11 @@ public class ExampleTest {
       "def feizhu (A : U) (a b : A) : U => [| i j |] A { | 0 _ => a | _ 1 => b }"));
   }
 
+  @Test public void boundaries() {
+    assertThrowsExactly(SPE.class, () -> tyck(
+      "def feizhu (A : U) (a b : A) : [| i |] A { | 0 => a | 1 => b } => \\i. a"));
+  }
+
   @Test public void square() {
     tyck("""
       def Eq (A : U) (a b : A) : U =>

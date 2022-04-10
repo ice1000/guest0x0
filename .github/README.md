@@ -25,6 +25,25 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ## Milestones
 
+### v0.4
+
+![image](https://user-images.githubusercontent.com/16398479/162601962-c77035cf-5858-45a5-a2c0-062830276210.png)
+
+Implemented boundaries' confluence check and the new syntax for multidimensional cubes ("extension types"),
+855 lines of Java now. The multi-case trees utilities from Aya tools are used, very neat.
+Error message for holes is now more informative (displays shadowing information).
+The following code has some endpoints do not agree:
+
+```
+def Guest0x0 (A : U) (a b c d : A)
+             (ab : Eq A a b) (cd : Eq A c d) : U =>
+   [| i j |] A { | 0 _ => ab j -- 0 0 => a, 0 1 => b
+                 | 1 _ => cd j -- 1 0 => c, 1 1 => d
+                 | 1 1 => a } -- violation
+```
+
+Guest0x0 will reject the above with `The 3rd and 2nd boundaries do not agree!!`.
+
 ### v0.3
 
 ![image](https://user-images.githubusercontent.com/16398479/162591730-6f218433-a26c-467f-b6f8-3dfc6ef7c0fe.png)
