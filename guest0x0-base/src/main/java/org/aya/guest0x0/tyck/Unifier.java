@@ -1,10 +1,11 @@
 package org.aya.guest0x0.tyck;
 
+import kala.collection.SeqView;
+import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
 import kala.tuple.Tuple;
-import org.aya.guest0x0.syntax.LocalVar;
-import org.aya.guest0x0.syntax.Param;
-import org.aya.guest0x0.syntax.Term;
+import kala.tuple.Tuple2;
+import org.aya.guest0x0.syntax.*;
 import org.jetbrains.annotations.NotNull;
 
 public interface Unifier {
@@ -39,5 +40,24 @@ public interface Unifier {
 
   private static @NotNull Term rhs(Term body, LocalVar x, Param<Term> param) {
     return body.subst(x, new Term.Ref(param.x()));
+  }
+
+  record Cof(@NotNull Normalizer l, @NotNull Normalizer r) {
+    public Cof(@NotNull MutableMap<LocalVar, Def<Term>> sigma) {
+      this(new Normalizer(sigma, MutableMap.create()), new Normalizer(sigma, MutableMap.create()));
+    }
+
+    public void unify(
+      @NotNull ImmutableSeq<LocalVar> dims,
+      @NotNull ImmutableSeq<Boundary.Case> lc, // Lambda calculus!!
+      @NotNull ImmutableSeq<Boundary.Case> rc  // Reference counting!!
+    ) {
+      assert lc.sizeEquals(dims) && rc.sizeEquals(dims);
+      for (var ttt : dims.zipView(lc.zipView(rc))) {
+        if (ttt._2._1 == ttt._2._2) continue;
+        if (ttt._2._1 == Boundary.Case.VAR) r.rho().put(ttt._1, new Term.End(ttt._2._2 == Boundary.Case.LEFT));
+        if (ttt._2._2 == Boundary.Case.VAR) l.rho().put(ttt._1, new Term.End(ttt._2._1 == Boundary.Case.LEFT));
+      }
+    }
   }
 }
