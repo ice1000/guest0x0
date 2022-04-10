@@ -55,8 +55,9 @@ public record Elaborator(
       case Expr.Hole hole -> {
         var docs = MutableList.<Doc>create();
         gamma.forEach((k, v) -> {
-          if (hole.accessible().contains(k))
-            docs.append(Doc.sep(Doc.plain(k.name()), Doc.symbol(":"), normalize(v).toDoc()));
+          var list = MutableList.of(Doc.plain(k.name()), Doc.symbol(":"), normalize(v).toDoc());
+          if (!hole.accessible().contains(k)) list.append(Doc.english("(hidden)"));
+          docs.append(Doc.sep(list));
         });
         docs.append(Doc.plain("----------------------------------"));
         docs.append(type.toDoc());
