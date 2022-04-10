@@ -3,7 +3,7 @@
 [![maven]](https://repo1.maven.org/maven2/org/aya-prover/guest0x0-base/)
 [![test](https://github.com/ice1000/guest0x0/actions/workflows/gradle-check.yml/badge.svg)](https://github.com/ice1000/guest0x0/actions/workflows/gradle-check.yml)
 
-![image](https://user-images.githubusercontent.com/16398479/162591730-6f218433-a26c-467f-b6f8-3dfc6ef7c0fe.png)
+![image](https://user-images.githubusercontent.com/16398479/162600129-d59a0c0c-de5a-49e4-b0dd-dd3c4fd51938.png)
 
 [maven]: https://img.shields.io/maven-central/v/org.aya-prover/guest0x0-base
 
@@ -26,6 +26,8 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 ## Milestones
 
 ### v0.3
+
+![image](https://user-images.githubusercontent.com/16398479/162591730-6f218433-a26c-467f-b6f8-3dfc6ef7c0fe.png)
 
 Added some cosmetics features like pretty printing with precedence, one more conversion rule,
 JPMS support, interval terms, a bunch of helper methods, and unicode keyword.
@@ -64,6 +66,8 @@ A : U
 
 ### v0.2
 
+![image](https://user-images.githubusercontent.com/16398479/162101384-cebf6e0f-c0c4-4044-8dcc-291f86a0bc09.png)
+
 Lambdas are overloaded as paths, and paths reduce according to the boundaries.
 Total lines of Java code: 580, including blank/comments. The following are missing:
 
@@ -81,6 +85,8 @@ def funExt (A B : U) (f g : A -> B)
 ```
 
 ### v0.1
+
+![image](https://user-images.githubusercontent.com/16398479/161549473-ef24de7c-3033-4874-8354-54a960b3f873.png)
 
 Minimal type checker with definitions, pi, sigma, and universe.
 484 lines of Java code (including comments and blank lines and `import` statements in many files),
