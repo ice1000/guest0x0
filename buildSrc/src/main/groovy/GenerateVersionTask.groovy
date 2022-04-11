@@ -26,7 +26,7 @@ class GenerateVersionTask extends DefaultTask {
     }
     def code = """\
       package ${basePackage}.prelude;
-      import ${basePackage}.util.Version;
+      import org.aya.util.Version;
       import org.jetbrains.annotations.NotNull;
       import org.jetbrains.annotations.NonNls;
       public class $className {

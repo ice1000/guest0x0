@@ -14,6 +14,8 @@ idea.module {
   sourceDirs.add(file(genDir))
 }
 
-tasks.register<GenerateVersionTask>("genVer") {
-  tasks.compileJava.configure { dependsOn(this@register) }
+val genVer = tasks.register<GenerateVersionTask>("genVer") {
+  basePackage = "org.aya.guest0x0"
+  outputDir = file(genDir).resolve("org/aya/guest0x0/prelude")
 }
+tasks.compileJava.configure { dependsOn(genVer) }
