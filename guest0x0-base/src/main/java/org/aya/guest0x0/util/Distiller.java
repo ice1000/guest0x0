@@ -11,7 +11,7 @@ import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
 
 public interface Distiller {
-  int FREE = 0, CODOMAIN = 1, APP_HEAD = 2, APP_SPINE = 3, PROJ_HEAD = 4;
+  int FREE = 0, I_OPERAND = 1, CODOMAIN = 2, APP_HEAD = 3, APP_SPINE = 4, PROJ_HEAD = 5;
   static @NotNull Doc expr(@NotNull Expr expr, @MagicConstant(valuesFromClass = Distiller.class) int envPrec) {
     return switch (expr) {
       case Expr.UI u -> Doc.plain(u.isU() ? "U" : "I");
@@ -36,6 +36,15 @@ public interface Distiller {
       }
       case Expr.Hole hole -> Doc.symbol("_");
       case Expr.End end -> Doc.symbol(end.isLeft() ? "0" : "1");
+      case Expr.INeg iNeg -> {
+        var doc = expr(iNeg.i(), I_OPERAND);
+        yield envPrec > I_OPERAND ? Doc.parened(doc) : doc;
+      }
+      case Expr.IConn iConn -> {
+        var doc = Doc.sep(expr(iConn.l(), I_OPERAND),
+          Doc.symbol(iConn.isAnd() ? "/\\" : "\\/"), expr(iConn.r(), I_OPERAND));
+        yield envPrec > I_OPERAND ? Doc.parened(doc) : doc;
+      }
     };
   }
   private static @NotNull Doc dependentType(boolean isPi, Param<?> param, Docile cod) {

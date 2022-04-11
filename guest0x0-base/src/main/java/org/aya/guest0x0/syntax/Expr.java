@@ -3,7 +3,6 @@ package org.aya.guest0x0.syntax;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableList;
 import org.aya.guest0x0.util.Distiller;
-import org.aya.guest0x0.util.SPE;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.aya.util.error.SourcePos;
@@ -17,7 +16,6 @@ public sealed interface Expr extends Docile {
   }
   record Unresolved(@Override @NotNull SourcePos pos, String name) implements Expr {}
   record Resolved(@Override @NotNull SourcePos pos, LocalVar ref) implements Expr {}
-
   /** @param isApp it's a tuple if false */
   record Two(boolean isApp, @Override @NotNull SourcePos pos, Expr f, Expr a) implements Expr {}
   record Lam(@Override @NotNull SourcePos pos, LocalVar x, Expr a) implements Expr {}
@@ -29,16 +27,16 @@ public sealed interface Expr extends Docile {
       return unlam(binds, n - 1, lam.a);
     } else return null;
   }
-
   /** @param isOne it's a second projection if false */
   record Proj(@Override @NotNull SourcePos pos, @NotNull Expr t, boolean isOne) implements Expr {}
-
   /** @param isU it's the interval type if false */
   record UI(@Override @NotNull SourcePos pos, boolean isU) implements Expr {}
   record End(@Override @NotNull SourcePos pos, boolean isLeft) implements Expr {}
   record Hole(@Override @NotNull SourcePos pos, ImmutableSeq<LocalVar> accessible) implements Expr {}
-
   /** @param isPi it's a sigma if false */
   record DT(boolean isPi, @Override @NotNull SourcePos pos, Param<Expr> param, Expr cod) implements Expr {}
   record Path(@Override @NotNull SourcePos pos, @NotNull Boundary.Data<Expr> data) implements Expr {}
+  record INeg(@Override @NotNull SourcePos pos, @NotNull Expr i) implements Expr {}
+  /** @param isAnd it's or if false */
+  record IConn(boolean isAnd, @Override @NotNull SourcePos pos, @NotNull Expr l, @NotNull Expr r) implements Expr {}
 }

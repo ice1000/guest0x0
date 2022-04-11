@@ -69,6 +69,8 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
         state.purge();
         yield new Expr.Path(path.pos(), data);
       }
+      case Expr.INeg iNeg -> new Expr.INeg(iNeg.pos(), expr(iNeg.i()));
+      case Expr.IConn iConn -> new Expr.IConn(iConn.isAnd(), iConn.pos(), expr(iConn.l()), expr(iConn.r()));
     };
   }
 
