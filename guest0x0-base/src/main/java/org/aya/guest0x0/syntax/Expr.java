@@ -36,7 +36,5 @@ public sealed interface Expr extends Docile {
   /** @param isPi it's a sigma if false */
   record DT(boolean isPi, @Override @NotNull SourcePos pos, Param<Expr> param, Expr cod) implements Expr {}
   record Path(@Override @NotNull SourcePos pos, @NotNull Boundary.Data<Expr> data) implements Expr {}
-  record Inv(@Override @NotNull SourcePos pos, @NotNull Expr i) implements Expr {}
-  /** @param isAnd it's or if false */
-  record IConn(boolean isAnd, @Override @NotNull SourcePos pos, @NotNull Expr l, @NotNull Expr r) implements Expr {}
+  record Formula(@Override @NotNull SourcePos pos, @NotNull Boundary.Formula<Expr> formula) implements Expr {}
 }

@@ -2,6 +2,7 @@ package org.aya.guest0x0.util;
 
 import kala.collection.Seq;
 import kala.collection.mutable.MutableList;
+import org.aya.guest0x0.syntax.Boundary;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Param;
 import org.aya.guest0x0.syntax.Term;
@@ -9,6 +10,8 @@ import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.BiFunction;
 
 public interface Distiller {
   int FREE = 0, I_OPERAND = 1, CODOMAIN = 2, APP_HEAD = 3, APP_SPINE = 4, PROJ_HEAD = 5;
@@ -36,20 +39,23 @@ public interface Distiller {
       }
       case Expr.Hole hole -> Doc.symbol("_");
       case Expr.End end -> Doc.symbol(end.isLeft() ? "0" : "1");
-      case Expr.Inv inv -> {
-        var doc = expr(inv.i(), I_OPERAND);
-        yield envPrec > I_OPERAND ? Doc.parened(doc) : doc;
-      }
-      case Expr.IConn iConn -> {
-        var doc = Doc.sep(expr(iConn.l(), I_OPERAND),
-          Doc.symbol(iConn.isAnd() ? "/\\" : "\\/"), expr(iConn.r(), I_OPERAND));
-        yield envPrec > I_OPERAND ? Doc.parened(doc) : doc;
-      }
+      case Expr.Formula e -> formulae(Distiller::expr, e.formula(), envPrec);
     };
   }
   private static @NotNull Doc dependentType(boolean isPi, Param<?> param, Docile cod) {
     return Doc.sep(Doc.plain(isPi ? "Pi" : "Sig"),
       param.toDoc(), Doc.symbol(isPi ? "->" : "**"), cod.toDoc());
+  }
+  private static @NotNull <E extends Docile> Doc formulae(
+    BiFunction<E, Integer, Doc> f,
+    Boundary.Formula<E> formula, int envPrec
+  ) {
+    var doc = switch (formula) {
+      case Boundary.Conn<E> conn -> Doc.sep(f.apply(conn.l(), I_OPERAND),
+        Doc.symbol(conn.isAnd() ? "/\\" : "\\/"), f.apply(conn.r(), I_OPERAND));
+      case Boundary.Inv<E> inv -> f.apply(inv.i(), I_OPERAND);
+    };
+    return envPrec > I_OPERAND ? Doc.parened(doc) : doc;
   }
 
   static @NotNull Doc term(@NotNull Term term, int envPrec) {

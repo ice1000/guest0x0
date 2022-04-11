@@ -3,7 +3,10 @@ package org.aya.guest0x0.tyck;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import kala.control.Option;
-import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.syntax.Def;
+import org.aya.guest0x0.syntax.Expr;
+import org.aya.guest0x0.syntax.LocalVar;
+import org.aya.guest0x0.syntax.Param;
 import org.aya.guest0x0.util.SPE;
 import org.aya.pretty.doc.Doc;
 import org.jetbrains.annotations.NotNull;
@@ -69,8 +72,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
         state.purge();
         yield new Expr.Path(path.pos(), data);
       }
-      case Expr.Inv inv -> new Expr.Inv(inv.pos(), expr(inv.i()));
-      case Expr.IConn iConn -> new Expr.IConn(iConn.isAnd(), iConn.pos(), expr(iConn.l()), expr(iConn.r()));
+      case Expr.Formula f -> new Expr.Formula(f.pos(), f.formula().fmap(this::expr));
     };
   }
 
