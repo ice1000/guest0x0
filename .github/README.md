@@ -27,7 +27,11 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ### v0.5
 
-Interval connections and involution and de Morgan laws.
+![image](https://user-images.githubusercontent.com/16398479/162815822-e22a0538-7185-4585-b53d-b7feaedda47d.png)
+
+Interval connections and involution and de Morgan laws. 915 lines of Java code.
+Time to implement `transp`. I decide to design a new syntax for it, because I think of it as the
+elimination principle of `I`, and it has a special typing rule (i.e. you can't alias it as a function).
 
 ```
 def sym (A : U) (a b : A) (p : Eq A a b) : Eq A b a => \i. p (~ i)
