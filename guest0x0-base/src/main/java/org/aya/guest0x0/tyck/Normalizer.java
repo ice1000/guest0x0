@@ -59,19 +59,28 @@ public record Normalizer(
         var heaven = piper(pApp.b(), i); // Important: use unnormalized pApp.b()
         yield heaven != null ? heaven : new Term.PCall(p, i, pApp.b().fmap(this::term));
       }
-      case Term.Formula f -> {
-        var formula = f.formula().fmap(this::term);
-        yield switch (formula) { // de Morgan laws
-          case Boundary.Inv<Term> inv && inv.i() instanceof Term.Formula i
-            && i.formula() instanceof Boundary.Lit<Term> lit -> Term.end(!lit.isLeft());
-          case Boundary.Inv<Term> inv && inv.i() instanceof Term.Formula i
-            && i.formula() instanceof Boundary.Conn<Term> conn ->
-            new Term.Formula(new Boundary.Conn<>(!conn.isAnd(),
-              new Term.Formula(new Boundary.Inv<>(conn.l())),
-              new Term.Formula(new Boundary.Inv<>(conn.r()))));
-          default -> new Term.Formula(formula);
-        };
-      }
+      case Term.Formula f -> formulae(f.formula().fmap(this::term));
+    };
+  }
+
+  // https://github.com/mortberg/cubicaltt/blob/a5c6f94bfc0da84e214641e0b87aa9649ea114ea/Connections.hs#L178-L197
+  private Term formulae(Boundary.Formula<Term> formula) {
+    return switch (formula) { // de Morgan laws
+      case Boundary.Inv<Term> inv && inv.i() instanceof Term.Formula i
+        && i.formula() instanceof Boundary.Lit<Term> lit -> Term.end(!lit.isLeft());
+      case Boundary.Inv<Term> inv && inv.i() instanceof Term.Formula i
+        && i.formula() instanceof Boundary.Conn<Term> conn -> new Term.Formula(new Boundary.Conn<>(!conn.isAnd(),
+        formulae(new Boundary.Inv<>(conn.l())),
+        formulae(new Boundary.Inv<>(conn.r()))));
+      case Boundary.Conn<Term> conn && conn.l() instanceof Term.Formula lf
+        && lf.formula() instanceof Boundary.Lit<Term> l -> l.isLeft()
+        ? (conn.isAnd() ? lf : conn.r())
+        : (conn.isAnd() ? conn.r() : lf);
+      case Boundary.Conn<Term> conn && conn.r() instanceof Term.Formula rf
+        && rf.formula() instanceof Boundary.Lit<Term> r -> r.isLeft()
+        ? (conn.isAnd() ? rf : conn.l())
+        : (conn.isAnd() ? conn.l() : rf);
+      default -> new Term.Formula(formula);
     };
   }
 
