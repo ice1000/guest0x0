@@ -20,9 +20,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "aya",
+@CommandLine.Command(name = "guest0x0",
   mixinStandardHelpOptions = true,
-  version = "Aya v" + GeneratedVersion.VERSION_STRING,
+  version = "Guest0x0 v" + GeneratedVersion.VERSION_STRING,
   showDefaultValues = true)
 public class CliMain implements Callable<Integer> {
   @CommandLine.Parameters(paramLabel = "<input-file>", description = "File to compile")
@@ -33,6 +33,11 @@ public class CliMain implements Callable<Integer> {
   }
 
   @Override public Integer call() throws Exception {
+    if (inputFile == null) {
+      System.err.println("Guest0x0 " + GeneratedVersion.COMMIT_HASH);
+      System.err.println("Use -h for help");
+      return 1;
+    }
     var ak = tyck(Files.readString(Paths.get(inputFile)), true);
     System.out.println("Tycked " + ak.sigma().size() + " definitions, phew.");
     return 0;
