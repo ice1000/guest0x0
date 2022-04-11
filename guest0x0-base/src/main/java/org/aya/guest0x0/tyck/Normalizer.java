@@ -59,7 +59,19 @@ public record Normalizer(
         var heaven = piper(pApp.b(), i); // Important: use unnormalized pApp.b()
         yield heaven != null ? heaven : new Term.PCall(p, i, pApp.b().fmap(this::term));
       }
-      case Term.Formula f -> new Term.Formula(f.formula().fmap(this::term));
+      case Term.Formula f -> {
+        var formula = f.formula().fmap(this::term);
+        yield switch (formula) { // de Morgan laws
+          case Boundary.Inv<Term> inv && inv.i() instanceof Term.Formula i
+            && i.formula() instanceof Boundary.Lit<Term> lit -> Term.end(!lit.isLeft());
+          case Boundary.Inv<Term> inv && inv.i() instanceof Term.Formula i
+            && i.formula() instanceof Boundary.Conn<Term> conn ->
+            new Term.Formula(new Boundary.Conn<>(!conn.isAnd(),
+              new Term.Formula(new Boundary.Inv<>(conn.l())),
+              new Term.Formula(new Boundary.Inv<>(conn.r()))));
+          default -> new Term.Formula(formula);
+        };
+      }
     };
   }
 

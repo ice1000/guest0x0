@@ -25,6 +25,14 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ## Milestones
 
+### v0.5
+
+Interval connections and involution and de Morgan laws.
+
+```
+def sym (A : U) (a b : A) (p : Eq A a b) : Eq A b a => \i. p (~ i)
+```
+
 ### v0.4
 
 ![image](https://user-images.githubusercontent.com/16398479/162601962-c77035cf-5858-45a5-a2c0-062830276210.png)
