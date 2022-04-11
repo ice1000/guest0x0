@@ -36,8 +36,8 @@ public interface Distiller {
       }
       case Expr.Hole hole -> Doc.symbol("_");
       case Expr.End end -> Doc.symbol(end.isLeft() ? "0" : "1");
-      case Expr.INeg iNeg -> {
-        var doc = expr(iNeg.i(), I_OPERAND);
+      case Expr.Inv inv -> {
+        var doc = expr(inv.i(), I_OPERAND);
         yield envPrec > I_OPERAND ? Doc.parened(doc) : doc;
       }
       case Expr.IConn iConn -> {
@@ -90,6 +90,15 @@ public interface Distiller {
         docs.append(Doc.plain("."));
         docs.append(term(pLam.fill(), FREE));
         yield Doc.parened(Doc.sep(docs));
+      }
+      case Term.Inv inv -> {
+        var doc = term(inv.i(), I_OPERAND);
+        yield envPrec > I_OPERAND ? Doc.parened(doc) : doc;
+      }
+      case Term.Conn conn -> {
+        var doc = Doc.sep(term(conn.l(), I_OPERAND),
+          Doc.symbol(conn.isAnd() ? "/\\" : "\\/"), term(conn.r(), I_OPERAND));
+        yield envPrec > I_OPERAND ? Doc.parened(doc) : doc;
       }
     };
   }

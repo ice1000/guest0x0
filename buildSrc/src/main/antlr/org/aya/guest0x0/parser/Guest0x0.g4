@@ -21,7 +21,7 @@ expr
 
  // Introduction lures
  | LAM ID+ '.' expr # lam
- | '<<' expr ',' expr '>>' # pair
+ | LPAIR expr ',' expr RPAIR # pair
 
  // Others
  | ID # ref
@@ -30,15 +30,17 @@ expr
  // Cubical features
  | '[|' ID+ '|]' expr '{' boundary* '}' # cube
  | iPat # iLit
- | '~' expr # iNeg
+ | '~' expr # inv
  | expr (AND | OR) expr # iConn
  ;
 
 iPat : LEFT | RIGHT | '_';
-AND : '/\\';
-OR : '\\/';
+AND : '/\\' | '\u2227';
+OR : '\\/' | '\u2228';
 boundary : '|' iPat+ ARROW2 expr;
 
+LPAIR : '<<';
+RPAIR : '>>';
 ARROW : '->' | '\u2192';
 ARROW2 : '=>' | '\u21D2';
 TIMES : '**' | '\u00D7';
