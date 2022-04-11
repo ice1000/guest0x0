@@ -83,6 +83,10 @@ public class ExampleTest {
       "def feizhu (A : U) (a b : A) : [| i |] A { | 0 => a | 1 => b } => \\i. a"));
   }
 
+  @Test public void connections() {
+    tyck("def f (i j : I) : I => (j /\\ i) \\/ j /\\ ~ i");
+  }
+
   @Test public void square() {
     tyck("""
       def Eq (A : U) (a b : A) : U =>

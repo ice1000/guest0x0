@@ -165,6 +165,12 @@ public record Elaborator(
         YouTrack.jesperCockx(data, path.pos());
         yield new Synth(new Term.Path(data), Term.U);
       }
+      case Expr.Formula f -> switch (f.formula()) {
+        case Boundary.Inv<Expr> inv -> new Synth(new Term.Formula(
+          new Boundary.Inv<>(inherit(inv.i(), Term.I))), Term.I);
+        case Boundary.Conn<Expr> conn -> new Synth(new Term.Formula(
+          new Boundary.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);
+      };
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };
     var type = normalize(synth.type);
