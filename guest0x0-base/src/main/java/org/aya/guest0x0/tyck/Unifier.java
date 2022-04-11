@@ -29,6 +29,8 @@ public interface Unifier {
       case Term.PLam plam && r instanceof Term.PLam pram && plam.dims().sizeEquals(pram.dims()) ->
         untyped(plam.fill(), pram.fill().subst(MutableMap.from(
           pram.dims().zip(plam.dims()).map(p -> Tuple.of(p._1, new Term.Ref(p._2))))));
+      case Term.PCall lpcall && r instanceof Term.PCall rpcall ->
+        untyped(lpcall.p(), rpcall.p()) && lpcall.i().zipView(rpcall.i()).allMatch(p -> untyped(p._1, p._2));
       case Term.Formula lf && r instanceof Term.Formula rf -> formulae(lf.formula(), rf.formula());
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;

@@ -85,6 +85,16 @@ public class ExampleTest {
 
   @Test public void connections() {
     tyck("def f (i j : I) : I => (j /\\ i) \\/ j /\\ ~ i");
+    tyck("""
+      def Eq (A : U) (a b : A) : U =>
+        [| j |] A { | 0 => a | 1 => b }
+      def sym (A : U) (a b : A) (p : Eq A a b)
+        : Eq A b a => \\i. p (~ i)
+      def rotate (A : U) (a b : A) (p q : Eq A a b)
+                 (s : Eq (Eq A a b) p q)
+        : Eq (Eq A b a) (sym A a b q) (sym A a b p) =>
+          \\i j. s (~ i) (~ j)
+      """);
   }
 
   @Test public void square() {

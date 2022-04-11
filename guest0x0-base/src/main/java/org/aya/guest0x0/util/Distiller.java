@@ -52,7 +52,7 @@ public interface Distiller {
     var doc = switch (formula) {
       case Boundary.Conn<E> conn -> Doc.sep(f.apply(conn.l(), I_OPERAND),
         Doc.symbol(conn.isAnd() ? "/\\" : "\\/"), f.apply(conn.r(), I_OPERAND));
-      case Boundary.Inv<E> inv -> f.apply(inv.i(), I_OPERAND);
+      case Boundary.Inv<E> inv -> Doc.sep(Doc.plain("~"), f.apply(inv.i(), I_OPERAND));
       case Boundary.Lit<E> lit -> Doc.symbol(lit.isLeft() ? "0" : "1");
     };
     return envPrec > I_OPERAND ? Doc.parened(doc) : doc;
