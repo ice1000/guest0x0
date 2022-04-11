@@ -25,6 +25,24 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ## Milestones
 
+### v0.6
+
+Fixed many bugs in the previous version, including proper conversion lures for path application
+and full de morgan laws. These functions are now accepted:
+
+```
+def rotate (A : U) (a b : A) (p q : Eq A a b)
+           (s : Eq (Eq A a b) p q)
+  : Eq (Eq A b a) (sym A a b q) (sym A a b p)
+  => \i j. s (~ i) (~ j)
+def minSq (A : U) (a b : A) (p : Eq A a b)
+  : [| i j |] A { | 0 _ => a | 1 0 => a | 1 1 => b }
+  => \i j. p (i /\ j)
+def maxSq (A : U) (a b : A) (p : Eq A a b)
+  : [| i j |] A { | 0 0 => a | 1 0 => b | _ 1 => b }
+  => \i j. p (i \/ j)
+```
+
 ### v0.5
 
 ![image](https://user-images.githubusercontent.com/16398479/162815822-e22a0538-7185-4585-b53d-b7feaedda47d.png)

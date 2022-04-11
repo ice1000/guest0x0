@@ -13,3 +13,7 @@ sourceSets["main"].java.srcDir(file(genDir))
 idea.module {
   sourceDirs.add(file(genDir))
 }
+
+tasks.register<GenerateVersionTask>("genVer") {
+  tasks.compileJava.configure { dependsOn(this@register) }
+}
