@@ -54,7 +54,7 @@ public interface Distiller {
       case Term.Path path -> path.data().toDoc();
       case Term.Lam lam -> {
         var doc = Doc.sep(Doc.cat(Doc.plain("\\"),
-          Doc.symbol(lam.param().x().name()), Doc.plain(".")), term(lam.body(), FREE));
+          Doc.symbol(lam.x().name()), Doc.plain(".")), term(lam.body(), FREE));
         yield envPrec > FREE ? Doc.parened(doc) : doc;
       }
       case Term.Proj proj -> Doc.cat(term(proj.t(), PROJ_HEAD), Doc.plain("." + (proj.isOne() ? 1 : 2)));

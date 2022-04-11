@@ -1,11 +1,11 @@
 package org.aya.guest0x0.syntax;
 
+import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.tyck.Normalizer;
 import org.aya.guest0x0.util.Distiller;
-import org.aya.guest0x0.util.SPE;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
@@ -26,11 +26,11 @@ public sealed interface Term extends Docile {
   record Call(@NotNull LocalVar fn, @NotNull ImmutableSeq<Term> args) implements Term {}
   record Two(boolean isApp, @NotNull Term f, @NotNull Term a) implements Term {}
   record Proj(@NotNull Term t, boolean isOne) implements Term {}
-  record Lam(@NotNull Param<Term> param, @NotNull Term body) implements Term {}
+  record Lam(@NotNull LocalVar x, @NotNull Term body) implements Term {}
   static @Nullable Term unlam(MutableList<LocalVar> binds, Term t, int n) {
     if (n == 0) return t;
     if (t instanceof Lam lam) {
-      binds.append(lam.param.x());
+      binds.append(lam.x);
       return unlam(binds, lam.body, n - 1);
     } else return null;
   }
@@ -42,11 +42,11 @@ public sealed interface Term extends Docile {
     } else return null;
   }
 
-  static @NotNull Term mkLam(@NotNull ImmutableSeq<Param<Term>> telescope, @NotNull Term body) {
-    return telescope.view().foldRight(body, Lam::new);
+  static @NotNull Term mkLam(@NotNull SeqView<LocalVar> telescope, @NotNull Term body) {
+    return telescope.foldRight(body, Lam::new);
   }
   static @NotNull Term mkApp(@NotNull Term f, @NotNull Term a) {
-    return f instanceof Lam lam ? lam.body.subst(lam.param.x(), a) : new Two(true, f, a);
+    return f instanceof Lam lam ? lam.body.subst(lam.x, a) : new Two(true, f, a);
   }
 
   record DT(boolean isPi, @NotNull Param<Term> param, @NotNull Term cod) implements Term {

@@ -25,14 +25,14 @@ public record Normalizer(
         .map(this::term).getOrDefault(ref);
       case Term.UI u -> u;
       case Term.End end -> end;
-      case Term.Lam lam -> new Term.Lam(param(lam.param()), term(lam.body()));
+      case Term.Lam lam -> new Term.Lam(lam.x(), term(lam.body()));
       case Term.DT dt -> new Term.DT(dt.isPi(), param(dt.param()), term(dt.cod()));
       case Term.Two two -> {
         var f = term(two.f());
         var a = term(two.a());
         // Either a tuple or a stuck term is preserved
         if (!two.isApp() || !(f instanceof Term.Lam lam)) yield new Term.Two(two.isApp(), f, a);
-        rho.put(lam.param().x(), a);
+        rho.put(lam.x(), a);
         yield term(lam.body());
       }
       case Term.Proj proj -> {
@@ -86,7 +86,7 @@ public record Normalizer(
     public Term term(Term term) {
       return switch (term) {
         case Term.Lam lam -> {
-          var param = param(lam.param());
+          var param = param(lam.x());
           yield new Term.Lam(param, term(lam.body()));
         }
         case Term.UI u -> u;

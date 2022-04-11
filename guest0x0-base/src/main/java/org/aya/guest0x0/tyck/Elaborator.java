@@ -27,10 +27,8 @@ public record Elaborator(
   public Term inherit(Expr expr, Term type) {
     return switch (expr) {
       case Expr.Lam lam -> switch (normalize(type)) {
-        case Term.DT dt && dt.isPi() -> {
-          var body = hof(lam.x(), dt.param().type(), () -> inherit(lam.a(), dt.codomain(new Term.Ref(lam.x()))));
-          yield new Term.Lam(new Param<>(lam.x(), dt.param().type()), body);
-        }
+        case Term.DT dt && dt.isPi() -> new Term.Lam(lam.x(),
+          hof(lam.x(), dt.param().type(), () -> inherit(lam.a(), dt.codomain(new Term.Ref(lam.x())))));
         // Overloaded lambda
         case Term.Path path -> {
           var tyDims = path.data().dims();
@@ -121,7 +119,8 @@ public record Elaborator(
         var def = sigma.get(resolved.ref());
         var pi = Term.mkPi(def.telescope(), def.result());
         yield switch (def) {
-          case Def.Fn<Term> fn -> new Synth(Normalizer.rename(Term.mkLam(fn.telescope(), fn.body())), pi);
+          case Def.Fn<Term> fn -> new Synth(Normalizer.rename(Term.mkLam(
+            fn.telescope().view().map(Param::x), fn.body())), pi);
         };
       }
       case Expr.Proj proj -> {
@@ -170,10 +169,10 @@ public record Elaborator(
     };
     var type = normalize(synth.type);
     if (type instanceof Term.Path path) {
-      var binds = path.data().dims().map(x -> new Param<>(x, Term.I));
-      return new Synth(Normalizer.rename(Term.mkLam(binds,
-        new Term.PCall(synth.wellTyped, path.data().dims().map(Term.Ref::new), path.data()))),
-        Term.mkPi(binds, path.data().type()));
+      var dims = path.data().dims();
+      return new Synth(Normalizer.rename(Term.mkLam(dims.view(),
+        new Term.PCall(synth.wellTyped, dims.map(Term.Ref::new), path.data()))),
+        Term.mkPi(dims.map(x -> new Param<>(x, Term.I)), path.data().type()));
     } else return new Synth(synth.wellTyped, type);
   }
 

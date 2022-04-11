@@ -1,18 +1,19 @@
 package org.aya.guest0x0.tyck;
 
-import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
 import kala.tuple.Tuple;
-import kala.tuple.Tuple2;
-import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.syntax.Boundary;
+import org.aya.guest0x0.syntax.Def;
+import org.aya.guest0x0.syntax.LocalVar;
+import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
 
 public interface Unifier {
   static boolean untyped(@NotNull Term l, @NotNull Term r) {
     return switch (l) {
       case Term.Lam lam && r instanceof Term.Lam ram ->
-        untyped(lam.body(), rhs(ram.body(), ram.param().x(), lam.param()));
+        untyped(lam.body(), rhs(ram.body(), ram.x(), lam.x()));
       case Term.Lam lam -> eta(r, lam);
       case Term ll && r instanceof Term.Lam ram -> eta(ll, ram);
       case Term.Ref lref && r instanceof Term.Ref rref -> lref.var() == rref.var();
@@ -20,7 +21,7 @@ public interface Unifier {
         lapp.isApp() == rapp.isApp() && untyped(lapp.f(), rapp.f()) && untyped(lapp.a(), rapp.a());
       case Term.DT ldt && r instanceof Term.DT rdt -> ldt.isPi() == rdt.isPi()
         && untyped(ldt.param().type(), rdt.param().type())
-        && untyped(ldt.cod(), rhs(rdt.cod(), rdt.param().x(), ldt.param()));
+        && untyped(ldt.cod(), rhs(rdt.cod(), rdt.param().x(), ldt.param().x()));
       case Term.Proj lproj && r instanceof Term.Proj rproj ->
         lproj.isOne() == rproj.isOne() && untyped(lproj.t(), rproj.t());
       case Term.UI lu && r instanceof Term.UI ru -> lu.isU() == ru.isU();
@@ -35,11 +36,11 @@ public interface Unifier {
     };
   }
   private static boolean eta(@NotNull Term r, Term.Lam lam) {
-    return untyped(lam.body(), Term.mkApp(r, new Term.Ref(lam.param().x())));
+    return untyped(lam.body(), Term.mkApp(r, new Term.Ref(lam.x())));
   }
 
-  private static @NotNull Term rhs(Term body, LocalVar x, Param<Term> param) {
-    return body.subst(x, new Term.Ref(param.x()));
+  private static @NotNull Term rhs(Term rhs, LocalVar rb, LocalVar lb) {
+    return rhs.subst(rb, new Term.Ref(lb));
   }
 
   record Cof(@NotNull Normalizer l, @NotNull Normalizer r) {
