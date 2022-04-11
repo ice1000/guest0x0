@@ -97,15 +97,7 @@ public interface Distiller {
         docs.append(term(pLam.fill(), FREE));
         yield Doc.parened(Doc.sep(docs));
       }
-      case Term.Inv inv -> {
-        var doc = term(inv.i(), I_OPERAND);
-        yield envPrec > I_OPERAND ? Doc.parened(doc) : doc;
-      }
-      case Term.Conn conn -> {
-        var doc = Doc.sep(term(conn.l(), I_OPERAND),
-          Doc.symbol(conn.isAnd() ? "/\\" : "\\/"), term(conn.r(), I_OPERAND));
-        yield envPrec > I_OPERAND ? Doc.parened(doc) : doc;
-      }
+      case Term.Formula f -> formulae(Distiller::term, f.formula(), envPrec);
     };
   }
 }

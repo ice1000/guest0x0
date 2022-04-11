@@ -60,8 +60,7 @@ public record Normalizer(
         var heaven = piper(pApp.b(), i); // Important: use unnormalized pApp.b()
         yield heaven != null ? heaven : new Term.PCall(p, i, pApp.b().fmap(this::term));
       }
-      case Term.Inv inv -> new Term.Inv(term(inv.i()));
-      case Term.Conn conn -> new Term.Conn(conn.isAnd(), term(conn.l()), term(conn.r()));
+      case Term.Formula f -> new Term.Formula(f.formula().fmap(this::term));
     };
   }
 
@@ -107,8 +106,7 @@ public record Normalizer(
           yield new Term.PLam(params, term(pLam.fill()));
         }
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
-        case Term.Inv inv -> new Term.Inv(term(inv.i()));
-        case Term.Conn conn -> new Term.Conn(conn.isAnd(), term(conn.l()), term(conn.r()));
+        case Term.Formula f -> new Term.Formula(f.formula().fmap(this::term));
       };
     }
 
