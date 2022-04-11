@@ -92,8 +92,14 @@ public class ExampleTest {
         : Eq A b a => \\i. p (~ i)
       def rotate (A : U) (a b : A) (p q : Eq A a b)
                  (s : Eq (Eq A a b) p q)
-        : Eq (Eq A b a) (sym A a b q) (sym A a b p) =>
-          \\i j. s (~ i) (~ j)
+        : Eq (Eq A b a) (sym A a b q) (sym A a b p)
+        => \\i j. s (~ i) (~ j)
+      def minSq (A : U) (a b : A) (p : Eq A a b)
+        : [| i j |] A { | 0 _ => a | 1 0 => a | 1 1 => b }
+        => \\i j. p (i /\\ j)
+      def maxSq (A : U) (a b : A) (p : Eq A a b)
+        : [| i j |] A { | 0 0 => a | 1 0 => b | _ 1 => b }
+        => \\i j. p (i \\/ j)
       """);
   }
 
