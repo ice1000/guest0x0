@@ -4,7 +4,6 @@ import kala.collection.Seq;
 import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
-import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
 import kala.tuple.primitive.IntObjTuple2;
 import org.aya.guest0x0.syntax.Boundary;

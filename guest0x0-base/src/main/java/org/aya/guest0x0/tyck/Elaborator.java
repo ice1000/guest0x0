@@ -112,7 +112,6 @@ public record Elaborator(
   public Synth synth(Expr expr) {
     var synth = switch (expr) {
       case Expr.UI u -> new Synth(new Term.UI(u.isU()), Term.U);
-      case Expr.End lr -> new Synth(new Term.End(lr.isLeft()), Term.I);
       case Expr.Resolved resolved -> {
         var type = gamma.getOrNull(resolved.ref());
         if (type != null) yield new Synth(new Term.Ref(resolved.ref()), type);
@@ -170,6 +169,7 @@ public record Elaborator(
           new Boundary.Inv<>(inherit(inv.i(), Term.I))), Term.I);
         case Boundary.Conn<Expr> conn -> new Synth(new Term.Formula(
           new Boundary.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);
+        case Boundary.Lit lit -> new Synth(Term.end(lit.isLeft()), Term.I);
       };
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };
@@ -185,7 +185,7 @@ public record Elaborator(
   private @NotNull Normalizer jonSterling(SeqView<LocalVar> dims, Boundary<?> boundary) {
     return new Normalizer(sigma, MutableMap.from(dims
       .zip(boundary.pats()).filter(p -> p._2 != Boundary.Case.VAR)
-      .map(p -> Tuple.of(p._1, new Term.End(p._2 == Boundary.Case.LEFT)))));
+      .map(p -> Tuple.of(p._1, Term.end(p._2 == Boundary.Case.LEFT)))));
   }
 
   private <T> T hof(@NotNull LocalVar x, @NotNull Term type, @NotNull Supplier<T> t) {

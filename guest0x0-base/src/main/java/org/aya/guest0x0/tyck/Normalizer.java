@@ -24,7 +24,6 @@ public record Normalizer(
         .map(Normalizer::rename)
         .map(this::term).getOrDefault(ref);
       case Term.UI u -> u;
-      case Term.End end -> end;
       case Term.Lam lam -> new Term.Lam(lam.x(), term(lam.body()));
       case Term.DT dt -> new Term.DT(dt.isPi(), param(dt.param()), term(dt.cod()));
       case Term.Two two -> {
@@ -75,7 +74,9 @@ public record Normalizer(
       var sign = new Normalizer(sigma, MutableMap.from(rho));
       for (var ct : thought.pats().zipView(thoughts.dims().zipView(word))) {
         if (ct._1 == Boundary.Case.VAR) sign.rho.put(ct._2);
-        else if (!(ct._2._2 instanceof Term.End end && end.isLeft() == (ct._1 == Boundary.Case.LEFT))) continue meaning;
+        else if (!(ct._2._2 instanceof Term.Formula formula
+          && formula.formula() instanceof Boundary.Lit<Term> lit
+          && lit.isLeft() == (ct._1 == Boundary.Case.LEFT))) continue meaning;
       }
       return sign.term(thought.body());
     }
@@ -91,7 +92,6 @@ public record Normalizer(
           yield new Term.Lam(param, term(lam.body()));
         }
         case Term.UI u -> u;
-        case Term.End end -> end;
         case Term.Ref ref -> map.getOption(ref.var()).map(Term.Ref::new).getOrDefault(ref);
         case Term.DT dt -> {
           var param = param(dt.param());

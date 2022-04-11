@@ -38,7 +38,6 @@ public interface Distiller {
         yield envPrec > CODOMAIN ? Doc.parened(doc) : doc;
       }
       case Expr.Hole hole -> Doc.symbol("_");
-      case Expr.End end -> Doc.symbol(end.isLeft() ? "0" : "1");
       case Expr.Formula e -> formulae(Distiller::expr, e.formula(), envPrec);
     };
   }
@@ -54,6 +53,7 @@ public interface Distiller {
       case Boundary.Conn<E> conn -> Doc.sep(f.apply(conn.l(), I_OPERAND),
         Doc.symbol(conn.isAnd() ? "/\\" : "\\/"), f.apply(conn.r(), I_OPERAND));
       case Boundary.Inv<E> inv -> f.apply(inv.i(), I_OPERAND);
+      case Boundary.Lit<E> lit -> Doc.symbol(lit.isLeft() ? "0" : "1");
     };
     return envPrec > I_OPERAND ? Doc.parened(doc) : doc;
   }
@@ -73,7 +73,6 @@ public interface Distiller {
         yield envPrec > FREE ? Doc.parened(doc) : doc;
       }
       case Term.Proj proj -> Doc.cat(term(proj.t(), PROJ_HEAD), Doc.plain("." + (proj.isOne() ? 1 : 2)));
-      case Term.End end -> Doc.plain(end.isLeft() ? "0" : "1");
       case Term.Two two && two.isApp() -> {
         var inner = Doc.sep(term(two.f(), APP_HEAD), term(two.a(), APP_SPINE));
         yield envPrec > APP_HEAD ? Doc.parened(inner) : inner;

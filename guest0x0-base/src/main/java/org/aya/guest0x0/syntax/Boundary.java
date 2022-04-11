@@ -53,14 +53,13 @@ public record Boundary<E>(@NotNull ImmutableSeq<Case> pats, @NotNull E body) {
   }
   /** @param isAnd it's or if false */
   public record Conn<E extends Docile>(boolean isAnd, @NotNull E l, @NotNull E r) implements Formula<E> {
-    public @NotNull Conn<E> fmap(@NotNull Function<E, E> f) {
-      return new Conn<>(isAnd, f.apply(l), f.apply(r));
-    }
+    public @NotNull Conn<E> fmap(@NotNull Function<E, E> f) {return new Conn<>(isAnd, f.apply(l), f.apply(r));}
   }
   public record Inv<E extends Docile>(@NotNull E i) implements Formula<E> {
-    public @NotNull Inv<E> fmap(@NotNull Function<E, E> f) {
-      return new Inv<>(f.apply(i));
-    }
+    public @NotNull Inv<E> fmap(@NotNull Function<E, E> f) {return new Inv<>(f.apply(i));}
+  }
+  public record Lit<E extends Docile>(boolean isLeft) implements Formula<E> {
+    public @NotNull Lit<E> fmap(@NotNull Function<E, E> f) {return this;}
   }
 }
 

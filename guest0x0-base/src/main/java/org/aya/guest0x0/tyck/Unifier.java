@@ -12,8 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public interface Unifier {
   static boolean untyped(@NotNull Term l, @NotNull Term r) {
     return switch (l) {
-      case Term.Lam lam && r instanceof Term.Lam ram ->
-        untyped(lam.body(), rhs(ram.body(), ram.x(), lam.x()));
+      case Term.Lam lam && r instanceof Term.Lam ram -> untyped(lam.body(), rhs(ram.body(), ram.x(), lam.x()));
       case Term.Lam lam -> eta(r, lam);
       case Term ll && r instanceof Term.Lam ram -> eta(ll, ram);
       case Term.Ref lref && r instanceof Term.Ref rref -> lref.var() == rref.var();
@@ -27,11 +26,21 @@ public interface Unifier {
       case Term.UI lu && r instanceof Term.UI ru -> lu.isU() == ru.isU();
       case Term.Call lcall && r instanceof Term.Call rcall -> lcall.fn() == rcall.fn()
         && lcall.args().sameElements(rcall.args(), true);
-      case Term.End lend && r instanceof Term.End rend -> lend.isLeft() == rend.isLeft();
       case Term.PLam plam && r instanceof Term.PLam pram && plam.dims().sizeEquals(pram.dims()) ->
         untyped(plam.fill(), pram.fill().subst(MutableMap.from(
           pram.dims().zip(plam.dims()).map(p -> Tuple.of(p._1, new Term.Ref(p._2))))));
+      case Term.Formula lf && r instanceof Term.Formula rf -> formulae(lf.formula(), rf.formula());
       // Cubical subtyping?? Are we ever gonna unify cubes?
+      default -> false;
+    };
+  }
+  // Hopefully.... I don't know. :shrug:
+  static boolean formulae(Boundary.Formula<Term> lf, Boundary.Formula<Term> rf) {
+    return switch (lf) {
+      case Boundary.Lit<Term> l && rf instanceof Boundary.Lit<Term> r -> l.isLeft() == r.isLeft();
+      case Boundary.Inv<Term> l && rf instanceof Boundary.Inv<Term> r -> untyped(l.i(), r.i());
+      case Boundary.Conn<Term> l && rf instanceof Boundary.Conn<Term> r && l.isAnd() == r.isAnd() ->
+        untyped(l.l(), r.l()) && untyped(l.r(), r.r());
       default -> false;
     };
   }
@@ -56,8 +65,8 @@ public interface Unifier {
       assert lc.sizeEquals(dims) && rc.sizeEquals(dims);
       for (var ttt : dims.zipView(lc.zipView(rc))) {
         if (ttt._2._1 == ttt._2._2) continue;
-        if (ttt._2._1 == Boundary.Case.VAR) r.rho().put(ttt._1, new Term.End(ttt._2._2 == Boundary.Case.LEFT));
-        if (ttt._2._2 == Boundary.Case.VAR) l.rho().put(ttt._1, new Term.End(ttt._2._1 == Boundary.Case.LEFT));
+        if (ttt._2._1 == Boundary.Case.VAR) r.rho().put(ttt._1, Term.end(ttt._2._2 == Boundary.Case.LEFT));
+        if (ttt._2._2 == Boundary.Case.VAR) l.rho().put(ttt._1, Term.end(ttt._2._1 == Boundary.Case.LEFT));
       }
     }
   }
