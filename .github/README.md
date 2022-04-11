@@ -27,6 +27,8 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ### v0.6
 
+![image](https://user-images.githubusercontent.com/16398479/162851016-86f3f199-7ec8-42b7-adac-c43bbcc5ec3e.png)
+
 Fixed many bugs in the previous version, including proper conversion lures for path application
 and full de morgan laws. These functions are now accepted:
 
@@ -42,6 +44,8 @@ def maxSq (A : U) (a b : A) (p : Eq A a b)
   : [| i j |] A { | 0 0 => a | 1 0 => b | _ 1 => b }
   => \i j. p (i \/ j)
 ```
+
+Also, a simple CLI interface is implemented.
 
 ### v0.5
 
