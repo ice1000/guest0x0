@@ -30,7 +30,7 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 ![image](https://user-images.githubusercontent.com/16398479/162851016-86f3f199-7ec8-42b7-adac-c43bbcc5ec3e.png)
 
 Fixed many bugs in the previous version, including proper conversion lures for path application
-and full de morgan laws. These functions are now accepted:
+and full de morgan laws. 924 lines of Java. These functions are now accepted:
 
 ```
 def rotate (A : U) (a b : A) (p q : Eq A a b)

@@ -29,6 +29,7 @@ expr
 
  // Cubical features
  | '[|' ID+ '|]' expr '{' boundary* '}' # cube
+ | expr '~@' expr # transp
  | iPat # iLit
  | '~' expr # inv
  | expr (AND | OR) expr # iConn

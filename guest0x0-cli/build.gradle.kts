@@ -19,4 +19,5 @@ val genVer = tasks.register<GenerateVersionTask>("genVer") {
   basePackage = "org.aya.guest0x0"
   outputDir = file(genDir).resolve("org/aya/guest0x0/prelude")
 }
-tasks.compileJava.configure { dependsOn(genVer) }
+@Suppress("unsupported")
+[tasks.sourcesJar, tasks.compileJava].forEach { it.configure { dependsOn(genVer) } }
