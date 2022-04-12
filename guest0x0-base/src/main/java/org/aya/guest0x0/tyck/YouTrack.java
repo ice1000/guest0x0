@@ -15,7 +15,7 @@ import org.aya.util.error.SourcePos;
 import org.aya.util.tyck.MCT;
 import org.jetbrains.annotations.NotNull;
 
-/** YouTrack checks Confluence. This file uses OOP in the evilest way. */
+/** YouTrack checks Confluence. */
 public interface YouTrack {
   static void jesperCockx(@NotNull Boundary.Data<Term> d, @NotNull SourcePos pos) {
     celebrate(d.dims().view(), d.boundaries().mapIndexed((i, b) -> new MCT.SubPats<>(b.pats().view(), i)))

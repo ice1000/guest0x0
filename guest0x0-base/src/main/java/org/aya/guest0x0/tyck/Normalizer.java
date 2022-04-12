@@ -60,6 +60,13 @@ public record Normalizer(
         yield heaven != null ? heaven : new Term.PCall(p, i, pApp.b().fmap(this::term));
       }
       case Term.Formula f -> formulae(f.formula().fmap(this::term));
+      case Term.Transp transp -> {
+        var psi = term(transp.psi());
+        if (psi instanceof Term.Formula f && f.formula() instanceof Boundary.Lit<Term> lit && lit.isLeft()) {
+          var x = new LocalVar("x");
+          yield new Term.Lam(x, new Term.Ref(x));
+        } else yield new Term.Transp(term(transp.cover()), psi);
+      }
     };
   }
 
@@ -128,6 +135,7 @@ public record Normalizer(
         }
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
         case Term.Formula f -> new Term.Formula(f.formula().fmap(this::term));
+        case Term.Transp transp -> new Term.Transp(term(transp.cover()), term(transp.psi()));
       };
     }
 

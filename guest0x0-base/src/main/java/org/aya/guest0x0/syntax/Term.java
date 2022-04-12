@@ -67,4 +67,5 @@ public sealed interface Term extends Docile {
   static @NotNull Term end(boolean isLeft) {
     return new Formula(new Boundary.Lit<>(isLeft));
   }
+  record Transp(@NotNull Term cover, @NotNull Term psi) implements Term {}
 }
