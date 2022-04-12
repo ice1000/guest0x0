@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 public sealed interface Term extends Docile {
   @Override default @NotNull Doc toDoc() {
-    return Distiller.term(this, Distiller.FREE);
+    return Distiller.term(this, Distiller.Prec.Free);
   }
   default @NotNull Term subst(@NotNull LocalVar x, @NotNull Term t) {
     return subst(MutableMap.of(x, t));

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 public sealed interface Expr extends Docile {
   @NotNull SourcePos pos();
   @Override default @NotNull Doc toDoc() {
-    return Distiller.expr(this, Distiller.FREE);
+    return Distiller.expr(this, Distiller.Prec.Free);
   }
   record Unresolved(@Override @NotNull SourcePos pos, String name) implements Expr {}
   record Resolved(@Override @NotNull SourcePos pos, LocalVar ref) implements Expr {}
