@@ -171,6 +171,12 @@ public record Elaborator(
           new Boundary.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);
         case Boundary.Lit lit -> new Synth(Term.end(lit.isLeft()), Term.I);
       };
+      case Expr.Transp transp -> {
+        var cover = inherit(transp.cover(), Term.mkPi(Term.I, Term.U));
+        var psi = inherit(transp.psi(), Term.I);
+        var ty = Term.mkPi(Term.mkApp(cover, Term.end(true)), Term.mkApp(cover, Term.end(false)));
+        yield new Synth(new Term.Transp(cover, psi), ty);
+      }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };
     var type = normalize(synth.type);

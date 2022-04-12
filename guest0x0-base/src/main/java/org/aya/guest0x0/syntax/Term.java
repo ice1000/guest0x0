@@ -58,6 +58,9 @@ public sealed interface Term extends Docile {
   static @NotNull Term mkPi(@NotNull ImmutableSeq<Param<Term>> telescope, @NotNull Term body) {
     return telescope.view().foldRight(body, (param, term) -> new DT(true, param, term));
   }
+  static @NotNull Term mkPi(@NotNull Term dom, @NotNull Term cod) {
+    return new Term.DT(true, new Param<>(new LocalVar("_"), dom), cod);
+  }
   @NotNull Term U = new UI(true), I = new UI(false);
   record UI(boolean isU) implements Term {}
   record Path(@NotNull Boundary.Data<Term> data) implements Term {}
