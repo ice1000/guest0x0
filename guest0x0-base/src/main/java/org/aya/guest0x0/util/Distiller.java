@@ -65,7 +65,7 @@ public interface Distiller {
         yield Doc.symbol(lit.isLeft() ? "0" : "1");
       }
     };
-    return envPrec.ordinal() > IOp.ordinal() ? Doc.parened(doc) : doc;
+    return envPrec.ordinal() >= IOp.ordinal() ? Doc.parened(doc) : doc;
   }
 
   static @NotNull Doc term(@NotNull Term term, Prec envPrec) {

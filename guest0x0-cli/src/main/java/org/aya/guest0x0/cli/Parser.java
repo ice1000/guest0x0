@@ -29,6 +29,7 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SimpFunContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.expr(0)), expr(pi.expr(1)));
       case Guest0x0Parser.SimpTupContext si -> new Expr.DT(false, sourcePosOf(si), param(si.expr(0)), expr(si.expr(1)));
       case Guest0x0Parser.ILitContext il -> iPat(il.iPat());
+      case Guest0x0Parser.TranspContext tp -> new Expr.Transp(sourcePosOf(tp), expr(tp.expr(0)), expr(tp.expr(1)));
       case Guest0x0Parser.InvContext in -> new Expr.Formula(sourcePosOf(in), new Boundary.Inv<>(expr(in.expr())));
       case Guest0x0Parser.IConnContext ic -> new Expr.Formula(sourcePosOf(ic),
         new Boundary.Conn<>(ic.AND() != null, expr(ic.expr(0)), expr(ic.expr(1))));

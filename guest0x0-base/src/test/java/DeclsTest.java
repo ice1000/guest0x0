@@ -7,16 +7,10 @@ import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DeclsTest {
-  @Test public void fnDef() {
-    var artifact = CliMain.def("def uncurry (A B C : U)" +
-      "(t : A ** B) (f : A -> B -> C) : C => f (t.1) (t.2)").first();
-    var tycked = CliMain.andrasKovacs().def(artifact);
-    assertNotNull(tycked);
-  }
-
   @Test public void dontSayLazy() {
     var akJr = tyck("""
       def uncurry (A B C : U)
