@@ -36,4 +36,5 @@ public sealed interface Expr extends Docile {
   record DT(boolean isPi, @Override @NotNull SourcePos pos, Param<Expr> param, Expr cod) implements Expr {}
   record Path(@Override @NotNull SourcePos pos, @NotNull Boundary.Data<Expr> data) implements Expr {}
   record Formula(@Override @NotNull SourcePos pos, @NotNull Boundary.Formula<Expr> formula) implements Expr {}
+  record Transp(@Override @NotNull SourcePos pos, @NotNull Expr cover, @NotNull Expr psi) implements Expr {}
 }

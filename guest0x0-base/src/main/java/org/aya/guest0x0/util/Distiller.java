@@ -16,7 +16,7 @@ import static org.aya.guest0x0.util.Distiller.Prec.*;
 
 public interface Distiller {
   enum Prec {
-    Free, IOp, Cod, AppHead, AppSpine, ProjHead
+    Free, IOp, Transp, Cod, AppHead, AppSpine, ProjHead
   }
   static @NotNull Doc expr(@NotNull Expr expr, Prec envPrec) {
     return switch (expr) {
@@ -42,6 +42,10 @@ public interface Distiller {
       }
       case Expr.Hole hole -> Doc.symbol("_");
       case Expr.Formula e -> formulae(Distiller::expr, e.formula(), envPrec);
+      case Expr.Transp transp -> {
+        var doc = Doc.sep(expr(transp.cover(), Transp), Doc.plain("~@"), expr(transp.psi(), Transp));
+        yield envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
+      }
     };
   }
   private static @NotNull Doc dependentType(boolean isPi, Param<?> param, Docile cod) {
