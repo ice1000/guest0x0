@@ -25,6 +25,12 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ## Milestones
 
+### Untagged
+
+![image](https://user-images.githubusercontent.com/16398479/163258018-ee80a9f9-2fa1-45cb-b336-bc493d97a6ae.png)
+
+A work-in-progress `transp` implementation, denoted `~@` (very beautiful with JetBrains Mono or Fira Code).
+
 ### v0.6
 
 ![image](https://user-images.githubusercontent.com/16398479/162851016-86f3f199-7ec8-42b7-adac-c43bbcc5ec3e.png)
