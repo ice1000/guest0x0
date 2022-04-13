@@ -48,18 +48,21 @@ public record Boundary<E>(@NotNull ImmutableSeq<Case> pats, @NotNull E body) {
     }
   }
 
-  public sealed interface Formula<E extends Docile> {
+  public sealed interface Formula<E> {
     @NotNull Formula<E> fmap(@NotNull Function<E, E> f);
   }
   /** @param isAnd it's or if false */
-  public record Conn<E extends Docile>(boolean isAnd, @NotNull E l, @NotNull E r) implements Formula<E> {
+  public record Conn<E>(boolean isAnd, @NotNull E l, @NotNull E r) implements Formula<E> {
     public @NotNull Conn<E> fmap(@NotNull Function<E, E> f) {return new Conn<>(isAnd, f.apply(l), f.apply(r));}
   }
-  public record Inv<E extends Docile>(@NotNull E i) implements Formula<E> {
+  public record Inv<E>(@NotNull E i) implements Formula<E> {
     public @NotNull Inv<E> fmap(@NotNull Function<E, E> f) {return new Inv<>(f.apply(i));}
   }
-  public record Lit<E extends Docile>(boolean isLeft) implements Formula<E> {
+  public record Lit<E>(boolean isLeft) implements Formula<E> {
     public @NotNull Lit<E> fmap(@NotNull Function<E, E> f) {return this;}
+  }
+  public record Ref<E>(@NotNull LocalVar var) implements Formula<E> {
+    @Override public @NotNull Formula<E> fmap(@NotNull Function<E, E> f) {return this;}
   }
 }
 

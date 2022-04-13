@@ -6,6 +6,8 @@ import org.aya.guest0x0.syntax.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Function;
+
 public record Normalizer(
   @NotNull MutableMap<LocalVar, Def<Term>> sigma,
   @NotNull MutableMap<LocalVar, Term> rho
@@ -59,10 +61,11 @@ public record Normalizer(
         var heaven = piper(pApp.b(), i); // Important: use unnormalized pApp.b()
         yield heaven != null ? heaven : new Term.PCall(p, i, pApp.b().fmap(this::term));
       }
-      case Term.Formula f -> formulae(f.formula().fmap(this::term));
+      case Term.Formula f -> formulae(f.formula().fmap(this::term),
+        t -> t instanceof Term.Formula tf ? tf.formula() : null, Term.Formula::new);
       case Term.Transp transp -> {
-        var psi = term(transp.psi());
-        if (psi instanceof Term.Formula f && f.formula() instanceof Boundary.Lit<Term> lit && lit.isLeft()) {
+        var psi = formulae(transp.psi().formula(), Term.PureFormula::formula, Term.PureFormula::new);
+        if (psi.formula() instanceof Boundary.Lit<Term.PureFormula> lit && lit.isLeft()) {
           var x = new LocalVar("x");
           yield new Term.Lam(x, new Term.Ref(x));
         } else yield new Term.Transp(term(transp.cover()), psi);
@@ -71,23 +74,25 @@ public record Normalizer(
   }
 
   // https://github.com/mortberg/cubicaltt/blob/a5c6f94bfc0da84e214641e0b87aa9649ea114ea/Connections.hs#L178-L197
-  private Term formulae(Boundary.Formula<Term> formula) {
+  private <E> E formulae(
+    Boundary.Formula<E> formula,
+    Function<E, Boundary.@Nullable Formula<E>> unlift,
+    Function<Boundary.Formula<E>, @NotNull E> lift
+  ) {
     return switch (formula) { // de Morgan laws
-      case Boundary.Inv<Term> inv && inv.i() instanceof Term.Formula i
-        && i.formula() instanceof Boundary.Lit<Term> lit -> Term.end(!lit.isLeft());
-      case Boundary.Inv<Term> inv && inv.i() instanceof Term.Formula i
-        && i.formula() instanceof Boundary.Conn<Term> conn -> new Term.Formula(new Boundary.Conn<>(!conn.isAnd(),
-        formulae(new Boundary.Inv<>(conn.l())),
-        formulae(new Boundary.Inv<>(conn.r()))));
-      case Boundary.Conn<Term> conn && conn.l() instanceof Term.Formula lf
-        && lf.formula() instanceof Boundary.Lit<Term> l -> l.isLeft()
-        ? (conn.isAnd() ? lf : conn.r())
-        : (conn.isAnd() ? conn.r() : lf);
-      case Boundary.Conn<Term> conn && conn.r() instanceof Term.Formula rf
-        && rf.formula() instanceof Boundary.Lit<Term> r -> r.isLeft()
-        ? (conn.isAnd() ? rf : conn.l())
-        : (conn.isAnd() ? conn.l() : rf);
-      default -> new Term.Formula(formula);
+      case Boundary.Inv<E> inv && unlift.apply(inv.i()) instanceof Boundary.Lit<E> lit ->
+        lift.apply(new Boundary.Lit<>(!lit.isLeft()));
+      case Boundary.Inv<E> inv && unlift.apply(inv.i()) instanceof Boundary.Conn<E> conn ->
+        lift.apply(new Boundary.Conn<>(!conn.isAnd(),
+          formulae(new Boundary.Inv<>(conn.l()), unlift, lift),
+          formulae(new Boundary.Inv<>(conn.r()), unlift, lift)));
+      case Boundary.Conn<E> conn && unlift.apply(conn.l()) instanceof Boundary.Lit<E> l -> l.isLeft()
+        ? conn.isAnd() ? lift.apply(l) : conn.r()
+        : conn.isAnd() ? conn.r() : lift.apply(l);
+      case Boundary.Conn<E> conn && unlift.apply(conn.r()) instanceof Boundary.Lit<E> r -> r.isLeft()
+        ? (conn.isAnd() ? lift.apply(r) : conn.l())
+        : (conn.isAnd() ? conn.l() : lift.apply(r));
+      default -> lift.apply(formula);
     };
   }
 
@@ -120,7 +125,7 @@ public record Normalizer(
           yield new Term.Lam(param, term(lam.body()));
         }
         case Term.UI u -> u;
-        case Term.Ref ref -> map.getOption(ref.var()).map(Term.Ref::new).getOrDefault(ref);
+        case Term.Ref ref -> new Term.Ref(map.getOrDefault(ref.var(), ref.var()));
         case Term.DT dt -> {
           var param = param(dt.param());
           yield new Term.DT(dt.isPi(), param, term(dt.cod()));
@@ -135,7 +140,9 @@ public record Normalizer(
         }
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
         case Term.Formula f -> new Term.Formula(f.formula().fmap(this::term));
-        case Term.Transp transp -> new Term.Transp(term(transp.cover()), term(transp.psi()));
+        case Term.Transp transp -> new Term.Transp(term(transp.cover()), new Term.PureFormula(
+          transp.psi().formula().fmap(f -> f.formula() instanceof Boundary.Ref<Term.PureFormula> r
+            ? new Term.PureFormula(new Boundary.Ref<>(map.getOrDefault(r.var(), r.var()))) : f)));
       };
     }
 
