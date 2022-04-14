@@ -173,9 +173,8 @@ public record Elaborator(
       };
       case Expr.Transp transp -> {
         var cover = inherit(transp.cover(), Term.mkPi(Term.I, Term.U));
-        var psi = inherit(transp.psi(), Term.I);
         var ty = Term.mkPi(Term.mkApp(cover, Term.end(true)), Term.mkApp(cover, Term.end(false)));
-        yield new Synth(new Term.Transp(cover, psi), ty);
+        yield new Synth(new Term.Transp(cover, transp.vars(), transp.faces()), ty);
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };

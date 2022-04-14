@@ -1,6 +1,7 @@
 package org.aya.guest0x0.util;
 
 import kala.collection.Seq;
+import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableList;
 import org.aya.guest0x0.syntax.*;
 import org.aya.pretty.doc.Doc;
@@ -12,6 +13,8 @@ import java.util.function.BiFunction;
 import static org.aya.guest0x0.util.Distiller.Prec.*;
 
 public interface Distiller {
+  @FunctionalInterface
+  interface PP<E> extends BiFunction<E, Prec, Doc> {}
   enum Prec {
     Free, IOp, Transp, Cod, AppHead, AppSpine, ProjHead
   }
@@ -37,22 +40,25 @@ public interface Distiller {
         var doc = dependentType(dt.isPi(), dt.param(), expr(dt.cod(), Cod));
         yield envPrec.ordinal() > Cod.ordinal() ? Doc.parened(doc) : doc;
       }
-      case Expr.Hole hole -> Doc.symbol("_");
+      case Expr.Hole ignored -> Doc.symbol("_");
       case Expr.Formula e -> formulae(Distiller::expr, e.formula(), envPrec);
-      case Expr.Transp transp -> {
-        var doc = Doc.sep(expr(transp.cover(), Transp), Doc.plain("~@"), expr(transp.psi(), Transp));
-        yield envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
-      }
+      case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.vars(), transp.faces());
     };
+  }
+  private static <E> @NotNull Doc transp(
+    PP<E> f, Prec envPrec, E cover,
+    ImmutableSeq<LocalVar> lv, ImmutableSeq<Boundary.Face> faces
+  ) {
+    var pre = Doc.sep(f.apply(cover, Transp), Doc.plain("~@"),
+      Doc.sep(lv.map(v -> Doc.plain(v.name()))));
+    var doc = Doc.cblock(pre, 2, Doc.vcat(faces.map(Boundary.Face::toDoc)));
+    return envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
   }
   private static @NotNull Doc dependentType(boolean isPi, Param<?> param, Docile cod) {
     return Doc.sep(Doc.plain(isPi ? "Pi" : "Sig"),
       param.toDoc(), Doc.symbol(isPi ? "->" : "**"), cod.toDoc());
   }
-  private static @NotNull <E extends Docile> Doc formulae(
-      BiFunction<E, Prec, Doc> f,
-      Formula<E> formula, Prec envPrec
-  ) {
+  private static @NotNull <E> Doc formulae(PP<E> f, Formula<E> formula, Prec envPrec) {
     var doc = switch (formula) {
       case Formula.Conn<E> conn -> Doc.sep(f.apply(conn.l(), IOp),
         Doc.symbol(conn.isAnd() ? "/\\" : "\\/"), f.apply(conn.r(), IOp));
@@ -104,10 +110,7 @@ public interface Distiller {
         yield Doc.parened(Doc.sep(docs));
       }
       case Term.Formula f -> formulae(Distiller::term, f.formula(), envPrec);
-      case Term.Transp transp -> {
-        var doc = Doc.sep(term(transp.cover(), Transp), Doc.plain("~@"), term(transp.psi(), Transp));
-        yield envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
-      }
+      case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.vars(), transp.faces());
     };
   }
 }

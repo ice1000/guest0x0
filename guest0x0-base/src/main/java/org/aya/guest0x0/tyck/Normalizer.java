@@ -60,13 +60,7 @@ public record Normalizer(
         yield heaven != null ? heaven : new Term.PCall(p, i, pApp.b().fmap(this::term));
       }
       case Term.Formula f -> formulae(f.formula().fmap(this::term));
-      case Term.Transp transp -> {
-        var psi = term(transp.psi());
-        if (psi instanceof Term.Formula f && f.formula() instanceof Formula.Lit<Term> lit && lit.isLeft()) {
-          var x = new LocalVar("x");
-          yield new Term.Lam(x, new Term.Ref(x));
-        } else yield new Term.Transp(term(transp.cover()), psi);
-      }
+      case Term.Transp transp -> throw new UnsupportedOperationException("TODO");
     };
   }
 
@@ -120,7 +114,7 @@ public record Normalizer(
           yield new Term.Lam(param, term(lam.body()));
         }
         case Term.UI u -> u;
-        case Term.Ref ref -> map.getOption(ref.var()).map(Term.Ref::new).getOrDefault(ref);
+        case Term.Ref ref -> new Term.Ref(map.getOrDefault(ref.var(), ref.var()));
         case Term.DT dt -> {
           var param = param(dt.param());
           yield new Term.DT(dt.isPi(), param, term(dt.cod()));
@@ -135,7 +129,8 @@ public record Normalizer(
         }
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
         case Term.Formula f -> new Term.Formula(f.formula().fmap(this::term));
-        case Term.Transp transp -> new Term.Transp(term(transp.cover()), term(transp.psi()));
+        case Term.Transp transp -> new Term.Transp(term(transp.cover()),
+          transp.vars().map(v -> map.getOrDefault(v, v)), transp.faces());
       };
     }
 

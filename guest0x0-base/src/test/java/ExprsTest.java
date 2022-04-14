@@ -37,7 +37,8 @@ public class ExprsTest {
     assertEquals("a ((~ c) /\\ b)", distill("a (~ c /\\ b)"));
     assertEquals("a ((~ c d) /\\ b)", distill("a ((~ c d) /\\ b)"));
     assertEquals("a (~ (c d /\\ b))", distill("a (~ (c d /\\ b))"));
-    assertEquals("a b ~@ c /\\ d", distill("a b ~@ c /\\ d"));
+    assertEquals("a b ~@ i {\n  | 0\n}", distill("a b ~@ i { | 0 }"));
+    assertEquals("a b ~@ i j {\n  | 0 1\n}", distill("a b ~@ i j { | 0 1 }"));
   }
 
   private static @NotNull String distill(@Language("TEXT") String s) {

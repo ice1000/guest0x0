@@ -44,7 +44,7 @@ public record Boundary<E>(@NotNull Face face, @NotNull E body) {
 
     @Override public @NotNull Doc toDoc() {
       var head = MutableList.of(Doc.symbol("[|"));
-      dims.forEach(d -> head.append(Doc.symbol(d.name())));
+      dims.forEach(d -> head.append(Doc.plain(d.name())));
       head.appendAll(new Doc[]{Doc.symbol("|]"), type.toDoc()});
       return Doc.cblock(Doc.sep(head), 2, Doc.vcat(boundaries.map(b ->
         Doc.sep(b.face.toDoc(), Doc.symbol("=>"), b.body().toDoc()))));

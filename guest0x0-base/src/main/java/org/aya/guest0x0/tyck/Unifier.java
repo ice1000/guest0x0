@@ -30,7 +30,8 @@ public interface Unifier {
         untyped(lpcall.p(), rpcall.p()) && lpcall.i().zipView(rpcall.i()).allMatch(p -> untyped(p._1, p._2));
       case Term.Formula lf && r instanceof Term.Formula rf -> formulae(lf.formula(), rf.formula());
       case Term.Transp ltp && r instanceof Term.Transp rtp ->
-        untyped(ltp.cover(), rtp.cover()) && untyped(ltp.psi(), rtp.psi());
+        // Unify pattern matchings?!?!?! You're out of your mind!
+        untyped(ltp.cover(), rtp.cover()) && ltp.vars().sameElements(rtp.vars(), true);
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };

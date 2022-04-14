@@ -70,5 +70,8 @@ public sealed interface Term extends Docile {
   static @NotNull Term end(boolean isLeft) {
     return new Formula(new org.aya.guest0x0.syntax.Formula.Lit<>(isLeft));
   }
-  record Transp(@NotNull Term cover, @NotNull Term psi) implements Term {}
+  record Transp(
+    @NotNull Term cover,
+    @NotNull ImmutableSeq<LocalVar> vars,
+    @NotNull ImmutableSeq<Boundary.Face> faces) implements Term {}
 }

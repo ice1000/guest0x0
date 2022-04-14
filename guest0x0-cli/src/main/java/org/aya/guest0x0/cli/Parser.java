@@ -1,8 +1,10 @@
 package org.aya.guest0x0.cli;
 
+import kala.collection.Seq;
 import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.*;
 import org.aya.repl.antlr.AntlrUtil;
@@ -10,6 +12,8 @@ import org.aya.util.error.SourceFile;
 import org.aya.util.error.SourcePos;
 import org.aya.util.error.WithPos;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public record Parser(@NotNull SourceFile source) {
   public @NotNull Expr expr(@NotNull Guest0x0Parser.ExprContext expr) {
@@ -21,7 +25,7 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SndContext snd -> new Expr.Proj(sourcePosOf(snd), expr(snd.expr()), false);
       case Guest0x0Parser.TreborContext trebor -> new Expr.UI(sourcePosOf(trebor), true);
       case Guest0x0Parser.IntervalContext interval -> new Expr.UI(sourcePosOf(interval), false);
-      case Guest0x0Parser.LamContext lam -> buildLam(sourcePosOf(lam), ImmutableSeq.from(lam.ID()).view()
+      case Guest0x0Parser.LamContext lam -> buildLam(sourcePosOf(lam), Seq.wrapJava(lam.ID()).view()
         .map(id -> new WithPos<>(AntlrUtil.sourcePosOf(id, source), new LocalVar(id.getText()))), expr(lam.expr()));
       case Guest0x0Parser.RefContext ref -> new Expr.Unresolved(sourcePosOf(ref), ref.ID().getText());
       case Guest0x0Parser.PiContext pi -> buildDT(true, sourcePosOf(pi), param(pi.param()), expr(pi.expr()));
@@ -29,16 +33,20 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SimpFunContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.expr(0)), expr(pi.expr(1)));
       case Guest0x0Parser.SimpTupContext si -> new Expr.DT(false, sourcePosOf(si), param(si.expr(0)), expr(si.expr(1)));
       case Guest0x0Parser.ILitContext il -> iPat(il.iPat());
-      case Guest0x0Parser.TranspContext tp -> new Expr.Transp(sourcePosOf(tp), expr(tp.expr(0)), expr(tp.expr(1)));
+      case Guest0x0Parser.TranspContext tp -> new Expr.Transp(sourcePosOf(tp), expr(tp.expr()),
+        localVars(tp.ID()), Seq.wrapJava(tp.face()).map(this::face));
       case Guest0x0Parser.InvContext in -> new Expr.Formula(sourcePosOf(in), new Formula.Inv<>(expr(in.expr())));
       case Guest0x0Parser.IConnContext ic -> new Expr.Formula(sourcePosOf(ic),
         new Formula.Conn<>(ic.AND() != null, expr(ic.expr(0)), expr(ic.expr(1))));
       case Guest0x0Parser.CubeContext cube -> new Expr.Path(sourcePosOf(cube), new Boundary.Data<>(
-        ImmutableSeq.from(cube.ID()).map(id -> new LocalVar(id.getText())),
-        expr(cube.expr()),
-        ImmutableSeq.from(cube.boundary()).map(b -> new Boundary<>(face(b.face()), expr(b.expr())))));
+        localVars(cube.ID()), expr(cube.expr()),
+        Seq.wrapJava(cube.boundary()).map(b -> new Boundary<>(face(b.face()), expr(b.expr())))));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
+  }
+
+  @NotNull private ImmutableSeq<LocalVar> localVars(List<TerminalNode> ids) {
+    return Seq.wrapJava(ids).map(id -> new LocalVar(id.getText()));
   }
 
   private @NotNull Expr iPat(Guest0x0Parser.IPatContext iPat) {
@@ -49,7 +57,7 @@ public record Parser(@NotNull SourceFile source) {
   }
 
   private @NotNull Boundary.Face face(Guest0x0Parser.FaceContext face) {
-    return new Boundary.Face(ImmutableSeq.from(face.iPat()).map(i ->
+    return new Boundary.Face(Seq.wrapJava(face.iPat()).map(i ->
       i.LEFT() != null ? Boundary.Case.LEFT : i.RIGHT() != null
         ? Boundary.Case.RIGHT : Boundary.Case.VAR));
   }
@@ -58,7 +66,7 @@ public record Parser(@NotNull SourceFile source) {
     return switch (decl) {
       case Guest0x0Parser.FnDeclContext def -> new Def.Fn<>(
         new LocalVar(def.ID().getText()),
-        ImmutableSeq.from(def.param()).flatMap(this::param),
+        Seq.wrapJava(def.param()).flatMap(this::param),
         expr(def.expr(0)),
         expr(def.expr(1)));
       default -> throw new IllegalArgumentException("Unknown def: " + decl.getClass().getName());

@@ -72,7 +72,11 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
         yield new Expr.Path(path.pos(), data);
       }
       case Expr.Formula f -> new Expr.Formula(f.pos(), f.formula().fmap(this::expr));
-      case Expr.Transp transp -> new Expr.Transp(transp.pos(), expr(transp.cover()), expr(transp.psi()));
+      case Expr.Transp transp -> {
+        var transpVars = transp.vars().map(v -> env.getOrThrow(v.name(), () ->
+          new SPE(transp.pos(), Doc.english("Unresolved: " + v.name()))));
+        yield new Expr.Transp(transp.pos(), expr(transp.cover()), transpVars, transp.faces());
+      }
     };
   }
 
