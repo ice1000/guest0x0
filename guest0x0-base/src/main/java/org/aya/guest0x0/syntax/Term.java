@@ -49,9 +49,9 @@ public sealed interface Term extends Docile {
   static @NotNull Term mkLam(@NotNull SeqView<LocalVar> telescope, @NotNull Term body) {
     return telescope.foldRight(body, Lam::new);
   }
-  static @NotNull Lam mkLam(@NotNull String x, @NotNull Function<LocalVar, Term> body) {
+  static @NotNull Lam mkLam(@NotNull String x, @NotNull Function<Term, Term> body) {
     var xx = new LocalVar(x);
-    return new Lam(xx, body.apply(xx));
+    return new Lam(xx, body.apply(new Ref(xx)));
   }
   static @NotNull Term mkApp(@NotNull Term f, @NotNull Term a) {
     return f instanceof Lam lam ? lam.body.subst(lam.x, a) : new Two(true, f, a);

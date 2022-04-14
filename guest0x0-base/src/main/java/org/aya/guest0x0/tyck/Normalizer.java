@@ -11,6 +11,8 @@ import org.aya.guest0x0.util.Param;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Function;
+
 public record Normalizer(
   @NotNull MutableMap<LocalVar, Def<Term>> sigma,
   @NotNull MutableMap<LocalVar, Term> rho
@@ -69,7 +71,7 @@ public record Normalizer(
         var args = transp.a().map(this::term);
         for (var face : transp.cof().faces()) {
           if (piper(args, face, transp.cof().vars()) != null) // The last argument is junk
-            yield Term.mkLam("x", Term.Ref::new);
+            yield Term.mkLam("x", Function.identity());
         }
         var cover = term(transp.cover());
         yield new Term.Transp(cover, transp.cof(), args);
