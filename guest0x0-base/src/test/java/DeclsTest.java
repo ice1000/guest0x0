@@ -62,6 +62,8 @@ public class DeclsTest {
         [| j |] A { | 0 => a | 1 => b }
       def sym (A : U) (a b : A) (p : Eq A a b)
         : Eq A b a => \\i. p (~ i)
+      def symSym (A : U) (a b : A) (p : Eq A a b)
+        : Eq (Eq A a b) p (sym A b a (sym A a b p)) => \\i. p
       def rotate (A : U) (a b : A) (p q : Eq A a b)
                  (s : Eq (Eq A a b) p q)
         : Eq (Eq A b a) (sym A a b q) (sym A a b p)
@@ -91,14 +93,21 @@ public class DeclsTest {
 
   @Test public void transportTyping() {
     tyck("""
-      def transport (A : I -> U) (a : A 0) : A 1 => A ~@ {} a
-      def transportInv (A : I -> U) (a : A 1) : A 0 => (\\i. A (~ i)) ~@ {} a
-      def transportFn (A B : I -> U) (f : A 0 -> B 0) : A 1 -> B 1 =>
-        \\a. transport B (f (transport (\\i. A (~ i)) a))
-      def transportPi (A : I -> U) (B : Pi (i : I) -> A i -> U)
+      def trans (A : I -> U) (a : A 0) : A 1 => A ~@ {} a
+      def transInv (A : I -> U) (a : A 1) : A 0 => (\\i. A (~ i)) ~@ {} a
+      def transFn (A B : I -> U) (f : A 0 -> B 0) : A 1 -> B 1 =>
+        \\a. trans B (f (trans (\\i. A (~ i)) a))
+      def transPi (A : I -> U) (B : Pi (i : I) -> A i -> U)
         (f : Pi (x : A 0) -> B 0 x) : Pi (x : A 1) -> B 1 x =>
-          \\x. transport (\\j. B j ((\\i. A (j \\/ ~ i)) ~@ j { | 1 } x))
-               (f (transport (\\i. A (~ i)) x))
+          \\x. trans (\\j. B j ((\\i. A (j \\/ ~ i)) ~@ j { | 1 } x))
+               (f (trans (\\i. A (~ i)) x))
+      def Eq (A : U) (a b : A) : U =>
+        [| j |] A { | 0 => a | 1 => b }
+      def transPiEq (A : I -> U) (B : Pi (i : I) -> A i -> U)
+          : Eq ((Pi (x : A 0) -> B 0 x) -> (Pi (x : A 1) -> B 1 x))
+               (transPi A B)
+               (trans (\\i. Pi (x : A i) -> B i x))
+          => \\i. transPi A B
       """);
   }
 

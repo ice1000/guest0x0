@@ -81,9 +81,10 @@ public record Normalizer(
           case Term.DT dt && dt.isPi() -> Term.mkLam("f", u0 -> Term.mkLam("x", v -> {
             var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), transp.cof(), args, parkerLiu);
             // w0 = w.subst(i, 0)
-            var newCover = rename(new Term.Lam(i, dt.codomain(laptop.invFill(i))));
-            return Term.mkApp(new Term.Transp(newCover, transp.cof(), args, parkerLiu),
-              Term.mkApp(u0, laptop.inv()));
+            var w = Term.mkApp(laptop.invFill(i), v);
+            var w0 = Term.mkApp(laptop.inv(), v);
+            var newCover = rename(new Term.Lam(i, dt.codomain(w)));
+            return Term.mkApp(new Term.Transp(newCover, transp.cof(), args, parkerLiu), Term.mkApp(u0, w0));
           }));
           default -> new Term.Transp(cover, transp.cof(), args, parkerLiu);
         };
