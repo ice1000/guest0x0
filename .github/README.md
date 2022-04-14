@@ -27,9 +27,31 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ### Untagged
 
+## v0.7
+
 ![image](https://user-images.githubusercontent.com/16398479/163258018-ee80a9f9-2fa1-45cb-b336-bc493d97a6ae.png)
 
 A work-in-progress `transp` implementation, denoted `~@` (very beautiful with JetBrains Mono or Fira Code).
+The syntax is adapted from the new cofibration theory syntax.
+
+The `IsOne` constraint used in Cubical Agda is expressed as
+"the instantiations of a set of dimension variables match a pattern",
+and the type checking criteria becomes
+"the type line instantiated to every set of patterns gives the constant function".
+When matched, `transp` computes as identity. Other lures are yet unimplemented.
+
+We now have the ability to test some de Morgan laws:
+
+```
+def transport (A : I -> U) (a : A 0) : A 1 => A ~@ {} a
+def transport^-1 (A : I -> U) (a : A 1) : A 0 => (\i. A (~ i)) ~@ {} a
+def transportFn (A B : I -> U) (f : A 0 -> B 0) : A 1 -> B 1 =>
+  \a. transport B (f (transport (\i. A (~ i)) a))
+def transportPi (A : I -> U) (B : Pi (i : I) -> A i -> U)
+  (f : Pi (x : A 0) -> B 0 x) : Pi (x : A 1) -> B 1 x =>
+    \x. transport (\j. B j ((\i. A (j \/ ~ i)) ~@ j { | 1 } x))
+         (f (transport (\i. A (~ i)) x))
+```
 
 ### v0.6
 
