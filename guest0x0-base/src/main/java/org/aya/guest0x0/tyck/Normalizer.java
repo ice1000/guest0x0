@@ -79,20 +79,20 @@ public record Normalizer(
   }
 
   private Term transp(Term.Transp transp, ImmutableSeq<Term> args, LocalVar i, Term cover, Term psi) {
-    return switch (Term.mkApp(cover, new Term.Ref(i))) {
+    return switch (cover.app(new Term.Ref(i))) {
       case Term.DT dt && dt.isPi() -> Term.mkLam("f", u0 -> Term.mkLam("x", v -> {
         var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), transp.cof(), args, psi);
-        var w = Term.mkApp(laptop.invFill(i), v);
+        var w = laptop.invFill(i).app(v);
         // w0 = w.subst(i, 0), according to Minghao Liu
-        var w0 = Term.mkApp(laptop.inv(), v);
+        var w0 = laptop.inv().app(v);
         var newCover = rename(new Term.Lam(i, dt.codomain(w)));
-        return Term.mkApp(new Term.Transp(newCover, transp.cof(), args, psi), Term.mkApp(u0, w0));
+        return new Term.Transp(newCover, transp.cof(), args, psi).app(u0.app(w0));
       }));
       case Term.UI u && u.isU() -> Term.id("u");
       case Term.DT dt /*&& !dt.isPi()*/ -> Term.mkLam("t", u0 -> {
         var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), transp.cof(), args, psi);
         // Simon Huber wrote u0.1 both with and without parentheses, extremely confusing!!
-        var v = Term.mkApp(laptop.fill(i), new Term.Proj(u0, true));
+        var v = laptop.fill(i).app(new Term.Proj(u0, true));
         throw new UnsupportedOperationException("TODO: " + v);
       });
       default -> new Term.Transp(cover, transp.cof(), args, psi);

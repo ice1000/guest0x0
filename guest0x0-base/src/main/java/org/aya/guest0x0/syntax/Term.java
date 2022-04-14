@@ -54,7 +54,8 @@ public sealed interface Term extends Docile {
     var xx = new LocalVar(x);
     return new Lam(xx, body.apply(new Ref(xx)));
   }
-  static @NotNull Term mkApp(@NotNull Term f, @NotNull Term... args) {
+  default @NotNull Term app(@NotNull Term... args) {
+    var f = this;
     for (var a : args) f = f instanceof Lam lam ? lam.body.subst(lam.x, a) : new Two(true, f, a);
     return f;
   }

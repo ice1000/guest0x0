@@ -156,7 +156,7 @@ public record Elaborator(
           if (!(f.type instanceof Term.DT dt) || !dt.isPi())
             throw new SPE(two.pos(), Doc.english("Expects pi, got"), f.type, Doc.plain("when checking"), two);
           var a = hof(dt.param().x(), dt.param().type(), () -> inherit(two.a(), dt.param().type()));
-          yield new Synth(Term.mkApp(f.wellTyped, a), dt.codomain(a));
+          yield new Synth(f.wellTyped.app(a), dt.codomain(a));
         } else {
           var a = synth(two.a());
           yield new Synth(new Term.Two(false, f.wellTyped, a.wellTyped),
@@ -193,12 +193,12 @@ public record Elaborator(
       case Expr.Transp transp -> {
         var cover = inherit(transp.cover(), Term.mkPi(Term.I, Term.U));
         var detective = new AltF7(new LocalVar("?"));
-        var sample = Term.mkApp(cover, new Term.Ref(detective.var()));
+        var sample = cover.app(new Term.Ref(detective.var()));
         for (var face : transp.cof().faces()) {
           if (detective.press(jonSterling(transp.cof().vars().view(), face).term(sample)))
             throw new SPE(transp.pos(), Doc.english("Expects constant for"), face);
         }
-        var ty = Term.mkPi(Term.mkApp(cover, Term.end(true)), Term.mkApp(cover, Term.end(false)));
+        var ty = Term.mkPi(cover.app(Term.end(true)), cover.app(Term.end(false)));
         yield new Synth(new Term.Transp(cover, transp.cof(),
           transp.cof().vars().map(Term.Ref::new), HCompPDF.powerBottom(transp.cof())), ty);
       }

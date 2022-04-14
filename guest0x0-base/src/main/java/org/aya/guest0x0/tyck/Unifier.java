@@ -63,7 +63,7 @@ public class Unifier {
   }
 
   private boolean eta(@NotNull Term r, Term.Lam lam) {
-    return untyped(lam.body(), Term.mkApp(r, new Term.Ref(lam.x())));
+    return untyped(lam.body(), r.app(new Term.Ref(lam.x())));
   }
 
   private static @NotNull Term rhs(Term rhs, LocalVar rb, LocalVar lb) {

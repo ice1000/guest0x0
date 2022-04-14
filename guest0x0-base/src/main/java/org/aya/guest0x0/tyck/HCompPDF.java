@@ -34,18 +34,18 @@ public interface HCompPDF {
     @NotNull ImmutableSeq<Term> args, @NotNull Term psi
   ) {
     public @NotNull Term inv() {
-      return new Transp(mkLam("i", i -> mkApp(cover, neg(i))), cof, args, psi);
+      return new Transp(mkLam("i", i -> cover.app(neg(i))), cof, args, psi);
     }
 
     public @NotNull Term fill(@NotNull LocalVar i) {
       var ri = new Ref(i);
-      return new Transp(mkLam("j", j -> mkApp(cover, and(ri, j))),
+      return new Transp(mkLam("j", j -> cover.app(and(ri, j))),
         amendCof(i, LEFT), args.appended(ri), Term.or(psi, neg(ri)));
     }
 
     public @NotNull Term invFill(@NotNull LocalVar i) {
       var ri = new Ref(i);
-      return new Transp(mkLam("j", j -> mkApp(cover, neg(and(neg(ri), j)))),
+      return new Transp(mkLam("j", j -> cover.app(neg(and(neg(ri), j)))),
         amendCof(i, RIGHT), args.appended(ri), Term.or(psi, ri));
     }
 
