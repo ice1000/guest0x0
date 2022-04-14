@@ -27,10 +27,14 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+## v0.8
+
 ![image](https://user-images.githubusercontent.com/16398479/163415006-4c7ecf02-2ed1-4c8a-b3f6-779538401973.png)
 
 Updated the CLI frontend to hide stack traces by default. Fixed some core theory bugs
-(many thanks to Amélia, MBones, and Daniel for their helps).
+(many thanks to Amélia, MBones, and Daniel for their helps),
+implemented structural lures for universe, Pi, and Sigma types. 1179 lines of Java.
+I'm sort of giving up on lines of code thingies -- I don't want to sacrifice readability.
 
 ```
 def transPiEq (A : I -> U) (B : Pi (i : I) -> A i -> U)
@@ -38,6 +42,15 @@ def transPiEq (A : I -> U) (B : Pi (i : I) -> A i -> U)
          (transPi A B)
          (trans (\i. Pi (x : A i) -> B i x))
     => \i. transPi A B
+def transSigma (A : I -> U) (B : Pi (i : I) -> A i -> U)
+    (t : Sig (x : A 0) ** B 0 x) : Sig (x : A 1) ** B 1 x =>
+  << trans A (t.1),
+     trans (\j. B j ((\i. A (j /\ i)) ~@ j { | 0 } (t.1))) (t.2) >>
+def transSigmaEq (A : I -> U) (B : Pi (i : I) -> A i -> U)
+    : Eq ((Sig (x : A 0) ** B 0 x) -> (Sig (x : A 1) ** B 1 x))
+         (transSigma A B)
+         (trans (\i. Sig (x : A i) ** B i x))
+    => \i. transSigma A B
 ```
 
 ## v0.7

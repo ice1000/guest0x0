@@ -95,7 +95,7 @@ public record Normalizer(
         // Simon Huber wrote u0.1 both with and without parentheses, extremely confusing!!
         var v = laptop.fill(i).app(u0.proj(true));
         return new Term.Two(false, laptop.mk().app(u0.proj(true)),
-          new Term.Transp(dt.codomain(v), data).app(u0.proj(false)));
+          new Term.Transp(rename(new Term.Lam(i, dt.codomain(v))), data).app(u0.proj(false)));
       });
       default -> new Term.Transp(cover, data);
     };
