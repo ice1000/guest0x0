@@ -23,11 +23,13 @@ public interface HCompPDF {
     }
 
     public @NotNull Term fill(@NotNull LocalVar i) {
-      return new Transp(mkLam("j", j -> mkApp(cover, and(new Ref(i), j))), amendCof(i, LEFT), args);
+      return new Transp(mkLam("j", j -> mkApp(cover, and(new Ref(i), j))),
+        amendCof(i, LEFT), args.appended(new Ref(i)));
     }
 
     public @NotNull Term invFill(@NotNull LocalVar i) {
-      return new Transp(mkLam("j", j -> mkApp(cover, neg(and(neg(new Ref(i)), j)))), amendCof(i, RIGHT), args);
+      return new Transp(mkLam("j", j -> mkApp(cover, neg(and(neg(new Ref(i)), j)))),
+        amendCof(i, RIGHT), args.appended(new Ref(i)));
     }
 
     private @NotNull Boundary.Cof amendCof(@NotNull LocalVar i, @NotNull Boundary.Case at) {

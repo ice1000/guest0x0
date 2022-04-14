@@ -41,7 +41,8 @@ public class Unifier {
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };
-    if (!happy && data == null) data = new FailureData(l, r);
+    if (!happy && data == null)
+      data = new FailureData(l, r);
     return happy;
   }
 
