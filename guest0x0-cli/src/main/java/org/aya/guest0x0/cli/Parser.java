@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.util.LocalVar;
 import org.aya.repl.antlr.AntlrUtil;
 import org.aya.util.error.SourceFile;
 import org.aya.util.error.SourcePos;

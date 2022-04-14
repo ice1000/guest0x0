@@ -2,7 +2,6 @@ package org.aya.guest0x0.util;
 
 import org.aya.guest0x0.syntax.Boundary;
 import org.aya.guest0x0.syntax.Formula;
-import org.aya.guest0x0.syntax.LocalVar;
 import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
 

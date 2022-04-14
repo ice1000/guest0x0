@@ -6,6 +6,7 @@ import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.tyck.Normalizer;
 import org.aya.guest0x0.util.Distiller;
+import org.aya.guest0x0.util.LocalVar;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;

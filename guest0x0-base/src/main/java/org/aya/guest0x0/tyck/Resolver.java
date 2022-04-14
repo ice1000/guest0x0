@@ -4,6 +4,7 @@ import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import kala.control.Option;
 import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.SPE;
 import org.aya.pretty.doc.Doc;
 import org.jetbrains.annotations.NotNull;

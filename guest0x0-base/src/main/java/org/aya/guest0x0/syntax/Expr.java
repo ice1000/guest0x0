@@ -3,6 +3,7 @@ package org.aya.guest0x0.syntax;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableList;
 import org.aya.guest0x0.util.Distiller;
+import org.aya.guest0x0.util.LocalVar;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.aya.util.error.SourcePos;

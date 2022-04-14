@@ -7,7 +7,7 @@ import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import kala.tuple.primitive.IntObjTuple2;
 import org.aya.guest0x0.syntax.Boundary;
-import org.aya.guest0x0.syntax.LocalVar;
+import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.SPE;
 import org.aya.pretty.doc.Doc;

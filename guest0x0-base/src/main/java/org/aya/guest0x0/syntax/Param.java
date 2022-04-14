@@ -1,5 +1,6 @@
 package org.aya.guest0x0.syntax;
 
+import org.aya.guest0x0.util.LocalVar;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
