@@ -27,12 +27,14 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ### Untagged
 
+![image](https://user-images.githubusercontent.com/16398479/163415006-4c7ecf02-2ed1-4c8a-b3f6-779538401973.png)
+
 ## v0.7
 
 ![image](https://user-images.githubusercontent.com/16398479/163258018-ee80a9f9-2fa1-45cb-b336-bc493d97a6ae.png)
 
 A work-in-progress `transp` implementation, denoted `~@` (very beautiful with JetBrains Mono or Fira Code).
-The syntax is adapted from the new cofibration theory syntax.
+The syntax is adapted from the new cofibration theory syntax. 1027 lines of Java, good.
 
 The `IsOne` constraint used in Cubical Agda is expressed as
 "the instantiations of a set of dimension variables match a pattern",
