@@ -93,6 +93,7 @@ public class DeclsTest {
 
   @Test public void transportTyping() {
     tyck("""
+            
       def trans (A : I -> U) (a : A 0) : A 1 => A ~@ {} a
       def transInv (A : I -> U) (a : A 1) : A 0 => (\\i. A (~ i)) ~@ {} a
       def transFn (A B : I -> U) (f : A 0 -> B 0) : A 1 -> B 1 =>
@@ -108,6 +109,15 @@ public class DeclsTest {
                (transPi A B)
                (trans (\\i. Pi (x : A i) -> B i x))
           => \\i. transPi A B
+      def transSigma (A : I -> U) (B : Pi (i : I) -> A i -> U)
+          (t : Sig (x : A 0) ** B 0 x) : Sig (x : A 1) ** B 1 x =>
+        << trans A (t.1),
+           trans (\\j. B j ((\\i. A (j /\\ i)) ~@ j { | 0 } (t.1))) (t.2) >>
+      def transSigmaEq (A : I -> U) (B : Pi (i : I) -> A i -> U)
+          : Eq ((Sig (x : A 0) ** B 0 x) -> (Sig (x : A 1) ** B 1 x))
+               (transSigma A B)
+               (trans (\\i. Sig (x : A i) ** B i x))
+          => \\i. transSigma A B
       """);
   }
 
