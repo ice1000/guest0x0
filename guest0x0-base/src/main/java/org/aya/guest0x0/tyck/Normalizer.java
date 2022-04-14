@@ -62,7 +62,7 @@ public record Normalizer(
       case Term.Formula f -> formulae(f.formula().fmap(this::term));
       case Term.Transp transp -> {
         var psi = term(transp.psi());
-        if (psi instanceof Term.Formula f && f.formula() instanceof Boundary.Lit<Term> lit && lit.isLeft()) {
+        if (psi instanceof Term.Formula f && f.formula() instanceof Formula.Lit<Term> lit && lit.isLeft()) {
           var x = new LocalVar("x");
           yield new Term.Lam(x, new Term.Ref(x));
         } else yield new Term.Transp(term(transp.cover()), psi);
@@ -71,20 +71,20 @@ public record Normalizer(
   }
 
   // https://github.com/mortberg/cubicaltt/blob/a5c6f94bfc0da84e214641e0b87aa9649ea114ea/Connections.hs#L178-L197
-  private Term formulae(Boundary.Formula<Term> formula) {
+  private Term formulae(Formula<Term> formula) {
     return switch (formula) { // de Morgan laws
-      case Boundary.Inv<Term> inv && inv.i() instanceof Term.Formula i
-        && i.formula() instanceof Boundary.Lit<Term> lit -> Term.end(!lit.isLeft());
-      case Boundary.Inv<Term> inv && inv.i() instanceof Term.Formula i
-        && i.formula() instanceof Boundary.Conn<Term> conn -> new Term.Formula(new Boundary.Conn<>(!conn.isAnd(),
-        formulae(new Boundary.Inv<>(conn.l())),
-        formulae(new Boundary.Inv<>(conn.r()))));
-      case Boundary.Conn<Term> conn && conn.l() instanceof Term.Formula lf
-        && lf.formula() instanceof Boundary.Lit<Term> l -> l.isLeft()
+      case Formula.Inv<Term> inv && inv.i() instanceof Term.Formula i
+        && i.formula() instanceof Formula.Lit<Term> lit -> Term.end(!lit.isLeft());
+      case Formula.Inv<Term> inv && inv.i() instanceof Term.Formula i
+        && i.formula() instanceof Formula.Conn<Term> conn -> new Term.Formula(new Formula.Conn<>(!conn.isAnd(),
+        formulae(new Formula.Inv<>(conn.l())),
+        formulae(new Formula.Inv<>(conn.r()))));
+      case Formula.Conn<Term> conn && conn.l() instanceof Term.Formula lf
+        && lf.formula() instanceof Formula.Lit<Term> l -> l.isLeft()
         ? (conn.isAnd() ? lf : conn.r())
         : (conn.isAnd() ? conn.r() : lf);
-      case Boundary.Conn<Term> conn && conn.r() instanceof Term.Formula rf
-        && rf.formula() instanceof Boundary.Lit<Term> r -> r.isLeft()
+      case Formula.Conn<Term> conn && conn.r() instanceof Term.Formula rf
+        && rf.formula() instanceof Formula.Lit<Term> r -> r.isLeft()
         ? (conn.isAnd() ? rf : conn.l())
         : (conn.isAnd() ? conn.l() : rf);
       default -> new Term.Formula(formula);
@@ -103,7 +103,7 @@ public record Normalizer(
       for (var ct : thought.pats().zipView(thoughts.dims().zipView(word))) {
         if (ct._1 == Boundary.Case.VAR) sign.rho.put(ct._2);
         else if (!(ct._2._2 instanceof Term.Formula formula
-          && formula.formula() instanceof Boundary.Lit<Term> lit
+          && formula.formula() instanceof Formula.Lit<Term> lit
           && lit.isLeft() == (ct._1 == Boundary.Case.LEFT))) continue meaning;
       }
       return sign.term(thought.body());

@@ -2,10 +2,7 @@ package org.aya.guest0x0.util;
 
 import kala.collection.Seq;
 import kala.collection.mutable.MutableList;
-import org.aya.guest0x0.syntax.Boundary;
-import org.aya.guest0x0.syntax.Expr;
-import org.aya.guest0x0.syntax.Param;
-import org.aya.guest0x0.syntax.Term;
+import org.aya.guest0x0.syntax.*;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
@@ -53,14 +50,14 @@ public interface Distiller {
       param.toDoc(), Doc.symbol(isPi ? "->" : "**"), cod.toDoc());
   }
   private static @NotNull <E extends Docile> Doc formulae(
-    BiFunction<E, Prec, Doc> f,
-    Boundary.Formula<E> formula, Prec envPrec
+      BiFunction<E, Prec, Doc> f,
+      Formula<E> formula, Prec envPrec
   ) {
     var doc = switch (formula) {
-      case Boundary.Conn<E> conn -> Doc.sep(f.apply(conn.l(), IOp),
+      case Formula.Conn<E> conn -> Doc.sep(f.apply(conn.l(), IOp),
         Doc.symbol(conn.isAnd() ? "/\\" : "\\/"), f.apply(conn.r(), IOp));
-      case Boundary.Inv<E> inv -> Doc.sep(Doc.plain("~"), f.apply(inv.i(), IOp));
-      case Boundary.Lit<E> lit -> {
+      case Formula.Inv<E> inv -> Doc.sep(Doc.plain("~"), f.apply(inv.i(), IOp));
+      case Formula.Lit<E> lit -> {
         envPrec = Free; // A hack to force no paren
         yield Doc.symbol(lit.isLeft() ? "0" : "1");
       }
