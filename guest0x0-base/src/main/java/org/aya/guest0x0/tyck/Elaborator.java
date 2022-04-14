@@ -56,14 +56,19 @@ public record Elaborator(
       case Expr.Hole hole -> {
         var docs = MutableList.<Doc>create();
         gamma.forEach((k, v) -> {
-          var list = MutableList.of(Doc.plain(k.name()), Doc.symbol(":"), normalize(v).toDoc());
+          var list = MutableList.of(Doc.plain(k.name()));
           if (!hole.accessible().contains(k)) list.append(Doc.english("(out of scope)"));
+          list.appendAll(new Doc[]{Doc.symbol(":"), normalize(v).toDoc()});
           docs.append(Doc.sep(list));
         });
         docs.append(Doc.plain("----------------------------------"));
-        docs.append(type.toDoc());
-        docs.append(Doc.symbol("|->"));
-        docs.append(normalize(type).toDoc());
+        var tyDoc = type.toDoc();
+        docs.append(tyDoc);
+        var normDoc = normalize(type).toDoc();
+        if (!tyDoc.equals(normDoc)) {
+          docs.append(Doc.symbol("|->"));
+          docs.append(normDoc);
+        }
         throw new SPE(hole.pos(), Doc.vcat(docs));
       }
       default -> {
