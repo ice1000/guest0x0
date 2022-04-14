@@ -27,7 +27,7 @@ public interface YouTrack {
             var b = contents.get(j);
             var unifier = new Unifier.Cof(MutableMap.create());
             unifier.unify(d.dims(), a._2.face(), b._2.face());
-            if (!Unifier.untyped(unifier.l().term(a._2.body()), unifier.r().term(b._2.body())))
+            if (!new Unifier().untyped(unifier.l().term(a._2.body()), unifier.r().term(b._2.body())))
               throw new SPE(pos, Doc.plain("The"), Doc.ordinal(a._1 + 1), Doc.plain("and"), Doc.ordinal(b._1 + 1),
                 Doc.plain("boundaries do not agree!!"));
           }

@@ -79,9 +79,9 @@ public record Normalizer(
         yield switch (Term.mkApp(cover, new Term.Ref(i))) {
           case Term.DT dt && dt.isPi() -> Term.mkLam("f", u0 -> Term.mkLam("x", v -> {
             var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), args, transp.cof());
-            var w = laptop.invFill(i);
-            var w0 = laptop.inv(); // = w.subst(i, 0)
-            return Term.mkApp(new Term.Transp(rename(new Term.Lam(i, dt.codomain(w))), transp.cof(), args), u0, w0);
+            // w0 = w.subst(i, 0)
+            var newCover = rename(new Term.Lam(i, dt.codomain(laptop.invFill(i))));
+            return Term.mkApp(new Term.Transp(newCover, transp.cof(), args), Term.mkApp(u0, laptop.inv()));
           }));
           default -> new Term.Transp(cover, transp.cof(), args);
         };

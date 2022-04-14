@@ -10,9 +10,12 @@ import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.LocalVar;
 import org.jetbrains.annotations.NotNull;
 
-public interface Unifier {
-  static boolean untyped(@NotNull Term l, @NotNull Term r) {
-    return switch (l) {
+public class Unifier {
+  public record FailureData(@NotNull Term l, @NotNull Term r) {}
+  public FailureData data;
+
+  boolean untyped(@NotNull Term l, @NotNull Term r) {
+    var happy = switch (l) {
       case Term.Lam lam && r instanceof Term.Lam ram -> untyped(lam.body(), rhs(ram.body(), ram.x(), lam.x()));
       case Term.Lam lam -> eta(r, lam);
       case Term ll && r instanceof Term.Lam ram -> eta(ll, ram);
@@ -38,12 +41,16 @@ public interface Unifier {
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };
+    if (!happy && data == null) data = new FailureData(l, r);
+    return happy;
   }
-  private static boolean unifySeq(@NotNull ImmutableSeq<Term> l, @NotNull ImmutableSeq<Term> r) {
+
+  private boolean unifySeq(@NotNull ImmutableSeq<Term> l, @NotNull ImmutableSeq<Term> r) {
     return l.zipView(r).allMatch(p -> untyped(p._1, p._2));
   }
+
   // Hopefully.... I don't know. :shrug:
-  static boolean formulae(Formula<Term> lf, Formula<Term> rf) {
+  private boolean formulae(Formula<Term> lf, Formula<Term> rf) {
     return switch (lf) {
       case Formula.Lit<Term> l && rf instanceof Formula.Lit<Term> r -> l.isLeft() == r.isLeft();
       case Formula.Inv<Term> l && rf instanceof Formula.Inv<Term> r -> untyped(l.i(), r.i());
@@ -52,7 +59,8 @@ public interface Unifier {
       default -> false;
     };
   }
-  private static boolean eta(@NotNull Term r, Term.Lam lam) {
+
+  private boolean eta(@NotNull Term r, Term.Lam lam) {
     return untyped(lam.body(), Term.mkApp(r, new Term.Ref(lam.x())));
   }
 

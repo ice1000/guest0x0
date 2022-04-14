@@ -96,9 +96,19 @@ public record Elaborator(
   }
 
   private void unify(Term ty, Docile on, @NotNull Term actual, SourcePos pos) {
-    if (!Unifier.untyped(actual, ty))
-      throw new SPE(pos, Doc.plain("Expects type"), ty, Doc.plain("got"),
-        actual, Doc.english("on"), on);
+    var unifier = new Unifier();
+    if (!unifier.untyped(actual, ty)) throw new SPE(pos, unifyDoc(ty, on, actual, unifier));
+  }
+
+  private @NotNull Doc unifyDoc(Term ty, Docile on, @NotNull Term actual, Unifier unifier) {
+    var line1 = Doc.sep(Doc.plain("Expects"), ty.toDoc(), Doc.plain("got"),
+      actual.toDoc(), Doc.english("on"), on.toDoc());
+    if (unifier.data != null) {
+      var line2 = Doc.sep(Doc.english("In particular,"),
+        unifier.data.l().toDoc(), Doc.symbol("!="), unifier.data.r().toDoc());
+      line1 = Doc.vcat(line1, line2);
+    }
+    return line1;
   }
 
   private @NotNull Term boundaries(
@@ -110,8 +120,10 @@ public record Elaborator(
     var core = coreSupplier.get();
     for (var boundary : data.boundaries()) {
       var jon = jonSterling(lamDims.view(), boundary.face()).term(core);
-      if (!Unifier.untyped(boundary.body(), jon)) throw new SPE(pos,
-        Doc.english("Boundary mismatch, expect"), boundary.body(), Doc.plain("got"), jon);
+      var unifier = new Unifier();
+      if (!unifier.untyped(boundary.body(), jon)) throw new SPE(pos,
+        Doc.vcat(Doc.english("Boundary mismatch, oh no."),
+          unifyDoc(boundary.body(), boundary.face(), jon, unifier)));
     }
     lamDims.forEach(gamma::remove);
     return new Term.PLam(lamDims.toImmutableArray(), core);
