@@ -168,7 +168,7 @@ public record Elaborator(
         yield new Synth(new Term.Path(data), Term.U);
       }
       case Expr.Mula f -> switch (f.formula()) {
-        case Formula.Inv<Expr> inv -> new Synth(Term.inv(inherit(inv.i(), Term.I)), Term.I);
+        case Formula.Inv<Expr> inv -> new Synth(Term.neg(inherit(inv.i(), Term.I)), Term.I);
         case Formula.Conn<Expr> conn -> new Synth(new Term.Mula(
           new Formula.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);
         case Formula.Lit lit -> new Synth(Term.end(lit.isLeft()), Term.I);
