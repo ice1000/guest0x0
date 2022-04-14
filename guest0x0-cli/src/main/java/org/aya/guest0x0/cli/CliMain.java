@@ -3,8 +3,7 @@ package org.aya.guest0x0.cli;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
 import kala.control.Option;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.*;
 import org.aya.guest0x0.parser.Guest0x0Lexer;
 import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.prelude.GeneratedVersion;
@@ -38,9 +37,14 @@ public class CliMain implements Callable<Integer> {
       System.err.println("Use -h for help");
       return 1;
     }
-    var ak = tyck(Files.readString(Paths.get(inputFile)), true);
-    System.out.println("Tycked " + ak.sigma().size() + " definitions, phew.");
-    return 0;
+    try {
+      var ak = tyck(Files.readString(Paths.get(inputFile)), true);
+      System.out.println("Tycked " + ak.sigma().size() + " definitions, phew.");
+      return 0;
+    } catch (RuntimeException re) {
+      System.err.println(re.getMessage());
+      return 2;
+    }
   }
 
   public static @NotNull Elaborator andrasKovacs() {
@@ -48,7 +52,19 @@ public class CliMain implements Callable<Integer> {
   }
 
   public static @NotNull Guest0x0Parser parser(String s) {
-    return new Guest0x0Parser(new CommonTokenStream(new Guest0x0Lexer(CharStreams.fromString(s))));
+    var p = new Guest0x0Parser(new CommonTokenStream(new Guest0x0Lexer(CharStreams.fromString(s))));
+    p.removeErrorListeners();
+    p.addErrorListener(new Listener());
+    return p;
+  }
+
+  private static class Listener extends BaseErrorListener {
+    @Override public void syntaxError(
+      Recognizer<?, ?> r, Object os, int line, int col, String msg,
+      RecognitionException e
+    ) {
+      throw new RuntimeException("line " + line + ":" + col + " " + msg);
+    }
   }
 
   public static @NotNull ImmutableSeq<Def<Expr>> def(String s) {

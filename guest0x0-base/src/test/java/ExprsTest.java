@@ -41,6 +41,10 @@ public class ExprsTest {
     assertEquals("a b ~@ i j {\n  | 0 1\n}", distill("a b ~@ i j { | 0 1 }"));
   }
 
+  @Test public void parseFail() {
+    assertThrows(RuntimeException.class, () -> parse("\\"));
+  }
+
   private static @NotNull String distill(@Language("TEXT") String s) {
     return parse(s).toDoc().debugRender();
   }
