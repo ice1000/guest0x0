@@ -146,9 +146,9 @@ public record Elaborator(
         var t = synth(proj.t());
         if (!(t.type instanceof Term.DT dt) || dt.isPi())
           throw new SPE(proj.pos(), Doc.english("Expects a left adjoint, got"), t.type);
-        var fst = new Term.Proj(t.wellTyped, true);
+        var fst = t.wellTyped.proj(true);
         if (proj.isOne()) yield new Synth(fst, dt.param().type());
-        yield new Synth(new Term.Proj(t.wellTyped, false), dt.codomain(fst));
+        yield new Synth(t.wellTyped.proj(false), dt.codomain(fst));
       }
       case Expr.Two two -> {
         var f = synth(two.f());

@@ -28,7 +28,9 @@ public sealed interface Term extends Docile {
 
   record Ref(@NotNull LocalVar var) implements Term {}
   record Call(@NotNull LocalVar fn, @NotNull ImmutableSeq<Term> args) implements Term {}
-  record Two(boolean isApp, @NotNull Term f, @NotNull Term a) implements Term {}
+  record Two(boolean isApp, @NotNull Term f, @NotNull Term a) implements Term {
+    @Override public @NotNull Term proj(boolean isOne) {return isOne ? f : a;}
+  }
   record Proj(@NotNull Term t, boolean isOne) implements Term {}
   record Lam(@NotNull LocalVar x, @NotNull Term body) implements Term {}
   static @Nullable Term unlam(MutableList<LocalVar> binds, Term t, int n) {
@@ -59,6 +61,7 @@ public sealed interface Term extends Docile {
     for (var a : args) f = f instanceof Lam lam ? lam.body.subst(lam.x, a) : new Two(true, f, a);
     return f;
   }
+  default @NotNull Term proj(boolean isOne) {return new Proj(this, isOne);}
 
   record DT(boolean isPi, @NotNull Param<Term> param, @NotNull Term cod) implements Term {
     public @NotNull Term codomain(@NotNull Term term) {

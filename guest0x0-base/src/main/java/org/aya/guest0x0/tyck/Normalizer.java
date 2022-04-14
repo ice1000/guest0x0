@@ -73,29 +73,30 @@ public record Normalizer(
             yield Term.id("x");
         }
         var parkerLiu = term(transp.psi()); // Because of his talk about lax 2-functors!
-        yield transp(transp, args, new LocalVar("i"), term(transp.cover()), parkerLiu);
+        yield transp(args, new LocalVar("i"), term(transp.cover()), parkerLiu, transp.cof());
       }
     };
   }
 
-  private Term transp(Term.Transp transp, ImmutableSeq<Term> args, LocalVar i, Term cover, Term psi) {
+  private Term transp(ImmutableSeq<Term> args, LocalVar i, Term cover, Term psi, Boundary.Cof cof) {
     return switch (cover.app(new Term.Ref(i))) {
       case Term.DT dt && dt.isPi() -> Term.mkLam("f", u0 -> Term.mkLam("x", v -> {
-        var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), transp.cof(), args, psi);
+        var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), cof, args, psi);
         var w = laptop.invFill(i).app(v);
         // w0 = w.subst(i, 0), according to Minghao Liu
         var w0 = laptop.inv().app(v);
-        var newCover = rename(new Term.Lam(i, dt.codomain(w)));
-        return new Term.Transp(newCover, transp.cof(), args, psi).app(u0.app(w0));
+        var cod = rename(new Term.Lam(i, dt.codomain(w)));
+        return new Term.Transp(cod, cof, args, psi).app(u0.app(w0));
       }));
       case Term.UI u && u.isU() -> Term.id("u");
       case Term.DT dt /*&& !dt.isPi()*/ -> Term.mkLam("t", u0 -> {
-        var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), transp.cof(), args, psi);
+        var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), cof, args, psi);
         // Simon Huber wrote u0.1 both with and without parentheses, extremely confusing!!
-        var v = laptop.fill(i).app(new Term.Proj(u0, true));
-        throw new UnsupportedOperationException("TODO: " + v);
+        var v = laptop.fill(i).app(u0.proj(true));
+        return new Term.Two(false, laptop.mk().app(u0.proj(true)),
+          new Term.Transp(dt.codomain(v), cof, args, psi).app(u0.proj(false)));
       });
-      default -> new Term.Transp(cover, transp.cof(), args, psi);
+      default -> new Term.Transp(cover, cof, args, psi);
     };
   }
 

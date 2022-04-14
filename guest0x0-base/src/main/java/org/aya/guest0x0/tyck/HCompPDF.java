@@ -37,6 +37,9 @@ public interface HCompPDF {
       return new Transp(mkLam("i", i -> cover.app(neg(i))), cof, args, psi);
     }
 
+    /** Marisa Kirisame!! */
+    public @NotNull Term mk() {return new Transp(cover, cof, args, psi);}
+
     public @NotNull Term fill(@NotNull LocalVar i) {
       var ri = new Ref(i);
       return new Transp(mkLam("j", j -> cover.app(and(ri, j))),
