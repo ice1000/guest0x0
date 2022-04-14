@@ -56,11 +56,22 @@ public record Normalizer(
           var fill = term(pLam.fill());
           yield pLam.dims().sizeEquals(1) ? fill : new Term.PLam(pLam.dims().drop(1), fill);
         }
-        var heaven = piper(pApp.b(), i); // Important: use unnormalized pApp.b()
+        var heaven = stairway(pApp.b(), i); // Important: use unnormalized pApp.b()
         yield heaven != null ? heaven : new Term.PCall(p, i, pApp.b().fmap(this::term));
       }
       case Term.Mula f -> formulae(f.formula().fmap(this::term));
-      case Term.Transp transp -> throw new UnsupportedOperationException("TODO");
+      case Term.Transp transp -> {
+        var args = transp.data().vars().map(v -> term(new Term.Ref(v)));
+        for (var face : transp.data().faces()) {
+          if (piper(args, face, transp.data().vars()) != null) { // The last argument is junk
+            var x = new LocalVar("x");
+            yield new Term.Lam(x, new Term.Ref(x));
+          }
+        }
+        var cover = term(transp.cover());
+        // TODO: the substituted arguments should be stored
+        yield new Term.Transp(cover, transp.data());
+      }
     };
   }
 
@@ -85,24 +96,29 @@ public record Normalizer(
     };
   }
 
-  /** A piper that will lead us to reason. */
-  private @Nullable Term piper(
+  /** She's buying a stairway to heaven. */
+  private @Nullable Term stairway(
     @NotNull Boundary.Data<Term> thoughts,
     @NotNull ImmutableSeq<Term> word // With a word she can get what she came for.
   ) {
     assert word.sizeEquals(thoughts.dims().size());
-    meaning:
     for (var thought : thoughts.boundaries()) {
-      var sign = new Normalizer(sigma, MutableMap.from(rho));
-      for (var ct : thought.face().pats().zipView(thoughts.dims().zipView(word))) {
-        if (ct._1 == Boundary.Case.VAR) sign.rho.put(ct._2);
-        else if (!(ct._2._2 instanceof Term.Mula mula
-          && mula.formula() instanceof Formula.Lit<Term> lit
-          && lit.isLeft() == (ct._1 == Boundary.Case.LEFT))) continue meaning;
-      }
-      return sign.term(thought.body());
+      var reason = piper(word, thought.face(), thoughts.dims());
+      if (reason != null) return reason.term(thought.body());
     }
     return null; // Sometimes all of our thoughts are misgiven.
+  }
+
+  /** A piper that will lead us to reason. */
+  private Normalizer piper(ImmutableSeq<Term> word, Boundary.Face face, ImmutableSeq<LocalVar> dims) {
+    var sign = new Normalizer(sigma, MutableMap.from(rho));
+    for (var ct : face.pats().zipView(dims.zipView(word))) {
+      if (ct._1 == Boundary.Case.VAR) sign.rho.put(ct._2);
+      else if (!(ct._2._2 instanceof Term.Mula mula
+        && mula.formula() instanceof Formula.Lit<Term> lit
+        && lit.isLeft() == (ct._1 == Boundary.Case.LEFT))) return null;
+    }
+    return sign;
   }
 
   record Renamer(MutableMap<LocalVar, LocalVar> map) {
