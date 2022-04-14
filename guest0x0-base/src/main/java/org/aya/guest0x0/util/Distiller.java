@@ -109,7 +109,7 @@ public interface Distiller {
         yield Doc.parened(Doc.sep(docs));
       }
       case Term.Mula f -> formulae(Distiller::term, f.formula(), envPrec);
-      case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.cof());
+      case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.data().cof());
     };
   }
 }

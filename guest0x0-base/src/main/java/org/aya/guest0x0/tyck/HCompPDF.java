@@ -30,35 +30,34 @@ public interface HCompPDF {
     return cnf.isEmpty() ? end(true) : cnf.reduce(Term::or);
   }
   record Transps(
-    @NotNull Term cover, @NotNull Boundary.Cof cof,
-    @NotNull ImmutableSeq<Term> args, @NotNull Term psi
+    @NotNull Term cover, @NotNull TranspData data
   ) {
     public @NotNull Term inv() {
-      return new Transp(mkLam("i", i -> cover.app(neg(i))), cof, args, psi);
+      return new Transp(mkLam("i", i -> cover.app(neg(i))), data);
     }
 
     /** Marisa Kirisame!! */
-    public @NotNull Term mk() {return new Transp(cover, cof, args, psi);}
+    public @NotNull Term mk() {return new Transp(cover, data);}
 
     public @NotNull Term fill(@NotNull LocalVar i) {
       var ri = new Ref(i);
       return new Transp(mkLam("j", j -> cover.app(and(ri, j))),
-        amendCof(i, LEFT), args.appended(ri), Term.or(psi, neg(ri)));
+        new TranspData(amendCof(i, LEFT), data.a().appended(ri), Term.or(data.psi(), neg(ri))));
     }
 
     public @NotNull Term invFill(@NotNull LocalVar i) {
       var ri = new Ref(i);
       return new Transp(mkLam("j", j -> cover.app(neg(and(neg(ri), j)))),
-        amendCof(i, RIGHT), args.appended(ri), Term.or(psi, ri));
+        new TranspData(amendCof(i, RIGHT), data.a().appended(ri), Term.or(data.psi(), ri)));
     }
 
     private @NotNull Boundary.Cof amendCof(@NotNull LocalVar i, @NotNull Boundary.Case at) {
       // Optimization potential: if i \in cof.vars, it is only necessary to add a new face.
-      var newFaces = cof.faces().view()
+      var newFaces = data.cof().faces().view()
         .map(face -> new Boundary.Face(face.pats().appended(VAR)))
-        .appended(new Boundary.Face(ImmutableSeq.fill(cof.vars().size(), VAR).appended(at)))
+        .appended(new Boundary.Face(ImmutableSeq.fill(data.cof().vars().size(), VAR).appended(at)))
         .toImmutableSeq();
-      return new Boundary.Cof(cof.vars().appended(i), newFaces);
+      return new Boundary.Cof(data.cof().vars().appended(i), newFaces);
     }
   }
 }
