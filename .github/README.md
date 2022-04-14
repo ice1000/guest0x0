@@ -32,6 +32,14 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 Updated the CLI frontend to hide stack traces by default. Fixed some core theory bugs
 (many thanks to Amélia, MBones, and Daniel for their helps).
 
+```
+def transPiEq (A : I -> U) (B : Pi (i : I) -> A i -> U)
+    : Eq ((Pi (x : A 0) -> B 0 x) -> (Pi (x : A 1) -> B 1 x))
+         (transPi A B)
+         (trans (\i. Pi (x : A i) -> B i x))
+    => \i. transPi A B
+```
+
 ## v0.7
 
 ![image](https://user-images.githubusercontent.com/16398479/163258018-ee80a9f9-2fa1-45cb-b336-bc493d97a6ae.png)
@@ -48,14 +56,14 @@ When matched, `transp` computes as identity. Other lures are yet unimplemented.
 We now have the ability to test some de Morgan laws:
 
 ```
-def transport (A : I -> U) (a : A 0) : A 1 => A ~@ {} a
-def transport^-1 (A : I -> U) (a : A 1) : A 0 => (\i. A (~ i)) ~@ {} a
-def transportFn (A B : I -> U) (f : A 0 -> B 0) : A 1 -> B 1 =>
-  \a. transport B (f (transport (\i. A (~ i)) a))
-def transportPi (A : I -> U) (B : Pi (i : I) -> A i -> U)
+def trans (A : I -> U) (a : A 0) : A 1 => A ~@ {} a
+def trans^-1 (A : I -> U) (a : A 1) : A 0 => (\i. A (~ i)) ~@ {} a
+def transFn (A B : I -> U) (f : A 0 -> B 0) : A 1 -> B 1 =>
+  \a. trans B (f (trans (\i. A (~ i)) a))
+def transPi (A : I -> U) (B : Pi (i : I) -> A i -> U)
   (f : Pi (x : A 0) -> B 0 x) : Pi (x : A 1) -> B 1 x =>
-    \x. transport (\j. B j ((\i. A (j \/ ~ i)) ~@ j { | 1 } x))
-         (f (transport (\i. A (~ i)) x))
+    \x. trans (\j. B j ((\i. A (j \/ ~ i)) ~@ j { | 1 } x))
+         (f (trans (\i. A (~ i)) x))
 ```
 
 ### v0.6
