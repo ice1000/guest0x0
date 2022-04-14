@@ -9,8 +9,7 @@ import org.jetbrains.annotations.NotNull;
 public interface HCompPDF {
   record Transps(@NotNull Term cover, @NotNull ImmutableSeq<Term> args, @NotNull Boundary.Cof cof) {
     public @NotNull Term inv() {
-      var x = new LocalVar("i");
-      return new Term.Transp(new Term.Lam(x, Term.mkApp(cover, Term.inv(new Term.Ref(x)))), cof, args);
+      return new Term.Transp(Term.mkLam("i", i -> Term.mkApp(cover, Term.inv(new Term.Ref(i)))), cof, args);
     }
   }
 }

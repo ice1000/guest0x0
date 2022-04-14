@@ -13,6 +13,8 @@ import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Function;
+
 public sealed interface Term extends Docile {
   @Override default @NotNull Doc toDoc() {
     return Distiller.term(this, Distiller.Prec.Free);
@@ -46,6 +48,10 @@ public sealed interface Term extends Docile {
 
   static @NotNull Term mkLam(@NotNull SeqView<LocalVar> telescope, @NotNull Term body) {
     return telescope.foldRight(body, Lam::new);
+  }
+  static @NotNull Lam mkLam(@NotNull String x, @NotNull Function<LocalVar, Term> body) {
+    var xx = new LocalVar(x);
+    return new Lam(xx, body.apply(xx));
   }
   static @NotNull Term mkApp(@NotNull Term f, @NotNull Term a) {
     return f instanceof Lam lam ? lam.body.subst(lam.x, a) : new Two(true, f, a);

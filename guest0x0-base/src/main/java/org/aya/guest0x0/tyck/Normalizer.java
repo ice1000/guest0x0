@@ -68,10 +68,8 @@ public record Normalizer(
       case Term.Transp transp -> {
         var args = transp.a().map(this::term);
         for (var face : transp.cof().faces()) {
-          if (piper(args, face, transp.cof().vars()) != null) { // The last argument is junk
-            var x = new LocalVar("x");
-            yield new Term.Lam(x, new Term.Ref(x));
-          }
+          if (piper(args, face, transp.cof().vars()) != null) // The last argument is junk
+            yield Term.mkLam("x", Term.Ref::new);
         }
         var cover = term(transp.cover());
         yield new Term.Transp(cover, transp.cof(), args);
