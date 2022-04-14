@@ -26,6 +26,8 @@ import java.util.concurrent.Callable;
 public class CliMain implements Callable<Integer> {
   @CommandLine.Parameters(paramLabel = "<input-file>", description = "File to compile")
   public String inputFile;
+  @CommandLine.Option(names = {"--st"}, description = "Show the stack trace")
+  public boolean stackTrace = false;
 
   public static void main(String @NotNull ... args) {
     System.exit(new CommandLine(new CliMain()).execute(args));
@@ -43,6 +45,7 @@ public class CliMain implements Callable<Integer> {
       return 0;
     } catch (RuntimeException re) {
       System.err.println(re.getMessage());
+      if (stackTrace) re.printStackTrace();
       return 2;
     }
   }

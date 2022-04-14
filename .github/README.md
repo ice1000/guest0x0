@@ -29,6 +29,8 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ![image](https://user-images.githubusercontent.com/16398479/163415006-4c7ecf02-2ed1-4c8a-b3f6-779538401973.png)
 
+Updated the CLI frontend to hide stack traces by default.
+
 ## v0.7
 
 ![image](https://user-images.githubusercontent.com/16398479/163258018-ee80a9f9-2fa1-45cb-b336-bc493d97a6ae.png)
