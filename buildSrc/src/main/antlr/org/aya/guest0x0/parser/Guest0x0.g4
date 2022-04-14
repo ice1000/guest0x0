@@ -29,7 +29,7 @@ expr
 
  // Cubical features
  | '[|' ID+ '|]' expr '{' boundary* '}' # cube
- | expr '~@' ID+ '{' face* '}' # transp
+ | expr '~@' ID* '{' face* '}' # transp
  | iPat # iLit
  | '~' expr # inv
  | expr (AND | OR) expr # iConn
@@ -39,7 +39,7 @@ iPat : LEFT | RIGHT | '_';
 AND : '/\\' | '\u2227';
 OR : '\\/' | '\u2228';
 boundary : face ARROW2 expr;
-face : '|' iPat+ ;
+face : '|' iPat* ;
 
 LPAIR : '<<';
 RPAIR : '>>';

@@ -89,6 +89,14 @@ public class DeclsTest {
       """);
   }
 
+  @Test public void transportTyping() {
+    tyck("""
+      def transport (A : I -> U) (a : A 0) : A 1 => A ~@ {} a
+      def transportFn (A B : I -> U) (f : A 0 -> B 0) : A 1 -> B 1 =>
+        \\a. transport B (f (transport (\\i. A (~ i)) a))
+      """);
+  }
+
   private static @NotNull Elaborator tyck(@Language("TEXT") String s) {
     return CliMain.tyck(s, false);
   }
