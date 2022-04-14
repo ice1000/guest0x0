@@ -59,7 +59,7 @@ public record Normalizer(
         var heaven = piper(pApp.b(), i); // Important: use unnormalized pApp.b()
         yield heaven != null ? heaven : new Term.PCall(p, i, pApp.b().fmap(this::term));
       }
-      case Term.Formula f -> formulae(f.formula().fmap(this::term));
+      case Term.Mula f -> formulae(f.formula().fmap(this::term));
       case Term.Transp transp -> throw new UnsupportedOperationException("TODO");
     };
   }
@@ -67,21 +67,21 @@ public record Normalizer(
   // https://github.com/mortberg/cubicaltt/blob/a5c6f94bfc0da84e214641e0b87aa9649ea114ea/Connections.hs#L178-L197
   private Term formulae(Formula<Term> formula) {
     return switch (formula) { // de Morgan laws
-      case Formula.Inv<Term> inv && inv.i() instanceof Term.Formula i
+      case Formula.Inv<Term> inv && inv.i() instanceof Term.Mula i
         && i.formula() instanceof Formula.Lit<Term> lit -> Term.end(!lit.isLeft());
-      case Formula.Inv<Term> inv && inv.i() instanceof Term.Formula i
-        && i.formula() instanceof Formula.Conn<Term> conn -> new Term.Formula(new Formula.Conn<>(!conn.isAnd(),
+      case Formula.Inv<Term> inv && inv.i() instanceof Term.Mula i
+        && i.formula() instanceof Formula.Conn<Term> conn -> new Term.Mula(new Formula.Conn<>(!conn.isAnd(),
         formulae(new Formula.Inv<>(conn.l())),
         formulae(new Formula.Inv<>(conn.r()))));
-      case Formula.Conn<Term> conn && conn.l() instanceof Term.Formula lf
+      case Formula.Conn<Term> conn && conn.l() instanceof Term.Mula lf
         && lf.formula() instanceof Formula.Lit<Term> l -> l.isLeft()
         ? (conn.isAnd() ? lf : conn.r())
         : (conn.isAnd() ? conn.r() : lf);
-      case Formula.Conn<Term> conn && conn.r() instanceof Term.Formula rf
+      case Formula.Conn<Term> conn && conn.r() instanceof Term.Mula rf
         && rf.formula() instanceof Formula.Lit<Term> r -> r.isLeft()
         ? (conn.isAnd() ? rf : conn.l())
         : (conn.isAnd() ? conn.l() : rf);
-      default -> new Term.Formula(formula);
+      default -> new Term.Mula(formula);
     };
   }
 
@@ -96,8 +96,8 @@ public record Normalizer(
       var sign = new Normalizer(sigma, MutableMap.from(rho));
       for (var ct : thought.face().pats().zipView(thoughts.dims().zipView(word))) {
         if (ct._1 == Boundary.Case.VAR) sign.rho.put(ct._2);
-        else if (!(ct._2._2 instanceof Term.Formula formula
-          && formula.formula() instanceof Formula.Lit<Term> lit
+        else if (!(ct._2._2 instanceof Term.Mula mula
+          && mula.formula() instanceof Formula.Lit<Term> lit
           && lit.isLeft() == (ct._1 == Boundary.Case.LEFT))) continue meaning;
       }
       return sign.term(thought.body());
@@ -128,13 +128,16 @@ public record Normalizer(
           yield new Term.PLam(params, term(pLam.fill()));
         }
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
-        case Term.Formula f -> new Term.Formula(f.formula().fmap(this::term));
-        case Term.Transp transp -> new Term.Transp(term(transp.cover()),
-          transp.vars().map(v -> map.getOrDefault(v, v)), transp.faces());
+        case Term.Mula f -> new Term.Mula(f.formula().fmap(this::term));
+        case Term.Transp transp -> new Term.Transp(term(transp.cover()), transpData(transp.data()));
       };
     }
 
-    private @NotNull Boundary.Data<Term> boundaries(Boundary.@NotNull Data<Term> data) {
+    private @NotNull Boundary.TranspData transpData(@NotNull Boundary.TranspData data) {
+      return new Boundary.TranspData(data.vars().map(v -> map.getOrDefault(v, v)), data.faces());
+    }
+
+    private @NotNull Boundary.Data<Term> boundaries(@NotNull Boundary.Data<Term> data) {
       return data.fmap(this::term, data.dims().map(this::param));
     }
 

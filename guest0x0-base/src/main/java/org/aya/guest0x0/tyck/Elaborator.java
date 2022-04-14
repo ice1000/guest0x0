@@ -164,17 +164,17 @@ public record Elaborator(
         YouTrack.jesperCockx(data, path.pos());
         yield new Synth(new Term.Path(data), Term.U);
       }
-      case Expr.Formula f -> switch (f.formula()) {
-        case Formula.Inv<Expr> inv -> new Synth(new Term.Formula(
+      case Expr.Mula f -> switch (f.formula()) {
+        case Formula.Inv<Expr> inv -> new Synth(new Term.Mula(
           new Formula.Inv<>(inherit(inv.i(), Term.I))), Term.I);
-        case Formula.Conn<Expr> conn -> new Synth(new Term.Formula(
+        case Formula.Conn<Expr> conn -> new Synth(new Term.Mula(
           new Formula.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);
         case Formula.Lit lit -> new Synth(Term.end(lit.isLeft()), Term.I);
       };
       case Expr.Transp transp -> {
         var cover = inherit(transp.cover(), Term.mkPi(Term.I, Term.U));
         var ty = Term.mkPi(Term.mkApp(cover, Term.end(true)), Term.mkApp(cover, Term.end(false)));
-        yield new Synth(new Term.Transp(cover, transp.vars(), transp.faces()), ty);
+        yield new Synth(new Term.Transp(cover, transp.data()), ty);
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };

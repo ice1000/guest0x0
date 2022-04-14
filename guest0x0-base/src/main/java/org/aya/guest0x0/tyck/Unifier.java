@@ -28,10 +28,10 @@ public interface Unifier {
           pram.dims().zip(plam.dims()).map(p -> Tuple.of(p._1, new Term.Ref(p._2))))));
       case Term.PCall lpcall && r instanceof Term.PCall rpcall ->
         untyped(lpcall.p(), rpcall.p()) && lpcall.i().zipView(rpcall.i()).allMatch(p -> untyped(p._1, p._2));
-      case Term.Formula lf && r instanceof Term.Formula rf -> formulae(lf.formula(), rf.formula());
+      case Term.Mula lf && r instanceof Term.Mula rf -> formulae(lf.formula(), rf.formula());
       case Term.Transp ltp && r instanceof Term.Transp rtp ->
         // Unify pattern matchings?!?!?! You're out of your mind!
-        untyped(ltp.cover(), rtp.cover()) && ltp.vars().sameElements(rtp.vars(), true);
+        untyped(ltp.cover(), rtp.cover()) && ltp.data().vars().sameElements(rtp.data().vars(), true);
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };

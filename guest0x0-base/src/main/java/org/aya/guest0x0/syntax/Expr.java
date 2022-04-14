@@ -35,10 +35,8 @@ public sealed interface Expr extends Docile {
   /** @param isPi it's a sigma if false */
   record DT(boolean isPi, @Override @NotNull SourcePos pos, Param<Expr> param, Expr cod) implements Expr {}
   record Path(@Override @NotNull SourcePos pos, @NotNull Boundary.Data<Expr> data) implements Expr {}
-  record Formula(@Override @NotNull SourcePos pos, @NotNull org.aya.guest0x0.syntax.Formula<Expr> formula) implements Expr {}
+  record Mula(@Override @NotNull SourcePos pos, @NotNull Formula<Expr> formula) implements Expr {}
   record Transp(
     @Override @NotNull SourcePos pos, @NotNull Expr cover,
-    @NotNull ImmutableSeq<LocalVar> vars, // NEW SYNTAX!!
-    @NotNull ImmutableSeq<Boundary.Face> faces
-  ) implements Expr {}
+    @NotNull Boundary.TranspData data) implements Expr {}
 }

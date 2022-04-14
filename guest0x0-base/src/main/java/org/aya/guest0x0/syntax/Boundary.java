@@ -25,6 +25,8 @@ public record Boundary<E>(@NotNull Face face, @NotNull E body) {
     }
   }
 
+  public record TranspData(@NotNull ImmutableSeq<LocalVar> vars, @NotNull ImmutableSeq<Boundary.Face> faces) {}
+
   public <T> @NotNull Boundary<T> fmap(@NotNull Function<E, T> f) {
     return new Boundary<>(face, f.apply(body));
   }

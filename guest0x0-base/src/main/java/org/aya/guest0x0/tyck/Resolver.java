@@ -3,10 +3,7 @@ package org.aya.guest0x0.tyck;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import kala.control.Option;
-import org.aya.guest0x0.syntax.Def;
-import org.aya.guest0x0.syntax.Expr;
-import org.aya.guest0x0.syntax.LocalVar;
-import org.aya.guest0x0.syntax.Param;
+import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.SPE;
 import org.aya.pretty.doc.Doc;
 import org.jetbrains.annotations.NotNull;
@@ -71,11 +68,11 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
         state.purge();
         yield new Expr.Path(path.pos(), data);
       }
-      case Expr.Formula f -> new Expr.Formula(f.pos(), f.formula().fmap(this::expr));
+      case Expr.Mula f -> new Expr.Mula(f.pos(), f.formula().fmap(this::expr));
       case Expr.Transp transp -> {
-        var transpVars = transp.vars().map(v -> env.getOrThrow(v.name(), () ->
-          new SPE(transp.pos(), Doc.english("Unresolved: " + v.name()))));
-        yield new Expr.Transp(transp.pos(), expr(transp.cover()), transpVars, transp.faces());
+        var v = transp.data().vars().map(vv -> env.getOrThrow(vv.name(), () ->
+          new SPE(transp.pos(), Doc.english("Unresolved: " + vv.name()))));
+        yield new Expr.Transp(transp.pos(), expr(transp.cover()), new Boundary.TranspData(v, transp.data().faces()));
       }
     };
   }

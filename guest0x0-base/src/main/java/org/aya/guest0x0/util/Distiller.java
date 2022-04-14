@@ -1,7 +1,6 @@
 package org.aya.guest0x0.util;
 
 import kala.collection.Seq;
-import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableList;
 import org.aya.guest0x0.syntax.*;
 import org.aya.pretty.doc.Doc;
@@ -41,17 +40,14 @@ public interface Distiller {
         yield envPrec.ordinal() > Cod.ordinal() ? Doc.parened(doc) : doc;
       }
       case Expr.Hole ignored -> Doc.symbol("_");
-      case Expr.Formula e -> formulae(Distiller::expr, e.formula(), envPrec);
-      case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.vars(), transp.faces());
+      case Expr.Mula e -> formulae(Distiller::expr, e.formula(), envPrec);
+      case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.data());
     };
   }
-  private static <E> @NotNull Doc transp(
-    PP<E> f, Prec envPrec, E cover,
-    ImmutableSeq<LocalVar> lv, ImmutableSeq<Boundary.Face> faces
-  ) {
+  private static <E> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Boundary.TranspData data) {
     var pre = Doc.sep(f.apply(cover, Transp), Doc.plain("~@"),
-      Doc.sep(lv.map(v -> Doc.plain(v.name()))));
-    var doc = Doc.cblock(pre, 2, Doc.vcat(faces.map(Boundary.Face::toDoc)));
+      Doc.sep(data.vars().map(v -> Doc.plain(v.name()))));
+    var doc = Doc.cblock(pre, 2, Doc.vcat(data.faces().map(Boundary.Face::toDoc)));
     return envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
   }
   private static @NotNull Doc dependentType(boolean isPi, Param<?> param, Docile cod) {
@@ -109,8 +105,8 @@ public interface Distiller {
         docs.append(term(pLam.fill(), Free));
         yield Doc.parened(Doc.sep(docs));
       }
-      case Term.Formula f -> formulae(Distiller::term, f.formula(), envPrec);
-      case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.vars(), transp.faces());
+      case Term.Mula f -> formulae(Distiller::term, f.formula(), envPrec);
+      case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.data());
     };
   }
 }
