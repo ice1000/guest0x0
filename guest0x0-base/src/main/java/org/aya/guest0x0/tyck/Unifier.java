@@ -27,14 +27,16 @@ public interface Unifier {
         untyped(plam.fill(), pram.fill().subst(MutableMap.from(
           pram.dims().zip(plam.dims()).map(p -> Tuple.of(p._1, new Term.Ref(p._2))))));
       case Term.PCall lpcall && r instanceof Term.PCall rpcall ->
-        untyped(lpcall.p(), rpcall.p()) && lpcall.i().zipView(rpcall.i()).allMatch(p -> untyped(p._1, p._2));
+        untyped(lpcall.p(), rpcall.p()) && unifySeq(lpcall.i(), rpcall.i());
       case Term.Mula lf && r instanceof Term.Mula rf -> formulae(lf.formula(), rf.formula());
       case Term.Transp ltp && r instanceof Term.Transp rtp ->
-        // Unify pattern matchings?!?!?! You're out of your mind!
-        untyped(ltp.cover(), rtp.cover()) && ltp.data().vars().sameElements(rtp.data().vars(), true);
+        untyped(ltp.cover(), rtp.cover()) && unifySeq(ltp.a(), rtp.a());
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };
+  }
+  private static boolean unifySeq(@NotNull ImmutableSeq<Term> l, @NotNull ImmutableSeq<Term> r) {
+    return l.zipView(r).allMatch(p -> untyped(p._1, p._2));
   }
   // Hopefully.... I don't know. :shrug:
   static boolean formulae(Formula<Term> lf, Formula<Term> rf) {

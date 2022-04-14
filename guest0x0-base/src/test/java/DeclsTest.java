@@ -94,6 +94,10 @@ public class DeclsTest {
       def transport (A : I -> U) (a : A 0) : A 1 => A ~@ {} a
       def transportFn (A B : I -> U) (f : A 0 -> B 0) : A 1 -> B 1 =>
         \\a. transport B (f (transport (\\i. A (~ i)) a))
+      def transportPi (A : I -> U) (B : Pi (i : I) -> A i -> U)
+        (f : Pi (x : A 0) -> B 0 x) : Pi (x : A 1) -> B 1 x =>
+          \\x. transport (\\j. B j ((\\i. A (j \\/ ~ i)) ~@ j { | 1 } x))
+               (f (transport (\\i. A (~ i)) x))
       """);
   }
 
