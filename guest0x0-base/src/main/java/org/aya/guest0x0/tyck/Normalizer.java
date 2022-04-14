@@ -95,6 +95,8 @@ public record Normalizer(
       case Formula.Inv<Term> inv && inv.i() instanceof Term.Mula i
         && i.formula() instanceof Formula.Lit<Term> lit -> Term.end(!lit.isLeft());
       case Formula.Inv<Term> inv && inv.i() instanceof Term.Mula i
+        && i.formula() instanceof Formula.Inv<Term> ii -> ii.i(); // DNE!! :fear:
+      case Formula.Inv<Term> inv && inv.i() instanceof Term.Mula i
         && i.formula() instanceof Formula.Conn<Term> conn -> new Term.Mula(new Formula.Conn<>(!conn.isAnd(),
         formulae(new Formula.Inv<>(conn.l())),
         formulae(new Formula.Inv<>(conn.r()))));

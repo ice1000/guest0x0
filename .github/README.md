@@ -29,7 +29,8 @@ Make sure you listen to Suede or Deep Purple while looking at this project.
 
 ![image](https://user-images.githubusercontent.com/16398479/163415006-4c7ecf02-2ed1-4c8a-b3f6-779538401973.png)
 
-Updated the CLI frontend to hide stack traces by default.
+Updated the CLI frontend to hide stack traces by default. Fixed some core theory bugs
+(many thanks to Amélia, MBones, and Daniel for their helps).
 
 ## v0.7
 
