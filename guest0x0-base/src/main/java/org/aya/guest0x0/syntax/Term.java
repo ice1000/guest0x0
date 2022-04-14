@@ -69,8 +69,7 @@ public sealed interface Term extends Docile {
   record PLam(@NotNull ImmutableSeq<LocalVar> dims, @NotNull Term fill) implements Term {}
   record PCall(@NotNull Term p, @NotNull ImmutableSeq<Term> i, @NotNull Boundary.Data<Term> b) implements Term {}
   record Mula(@NotNull Formula<Term> formula) implements Term {}
-  static @NotNull Term end(boolean isLeft) {
-    return new Mula(new org.aya.guest0x0.syntax.Formula.Lit<>(isLeft));
-  }
-  record Transp(@NotNull Term cover, @NotNull Boundary.Cof data, @NotNull ImmutableSeq<Term> a) implements Term {}
+  static @NotNull Term end(boolean isLeft) {return new Mula(new Formula.Lit<>(isLeft));}
+  static @NotNull Term inv(@NotNull Term term) {return new Mula(new Formula.Inv<>(term));}
+  record Transp(@NotNull Term cover, @NotNull Boundary.Cof cof, @NotNull ImmutableSeq<Term> a) implements Term {}
 }

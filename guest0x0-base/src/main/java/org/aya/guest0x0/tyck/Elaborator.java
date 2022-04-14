@@ -168,8 +168,7 @@ public record Elaborator(
         yield new Synth(new Term.Path(data), Term.U);
       }
       case Expr.Mula f -> switch (f.formula()) {
-        case Formula.Inv<Expr> inv -> new Synth(new Term.Mula(
-          new Formula.Inv<>(inherit(inv.i(), Term.I))), Term.I);
+        case Formula.Inv<Expr> inv -> new Synth(Term.inv(inherit(inv.i(), Term.I)), Term.I);
         case Formula.Conn<Expr> conn -> new Synth(new Term.Mula(
           new Formula.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);
         case Formula.Lit lit -> new Synth(Term.end(lit.isLeft()), Term.I);
@@ -178,12 +177,12 @@ public record Elaborator(
         var cover = inherit(transp.cover(), Term.mkPi(Term.I, Term.U));
         var detective = new AltF7(new LocalVar("?"));
         var sample = Term.mkApp(cover, new Term.Ref(detective.var()));
-        for (var face : transp.data().faces()) {
-          if (detective.press(jonSterling(transp.data().vars().view(), face).term(sample)))
+        for (var face : transp.cof().faces()) {
+          if (detective.press(jonSterling(transp.cof().vars().view(), face).term(sample)))
             throw new SPE(transp.pos(), Doc.english("Expects constant for"), face);
         }
         var ty = Term.mkPi(Term.mkApp(cover, Term.end(true)), Term.mkApp(cover, Term.end(false)));
-        yield new Synth(new Term.Transp(cover, transp.data(), transp.data().vars().map(Term.Ref::new)), ty);
+        yield new Synth(new Term.Transp(cover, transp.cof(), transp.cof().vars().map(Term.Ref::new)), ty);
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };

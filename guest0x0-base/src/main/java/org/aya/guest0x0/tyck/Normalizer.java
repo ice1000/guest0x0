@@ -67,14 +67,14 @@ public record Normalizer(
       case Term.Mula f -> formulae(f.formula().fmap(this::term));
       case Term.Transp transp -> {
         var args = transp.a().map(this::term);
-        for (var face : transp.data().faces()) {
-          if (piper(args, face, transp.data().vars()) != null) { // The last argument is junk
+        for (var face : transp.cof().faces()) {
+          if (piper(args, face, transp.cof().vars()) != null) { // The last argument is junk
             var x = new LocalVar("x");
             yield new Term.Lam(x, new Term.Ref(x));
           }
         }
         var cover = term(transp.cover());
-        yield new Term.Transp(cover, transp.data(), args);
+        yield new Term.Transp(cover, transp.cof(), args);
       }
     };
   }
@@ -150,7 +150,7 @@ public record Normalizer(
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
         case Term.Mula f -> new Term.Mula(f.formula().fmap(this::term));
         case Term.Transp transp -> new Term.Transp(term(transp.cover()),
-          transpData(transp.data()), transp.a().map(this::term));
+          transpData(transp.cof()), transp.a().map(this::term));
       };
     }
 

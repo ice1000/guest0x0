@@ -74,9 +74,9 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
       }
       case Expr.Mula f -> new Expr.Mula(f.pos(), f.formula().fmap(this::expr));
       case Expr.Transp transp -> {
-        var v = transp.data().vars().map(vv -> env.getOrThrow(vv.name(), () ->
+        var v = transp.cof().vars().map(vv -> env.getOrThrow(vv.name(), () ->
           new SPE(transp.pos(), Doc.english("Unresolved: " + vv.name()))));
-        yield new Expr.Transp(transp.pos(), expr(transp.cover()), new Boundary.Cof(v, transp.data().faces()));
+        yield new Expr.Transp(transp.pos(), expr(transp.cover()), new Boundary.Cof(v, transp.cof().faces()));
       }
     };
   }

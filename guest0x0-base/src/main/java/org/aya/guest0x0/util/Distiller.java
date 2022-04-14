@@ -44,7 +44,7 @@ public interface Distiller {
       }
       case Expr.Hole ignored -> Doc.symbol("_");
       case Expr.Mula e -> formulae(Distiller::expr, e.formula(), envPrec);
-      case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.data());
+      case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.cof());
     };
   }
   private static <E> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Boundary.Cof data) {
@@ -109,7 +109,7 @@ public interface Distiller {
         yield Doc.parened(Doc.sep(docs));
       }
       case Term.Mula f -> formulae(Distiller::term, f.formula(), envPrec);
-      case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.data());
+      case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.cof());
     };
   }
 }
