@@ -38,7 +38,8 @@ expr
 iPat : LEFT | RIGHT | '_';
 AND : '/\\' | '\u2227';
 OR : '\\/' | '\u2228';
-boundary : '|' iPat+ ARROW2 expr;
+boundary : face ARROW2 expr;
+face : '|' iPat+ ;
 
 LPAIR : '<<';
 RPAIR : '>>';

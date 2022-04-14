@@ -60,11 +60,11 @@ public interface Unifier {
 
     public void unify(
       @NotNull ImmutableSeq<LocalVar> dims,
-      @NotNull ImmutableSeq<Boundary.Case> lc, // Lambda calculus!!
-      @NotNull ImmutableSeq<Boundary.Case> rc  // Reference counting!!
+      @NotNull Boundary.Face lc, // Lambda calculus!!
+      @NotNull Boundary.Face rc  // Reference counting!!
     ) {
-      assert lc.sizeEquals(dims) && rc.sizeEquals(dims);
-      for (var ttt : dims.zipView(lc.zipView(rc))) {
+      assert lc.pats().sizeEquals(dims) && rc.pats().sizeEquals(dims);
+      for (var ttt : dims.zipView(lc.pats().zipView(rc.pats()))) {
         if (ttt._2._1 == ttt._2._2) continue;
         if (ttt._2._1 == Boundary.Case.VAR) r.rho().put(ttt._1, Term.end(ttt._2._2 == Boundary.Case.LEFT));
         if (ttt._2._2 == Boundary.Case.VAR) l.rho().put(ttt._1, Term.end(ttt._2._1 == Boundary.Case.LEFT));

@@ -100,7 +100,7 @@ public record Normalizer(
     meaning:
     for (var thought : thoughts.boundaries()) {
       var sign = new Normalizer(sigma, MutableMap.from(rho));
-      for (var ct : thought.pats().zipView(thoughts.dims().zipView(word))) {
+      for (var ct : thought.face().pats().zipView(thoughts.dims().zipView(word))) {
         if (ct._1 == Boundary.Case.VAR) sign.rho.put(ct._2);
         else if (!(ct._2._2 instanceof Term.Formula formula
           && formula.formula() instanceof Formula.Lit<Term> lit

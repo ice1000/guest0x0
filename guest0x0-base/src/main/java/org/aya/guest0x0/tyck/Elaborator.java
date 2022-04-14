@@ -155,10 +155,10 @@ public record Elaborator(
         var ty = inherit(path.data().type(), new Term.UI(true));
         var boundaries = MutableArrayList.<Boundary<Term>>create(path.data().boundaries().size());
         for (var boundary : path.data().boundaries()) {
-          if (!dims.sizeEquals(boundary.pats())) throw new SPE(path.pos(),
-            Doc.english("Expects " + dims.size() + " patterns, got: " + boundary.pats().size()));
+          if (!dims.sizeEquals(boundary.face().pats())) throw new SPE(path.pos(),
+            Doc.english("Expects " + dims.size() + " patterns, got: " + boundary.face().pats().size()));
           var term = inherit(boundary.body(), jonSterling(dims.view(), boundary).term(ty));
-          boundaries.append(new Boundary<>(boundary.pats(), term));
+          boundaries.append(new Boundary<>(boundary.face(), term));
         }
         var data = new Boundary.Data<>(dims, ty, boundaries.toImmutableArray());
         YouTrack.jesperCockx(data, path.pos());
@@ -190,7 +190,7 @@ public record Elaborator(
 
   private @NotNull Normalizer jonSterling(SeqView<LocalVar> dims, Boundary<?> boundary) {
     return new Normalizer(sigma, MutableMap.from(dims
-      .zip(boundary.pats()).filter(p -> p._2 != Boundary.Case.VAR)
+      .zip(boundary.face().pats()).filter(p -> p._2 != Boundary.Case.VAR)
       .map(p -> Tuple.of(p._1, Term.end(p._2 == Boundary.Case.LEFT)))));
   }
 

@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 /** YouTrack checks Confluence. */
 public interface YouTrack {
   static void jesperCockx(@NotNull Boundary.Data<Term> d, @NotNull SourcePos pos) {
-    celebrate(d.dims().view(), d.boundaries().mapIndexed((i, b) -> new MCT.SubPats<>(b.pats().view(), i)))
+    celebrate(d.dims().view(), d.boundaries().mapIndexed((i, b) -> new MCT.SubPats<>(b.face().pats().view(), i)))
       .forEach(cls -> {
         var contents = cls.contents().map(i -> IntObjTuple2.of(i, d.boundaries().get(i)));
         for (int i = 1; i < contents.size(); i++) {
@@ -26,7 +26,7 @@ public interface YouTrack {
           for (int j = 0; j < i; j++) {
             var b = contents.get(j);
             var unifier = new Unifier.Cof(MutableMap.create());
-            unifier.unify(d.dims(), a._2.pats(), b._2.pats());
+            unifier.unify(d.dims(), a._2.face(), b._2.face());
             if (!Unifier.untyped(unifier.l().term(a._2.body()), unifier.r().term(b._2.body())))
               throw new SPE(pos, Doc.plain("The"), Doc.ordinal(a._1 + 1), Doc.plain("and"), Doc.ordinal(b._1 + 1),
                 Doc.plain("boundaries do not agree!!"));

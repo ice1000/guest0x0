@@ -36,7 +36,7 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.CubeContext cube -> new Expr.Path(sourcePosOf(cube), new Boundary.Data<>(
         ImmutableSeq.from(cube.ID()).map(id -> new LocalVar(id.getText())),
         expr(cube.expr()),
-        ImmutableSeq.from(cube.boundary()).map(this::boundary)));
+        ImmutableSeq.from(cube.boundary()).map(b -> new Boundary<>(face(b.face()), expr(b.expr())))));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
   }
@@ -48,10 +48,10 @@ public record Parser(@NotNull SourceFile source) {
       : new Expr.Hole(pos, ImmutableSeq.empty());
   }
 
-  private @NotNull Boundary<Expr> boundary(Guest0x0Parser.BoundaryContext boundary) {
-    return new Boundary<>(ImmutableSeq.from(boundary.iPat()).map(i ->
+  private @NotNull Boundary.Face face(Guest0x0Parser.FaceContext face) {
+    return new Boundary.Face(ImmutableSeq.from(face.iPat()).map(i ->
       i.LEFT() != null ? Boundary.Case.LEFT : i.RIGHT() != null
-        ? Boundary.Case.RIGHT : Boundary.Case.VAR), expr(boundary.expr()));
+        ? Boundary.Case.RIGHT : Boundary.Case.VAR));
   }
 
   public @NotNull Def<Expr> def(@NotNull Guest0x0Parser.DeclContext decl) {

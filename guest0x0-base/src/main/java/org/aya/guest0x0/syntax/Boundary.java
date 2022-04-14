@@ -8,13 +8,25 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
-public record Boundary<E>(@NotNull ImmutableSeq<Case> pats, @NotNull E body) {
+public record Boundary<E>(@NotNull Face face, @NotNull E body) {
   public enum Case {
     LEFT, RIGHT, VAR
   }
 
+  public record Face(@NotNull ImmutableSeq<Case> pats) implements Docile {
+    @Override public @NotNull Doc toDoc() {
+      var zesen = MutableList.of(Doc.symbol("|"));
+      pats.forEach(d -> zesen.append(Doc.symbol(switch (d) {
+        case LEFT -> "0";
+        case RIGHT -> "1";
+        case VAR -> "_";
+      })));
+      return Doc.sep(zesen);
+    }
+  }
+
   public <T> @NotNull Boundary<T> fmap(@NotNull Function<E, T> f) {
-    return new Boundary<>(pats, f.apply(body));
+    return new Boundary<>(face, f.apply(body));
   }
 
   public record Data<E extends Docile>(
@@ -34,17 +46,8 @@ public record Boundary<E>(@NotNull ImmutableSeq<Case> pats, @NotNull E body) {
       var head = MutableList.of(Doc.symbol("[|"));
       dims.forEach(d -> head.append(Doc.symbol(d.name())));
       head.appendAll(new Doc[]{Doc.symbol("|]"), type.toDoc()});
-      return Doc.cblock(Doc.sep(head), 2, Doc.vcat(boundaries.map(b -> {
-        var zesen = MutableList.of(Doc.symbol("|"));
-        b.pats().forEach(d -> zesen.append(Doc.symbol(switch (d) {
-          case LEFT -> "0";
-          case RIGHT -> "1";
-          case VAR -> "_";
-        })));
-        zesen.append(Doc.symbol("=>"));
-        zesen.append(b.body().toDoc());
-        return Doc.sep(zesen);
-      })));
+      return Doc.cblock(Doc.sep(head), 2, Doc.vcat(boundaries.map(b ->
+        Doc.sep(b.face.toDoc(), Doc.symbol("=>"), b.body().toDoc()))));
     }
   }
 }
