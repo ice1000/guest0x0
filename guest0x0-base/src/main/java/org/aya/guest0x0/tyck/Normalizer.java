@@ -6,6 +6,7 @@ import org.aya.guest0x0.syntax.Boundary;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Formula;
 import org.aya.guest0x0.syntax.Term;
+import org.aya.guest0x0.tyck.HCompPDF.Transps;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
 import org.jetbrains.annotations.NotNull;
@@ -73,8 +74,17 @@ public record Normalizer(
           if (piper(args, face, transp.cof().vars()) != null) // The last argument is junk
             yield Term.mkLam("x", Function.identity());
         }
+        var i = new LocalVar("i");
         var cover = term(transp.cover());
-        yield new Term.Transp(cover, transp.cof(), args);
+        yield switch (Term.mkApp(cover, new Term.Ref(i))) {
+          case Term.DT dt && dt.isPi() -> Term.mkLam("f", u0 -> Term.mkLam("x", v -> {
+            var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), args, transp.cof());
+            var w = laptop.invFill(i);
+            var w0 = laptop.inv(); // = w.subst(i, 0)
+            return Term.mkApp(new Term.Transp(rename(new Term.Lam(i, dt.codomain(w))), transp.cof(), args), u0, w0);
+          }));
+          default -> new Term.Transp(cover, transp.cof(), args);
+        };
       }
     };
   }
