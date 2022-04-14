@@ -7,6 +7,7 @@ import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.tyck.Normalizer;
 import org.aya.guest0x0.util.Distiller;
 import org.aya.guest0x0.util.LocalVar;
+import org.aya.guest0x0.util.Param;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
@@ -71,5 +72,5 @@ public sealed interface Term extends Docile {
   static @NotNull Term end(boolean isLeft) {
     return new Mula(new org.aya.guest0x0.syntax.Formula.Lit<>(isLeft));
   }
-  record Transp(@NotNull Term cover, @NotNull Boundary.TranspData data, @NotNull ImmutableSeq<Term> a) implements Term {}
+  record Transp(@NotNull Term cover, @NotNull Boundary.Cof data, @NotNull ImmutableSeq<Term> a) implements Term {}
 }

@@ -2,8 +2,12 @@ package org.aya.guest0x0.tyck;
 
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
-import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.syntax.Boundary;
+import org.aya.guest0x0.syntax.Def;
+import org.aya.guest0x0.syntax.Formula;
+import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.LocalVar;
+import org.aya.guest0x0.util.Param;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -150,8 +154,8 @@ public record Normalizer(
       };
     }
 
-    private @NotNull Boundary.TranspData transpData(@NotNull Boundary.TranspData data) {
-      return new Boundary.TranspData(data.vars().map(v -> map.getOrDefault(v, v)), data.faces());
+    private @NotNull Boundary.Cof transpData(@NotNull Boundary.Cof data) {
+      return new Boundary.Cof(data.vars().map(v -> map.getOrDefault(v, v)), data.faces());
     }
 
     private @NotNull Boundary.Data<Term> boundaries(@NotNull Boundary.Data<Term> data) {

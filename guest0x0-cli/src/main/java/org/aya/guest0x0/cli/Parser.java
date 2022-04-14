@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.LocalVar;
+import org.aya.guest0x0.util.Param;
 import org.aya.repl.antlr.AntlrUtil;
 import org.aya.util.error.SourceFile;
 import org.aya.util.error.SourcePos;
@@ -35,7 +36,7 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SimpTupContext si -> new Expr.DT(false, sourcePosOf(si), param(si.expr(0)), expr(si.expr(1)));
       case Guest0x0Parser.ILitContext il -> iPat(il.iPat());
       case Guest0x0Parser.TranspContext tp -> new Expr.Transp(sourcePosOf(tp), expr(tp.expr()),
-        new Boundary.TranspData(localVars(tp.ID()), Seq.wrapJava(tp.face()).map(this::face)));
+        new Boundary.Cof(localVars(tp.ID()), Seq.wrapJava(tp.face()).map(this::face)));
       case Guest0x0Parser.InvContext in -> new Expr.Mula(sourcePosOf(in), new Formula.Inv<>(expr(in.expr())));
       case Guest0x0Parser.IConnContext ic -> new Expr.Mula(sourcePosOf(ic),
         new Formula.Conn<>(ic.AND() != null, expr(ic.expr(0)), expr(ic.expr(1))));

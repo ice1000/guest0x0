@@ -8,6 +8,7 @@ import kala.tuple.Tuple;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.AltF7;
 import org.aya.guest0x0.util.LocalVar;
+import org.aya.guest0x0.util.Param;
 import org.aya.guest0x0.util.SPE;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;

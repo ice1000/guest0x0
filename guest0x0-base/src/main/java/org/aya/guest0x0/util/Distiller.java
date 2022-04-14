@@ -2,7 +2,10 @@ package org.aya.guest0x0.util;
 
 import kala.collection.Seq;
 import kala.collection.mutable.MutableList;
-import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.syntax.Boundary;
+import org.aya.guest0x0.syntax.Expr;
+import org.aya.guest0x0.syntax.Formula;
+import org.aya.guest0x0.syntax.Term;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +47,7 @@ public interface Distiller {
       case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.data());
     };
   }
-  private static <E> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Boundary.TranspData data) {
+  private static <E> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Boundary.Cof data) {
     var pre = Doc.sep(f.apply(cover, Transp), Doc.plain("~@"),
       Doc.sep(data.vars().map(v -> Doc.plain(v.name()))));
     var doc = Doc.cblock(pre, 2, Doc.vcat(data.faces().map(Boundary.Face::toDoc)));
