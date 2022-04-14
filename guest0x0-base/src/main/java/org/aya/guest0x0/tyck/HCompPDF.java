@@ -1,6 +1,7 @@
 package org.aya.guest0x0.tyck;
 
 import kala.collection.immutable.ImmutableSeq;
+import kala.collection.mutable.MutableArrayList;
 import org.aya.guest0x0.syntax.Boundary;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.LocalVar;
@@ -17,19 +18,35 @@ import static org.aya.guest0x0.syntax.Term.*;
  * </ul>
  */
 public interface HCompPDF {
-  record Transps(@NotNull Term cover, @NotNull ImmutableSeq<Term> args, @NotNull Boundary.Cof cof) {
+  static @NotNull Term powerBottom(@NotNull Boundary.Cof cof) {
+    var cnf = MutableArrayList.<Term>create(cof.faces().size());
+    for (var face : cof.faces()) {
+      cnf.append(face.pats().zipView(cof.vars())
+        .filter(t -> t._1 != VAR)
+        .map(t -> t._1 == RIGHT ? new Ref(t._2) : neg(new Ref(t._2)))
+        .reduce(Term::and));
+    }
+    // Default to "never constant" -- the left endpoint
+    return cnf.isEmpty() ? end(true) : cnf.reduce(Term::or);
+  }
+  record Transps(
+    @NotNull Term cover, @NotNull Boundary.Cof cof,
+    @NotNull ImmutableSeq<Term> args, @NotNull Term psi
+  ) {
     public @NotNull Term inv() {
-      return new Transp(mkLam("i", i -> mkApp(cover, neg(i))), cof, args);
+      return new Transp(mkLam("i", i -> mkApp(cover, neg(i))), cof, args, psi);
     }
 
     public @NotNull Term fill(@NotNull LocalVar i) {
-      return new Transp(mkLam("j", j -> mkApp(cover, and(new Ref(i), j))),
-        amendCof(i, LEFT), args.appended(new Ref(i)));
+      var ri = new Ref(i);
+      return new Transp(mkLam("j", j -> mkApp(cover, and(ri, j))),
+        amendCof(i, LEFT), args.appended(ri), Term.or(psi, neg(ri)));
     }
 
     public @NotNull Term invFill(@NotNull LocalVar i) {
-      return new Transp(mkLam("j", j -> mkApp(cover, neg(and(neg(new Ref(i)), j)))),
-        amendCof(i, RIGHT), args.appended(new Ref(i)));
+      var ri = new Ref(i);
+      return new Transp(mkLam("j", j -> mkApp(cover, neg(and(neg(ri), j)))),
+        amendCof(i, RIGHT), args.appended(ri), Term.or(psi, ri));
     }
 
     private @NotNull Boundary.Cof amendCof(@NotNull LocalVar i, @NotNull Boundary.Case at) {

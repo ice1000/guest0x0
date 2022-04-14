@@ -15,6 +15,7 @@ public class Unifier {
   public FailureData data;
 
   boolean untyped(@NotNull Term l, @NotNull Term r) {
+    if (l == r) return true;
     var happy = switch (l) {
       case Term.Lam lam && r instanceof Term.Lam ram -> untyped(lam.body(), rhs(ram.body(), ram.x(), lam.x()));
       case Term.Lam lam -> eta(r, lam);
@@ -37,7 +38,7 @@ public class Unifier {
         untyped(lpcall.p(), rpcall.p()) && unifySeq(lpcall.i(), rpcall.i());
       case Term.Mula lf && r instanceof Term.Mula rf -> formulae(lf.formula(), rf.formula());
       case Term.Transp ltp && r instanceof Term.Transp rtp ->
-        untyped(ltp.cover(), rtp.cover()) && unifySeq(ltp.a(), rtp.a());
+        untyped(ltp.cover(), rtp.cover()) && untyped(ltp.psi(), rtp.psi());
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };

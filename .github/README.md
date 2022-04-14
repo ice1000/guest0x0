@@ -21,7 +21,7 @@ Experimenting with some basic programming in Java 17 and see the following:
 + Inductive types with pattern matching (hopefully) and "simpler indices" (see my TyDe paper)
 + An equalizer of the first projection of evaluation and just the first projection :trollface:
 
-Make sure you listen to Suede or Deep Purple while looking at this project.
+Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ## Milestones
 

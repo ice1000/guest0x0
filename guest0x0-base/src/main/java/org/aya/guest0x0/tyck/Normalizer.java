@@ -76,14 +76,16 @@ public record Normalizer(
         }
         var i = new LocalVar("i");
         var cover = term(transp.cover());
+        var parkerLiu = term(transp.psi()); // Because of his talk about lax 2-functors!
         yield switch (Term.mkApp(cover, new Term.Ref(i))) {
           case Term.DT dt && dt.isPi() -> Term.mkLam("f", u0 -> Term.mkLam("x", v -> {
-            var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), args, transp.cof());
+            var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), transp.cof(), args, parkerLiu);
             // w0 = w.subst(i, 0)
             var newCover = rename(new Term.Lam(i, dt.codomain(laptop.invFill(i))));
-            return Term.mkApp(new Term.Transp(newCover, transp.cof(), args), Term.mkApp(u0, laptop.inv()));
+            return Term.mkApp(new Term.Transp(newCover, transp.cof(), args, parkerLiu),
+              Term.mkApp(u0, laptop.inv()));
           }));
-          default -> new Term.Transp(cover, transp.cof(), args);
+          default -> new Term.Transp(cover, transp.cof(), args, parkerLiu);
         };
       }
     };
@@ -162,7 +164,7 @@ public record Normalizer(
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
         case Term.Mula f -> new Term.Mula(f.formula().fmap(this::term));
         case Term.Transp transp -> new Term.Transp(term(transp.cover()),
-          transpData(transp.cof()), transp.a().map(this::term));
+          transpData(transp.cof()), transp.a().map(this::term), term(transp.psi()));
       };
     }
 

@@ -199,7 +199,8 @@ public record Elaborator(
             throw new SPE(transp.pos(), Doc.english("Expects constant for"), face);
         }
         var ty = Term.mkPi(Term.mkApp(cover, Term.end(true)), Term.mkApp(cover, Term.end(false)));
-        yield new Synth(new Term.Transp(cover, transp.cof(), transp.cof().vars().map(Term.Ref::new)), ty);
+        yield new Synth(new Term.Transp(cover, transp.cof(),
+          transp.cof().vars().map(Term.Ref::new), HCompPDF.powerBottom(transp.cof())), ty);
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };

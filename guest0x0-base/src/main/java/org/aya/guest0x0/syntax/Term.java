@@ -81,5 +81,8 @@ public sealed interface Term extends Docile {
   static @NotNull Term conn(boolean isAnd, @NotNull Term l, @NotNull Term r) {return new Mula(new Formula.Conn<>(isAnd, l, r));}
   static @NotNull Term and(@NotNull Term l, @NotNull Term r) {return conn(true, l, r);}
   static @NotNull Term or(@NotNull Term l, @NotNull Term r) {return conn(false, l, r);}
-  record Transp(@NotNull Term cover, @NotNull Boundary.Cof cof, @NotNull ImmutableSeq<Term> a) implements Term {}
+  record Transp(
+    @NotNull Term cover, @NotNull Boundary.Cof cof,
+    @NotNull ImmutableSeq<Term> a, @NotNull Term psi
+  ) implements Term {}
 }
