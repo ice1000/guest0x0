@@ -9,8 +9,6 @@ import org.aya.guest0x0.syntax.LocalVar;
 import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.BiPredicate;
-
 public interface Unifier {
   static boolean untyped(@NotNull Term l, @NotNull Term r) {
     return switch (l) {
@@ -33,23 +31,20 @@ public interface Unifier {
           pram.dims().zip(plam.dims()).map(p -> Tuple.of(p._1, new Term.Ref(p._2))))));
       case Term.PCall lpcall && r instanceof Term.PCall rpcall ->
         untyped(lpcall.p(), rpcall.p()) && lpcall.i().zipView(rpcall.i()).allMatch(p -> untyped(p._1, p._2));
-      case Term.Formula lf && r instanceof Term.Formula rf -> formulae(lf.formula(), rf.formula(), Unifier::untyped);
+      case Term.Formula lf && r instanceof Term.Formula rf -> formulae(lf.formula(), rf.formula());
       case Term.Transp ltp && r instanceof Term.Transp rtp ->
-        untyped(ltp.cover(), rtp.cover()) && pureFormulae(ltp.psi(), rtp.psi());
+        untyped(ltp.cover(), rtp.cover()) && untyped(ltp.psi(), rtp.psi());
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };
   }
-  static boolean pureFormulae(@NotNull Term.PureFormula l, @NotNull Term.PureFormula r) {
-    return formulae(l.formula(), r.formula(), Unifier::pureFormulae);
-  }
   // Hopefully.... I don't know. :shrug:
-  static <E> boolean formulae(Boundary.Formula<E> lf, Boundary.Formula<E> rf, BiPredicate<E, E> comparer) {
+  static boolean formulae(Boundary.Formula<Term> lf, Boundary.Formula<Term> rf) {
     return switch (lf) {
-      case Boundary.Lit<E> l && rf instanceof Boundary.Lit<E> r -> l.isLeft() == r.isLeft();
-      case Boundary.Inv<E> l && rf instanceof Boundary.Inv<E> r -> comparer.test(l.i(), r.i());
-      case Boundary.Conn<E> l && rf instanceof Boundary.Conn<E> r && l.isAnd() == r.isAnd() ->
-        comparer.test(l.l(), r.l()) && comparer.test(l.r(), r.r());
+      case Boundary.Lit<Term> l && rf instanceof Boundary.Lit<Term> r -> l.isLeft() == r.isLeft();
+      case Boundary.Inv<Term> l && rf instanceof Boundary.Inv<Term> r -> untyped(l.i(), r.i());
+      case Boundary.Conn<Term> l && rf instanceof Boundary.Conn<Term> r && l.isAnd() == r.isAnd() ->
+        untyped(l.l(), r.l()) && untyped(l.r(), r.r());
       default -> false;
     };
   }

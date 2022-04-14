@@ -67,9 +67,8 @@ public sealed interface Term extends Docile {
   record PLam(@NotNull ImmutableSeq<LocalVar> dims, @NotNull Term fill) implements Term {}
   record PCall(@NotNull Term p, @NotNull ImmutableSeq<Term> i, @NotNull Boundary.Data<Term> b) implements Term {}
   record Formula(@NotNull Boundary.Formula<Term> formula) implements Term {}
-  static @NotNull Term.Formula end(boolean isLeft) {
+  static @NotNull Term end(boolean isLeft) {
     return new Formula(new Boundary.Lit<>(isLeft));
   }
-  record Transp(@NotNull Term cover, @NotNull PureFormula psi) implements Term {}
-  record PureFormula(@NotNull Boundary.Formula<PureFormula> formula) {}
+  record Transp(@NotNull Term cover, @NotNull Term psi) implements Term {}
 }

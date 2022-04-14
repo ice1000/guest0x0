@@ -40,7 +40,7 @@ public interface Distiller {
         var doc = dependentType(dt.isPi(), dt.param(), expr(dt.cod(), Cod));
         yield envPrec.ordinal() > Cod.ordinal() ? Doc.parened(doc) : doc;
       }
-      case Expr.Hole ignored -> Doc.symbol("_");
+      case Expr.Hole hole -> Doc.symbol("_");
       case Expr.Formula e -> formulae(Distiller::expr, e.formula(), envPrec);
       case Expr.Transp transp -> {
         var doc = Doc.sep(expr(transp.cover(), Transp), Doc.plain("~@"), expr(transp.psi(), Transp));
@@ -52,10 +52,7 @@ public interface Distiller {
     return Doc.sep(Doc.plain(isPi ? "Pi" : "Sig"),
       param.toDoc(), Doc.symbol(isPi ? "->" : "**"), cod.toDoc());
   }
-  static @NotNull Doc formulae(Term.PureFormula formula, Prec envPrec) {
-    return Distiller.formulae(Distiller::formulae, formula.formula(), envPrec);
-  }
-  static @NotNull <E> Doc formulae(
+  private static @NotNull <E extends Docile> Doc formulae(
     BiFunction<E, Prec, Doc> f,
     Boundary.Formula<E> formula, Prec envPrec
   ) {
@@ -66,10 +63,6 @@ public interface Distiller {
       case Boundary.Lit<E> lit -> {
         envPrec = Free; // A hack to force no paren
         yield Doc.symbol(lit.isLeft() ? "0" : "1");
-      }
-      case Boundary.Ref ref -> {
-        envPrec = Free; // A hack to force no paren
-        yield Doc.symbol(ref.var().name());
       }
     };
     return envPrec.ordinal() >= IOp.ordinal() ? Doc.parened(doc) : doc;
@@ -115,7 +108,7 @@ public interface Distiller {
       }
       case Term.Formula f -> formulae(Distiller::term, f.formula(), envPrec);
       case Term.Transp transp -> {
-        var doc = Doc.sep(term(transp.cover(), Transp), Doc.plain("~@"), formulae(transp.psi(), Transp));
+        var doc = Doc.sep(term(transp.cover(), Transp), Doc.plain("~@"), term(transp.psi(), Transp));
         yield envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
       }
     };

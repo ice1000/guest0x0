@@ -170,14 +170,12 @@ public record Elaborator(
         case Boundary.Conn<Expr> conn -> new Synth(new Term.Formula(
           new Boundary.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);
         case Boundary.Lit lit -> new Synth(Term.end(lit.isLeft()), Term.I);
-        case Boundary.Ref ref -> new Synth(new Term.Formula(new Boundary.Ref<>(ref.var())), Term.I);
       };
       case Expr.Transp transp -> {
         var cover = inherit(transp.cover(), Term.mkPi(Term.I, Term.U));
         var psi = inherit(transp.psi(), Term.I);
         var ty = Term.mkPi(Term.mkApp(cover, Term.end(true)), Term.mkApp(cover, Term.end(false)));
-        throw new UnsupportedOperationException("TODO");
-        // yield new Synth(new Term.Transp(cover, psi), ty);
+        yield new Synth(new Term.Transp(cover, psi), ty);
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };
