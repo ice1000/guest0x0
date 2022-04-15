@@ -3,10 +3,7 @@ package org.aya.guest0x0.tyck;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
 import kala.tuple.Tuple;
-import org.aya.guest0x0.syntax.Boundary;
-import org.aya.guest0x0.syntax.Def;
-import org.aya.guest0x0.syntax.Formula;
-import org.aya.guest0x0.syntax.Term;
+import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.LocalVar;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,13 +35,29 @@ public class Unifier {
         untyped(lpcall.p(), rpcall.p()) && unifySeq(lpcall.i(), rpcall.i());
       case Term.Mula lf && r instanceof Term.Mula rf -> formulae(lf.formula(), rf.formula());
       case Term.Transp ltp && r instanceof Term.Transp rtp ->
-        untyped(ltp.cover(), rtp.cover()); // && untyped(ltp.psi(), rtp.psi());
+        untyped(ltp.cover(), rtp.cover()) && restr(ltp.restr(), rtp.restr());
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };
     if (!happy && data == null)
       data = new FailureData(l, r);
     return happy;
+  }
+
+  private boolean restr(Restr<Term> ll, Restr<Term> rr) {
+    return switch (ll) {
+      case Restr.Const<Term> l && rr instanceof Restr.Const<Term> r -> l.isTrue() == r.isTrue();
+      case Restr.Vary<Term> l
+        && rr instanceof Restr.Vary<Term> r
+        && l.orz().sizeEquals(r.orz()) -> l.orz().zipView(r.orz()).allMatch(t -> cof(t._1, t._2));
+      default -> false;
+    };
+  }
+
+  private boolean cof(Restr.Cofib<Term> l, Restr.Cofib<Term> r) {
+    if (!l.ands().sizeEquals(r.ands())) return false;
+    return l.ands().zipView(r.ands()).allMatch(t ->
+      t._1.isLeft() == t._2.isLeft() && untyped(t._1.inst(), t._2.inst()));
   }
 
   private boolean unifySeq(@NotNull ImmutableSeq<Term> l, @NotNull ImmutableSeq<Term> r) {
