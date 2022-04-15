@@ -68,27 +68,8 @@ public record Normalizer(
       case Term.Transp transp -> {
         // Because of his talk about lax 2-functors!
         var parkerLiu = transp.restr().rename(Function.identity(), this::term);
-        if (satisfied(parkerLiu)) yield Term.id("x");
+        if (CofThy.satisfied(parkerLiu)) yield Term.id("x");
         yield transp(new LocalVar("i"), term(transp.cover()), parkerLiu);
-      }
-    };
-  }
-
-  private boolean satisfied(Restr<Term> restriction) {
-    return switch (restriction) {
-      case Restr.Const c -> c.isTrue();
-      case Restr.Vary<Term> restr -> {
-        for (var or : restr.orz()) {
-          var satisfied = true;
-          for (var eq : or.ands()) {
-            var matchy = eq.inst() instanceof Term.Mula mula
-              && mula.formula() instanceof Formula.Lit<?> lit
-              && lit.isLeft() == eq.isLeft();
-            satisfied = satisfied && matchy;
-          }
-          if (satisfied) yield true;
-        }
-        yield false;
       }
     };
   }
