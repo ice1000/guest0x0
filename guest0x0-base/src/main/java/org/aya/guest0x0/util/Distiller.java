@@ -45,9 +45,17 @@ public interface Distiller {
     };
   }
   private static <E> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Restr<?> restr) {
-    return Doc.empty();
-    // var doc = Doc.sep(f.apply(cover, Transp), Doc.symbol("#{"), f.apply(psi, Transp), Doc.symbol("}"));
-    // return envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
+    var doc = Doc.sep(f.apply(cover, Transp), Doc.symbol("#{"), switch (restr) {
+      case Restr.Const c -> Doc.symbol(c.isTrue() ? "0=0" : "0=1");
+      case Restr.Vary<?> v -> Doc.join(Doc.symbol("\\/"), v.orz().view().map(or -> {
+        var orDoc = Doc.join(Doc.symbol("/\\"), or.ands().view().map(and -> {
+          var expr = and.inst() instanceof Term t ? t.toDoc() : Doc.plain(and.i().name());
+          return Doc.sep(expr, Doc.symbol("="), and.isLeft() ? Doc.symbol("0") : Doc.symbol("1"));
+        }));
+        return or.ands().sizeGreaterThan(1) ? Doc.parened(orDoc) : orDoc;
+      }));
+    }, Doc.symbol("}"));
+    return envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
   }
   private static @NotNull Doc dependentType(boolean isPi, Param<?> param, Docile cod) {
     return Doc.sep(Doc.plain(isPi ? "Pi" : "Sig"),
