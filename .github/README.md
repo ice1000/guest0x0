@@ -16,7 +16,7 @@ Experimenting with some basic programming in Java 17 and see the following:
 
 "Basic programming" includes:
 
-+ A "de Morgan flavored" cubical type theory with redtt flavored cubes (the so-called "extension types")
++ A "de Morgan flavored" cubical type theory with redtt flavored cubes (the so-called "extension types")'
 + A ✨new syntax✨ for cofibration theory that is more convenient for confluence checking and hopefully is equivalent to existing ones
 + Inductive types with pattern matching (hopefully) and "simpler indices" (see my TyDe paper)
 + An equalizer of the first projection of evaluation and just the first projection :trollface:
@@ -25,9 +25,32 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ## Milestones
 
+### Progress
+
++ MLTT
+  + [x] Capture-avoiding substitution
+  + [x] Pi, Sigma, Universe
+  + [x] Function definition and delta reduction
+  + [ ] Typed conversion (bidirectional conversion checking)
+  + [ ] Inductive type and pattern matching
++ CHM
+  + [x] Extension type (generalized path type)
+  + Generalized transport
+    + [x] Pi, Sigma, Universe
+    + [ ] Higher inductive type
+    + [ ] Glue/V
+  + Homogenous composition
+    + [x] Pi, Sigma, Universe
+    + [ ] Higher inductive type
+    + [ ] Glue/V
+
 ### Untagged
 
-## v0.8
+![image](https://user-images.githubusercontent.com/16398479/163501950-c9820f2c-4b69-4133-ace8-2d561c298823.png)
+
+Elementary support for `hcomp`.
+
+### v0.8
 
 ![image](https://user-images.githubusercontent.com/16398479/163415006-4c7ecf02-2ed1-4c8a-b3f6-779538401973.png)
 
@@ -53,7 +76,7 @@ def transSigmaEq (A : I -> U) (B : Pi (i : I) -> A i -> U)
     => \i. transSigma A B
 ```
 
-## v0.7
+### v0.7
 
 ![image](https://user-images.githubusercontent.com/16398479/163258018-ee80a9f9-2fa1-45cb-b336-bc493d97a6ae.png)
 
