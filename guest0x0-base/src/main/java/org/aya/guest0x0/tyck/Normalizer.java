@@ -2,10 +2,7 @@ package org.aya.guest0x0.tyck;
 
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
-import org.aya.guest0x0.syntax.Boundary;
-import org.aya.guest0x0.syntax.Def;
-import org.aya.guest0x0.syntax.Formula;
-import org.aya.guest0x0.syntax.Term;
+import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.tyck.HCompPDF.Transps;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
@@ -70,51 +67,51 @@ public record Normalizer(
       case Term.Mula f -> formulae(f.formula().fmap(this::term));
       case Term.Transp transp -> {
         // Because of his talk about lax 2-functors!
-        var parkerLiu = transp.psi().rename(Function.identity(), this::term);
+        var parkerLiu = transp.restr().rename(Function.identity(), this::term);
         if (satisfied(parkerLiu)) yield Term.id("x");
         yield transp(new LocalVar("i"), term(transp.cover()), parkerLiu);
       }
     };
   }
 
-  private boolean satisfied(Boundary.Psi<Term> psi) {
-    for (var and : psi.orz()) {
-      var satisfied = true;
-      for (var or : and.ands()) {
-        switch (or) {
-          case Boundary.Cond.Const<?> c -> satisfied = satisfied && c.isTrue();
-          case Boundary.Cond.Eq<Term> eq -> {
+  private boolean satisfied(Restr<Term> restriction) {
+    return switch (restriction) {
+      case Restr.Const c -> c.isTrue();
+      case Restr.Vary<Term> restr -> {
+        for (var or : restr.orz()) {
+          var satisfied = true;
+          for (var eq : or.ands()) {
             var matchy = eq.inst() instanceof Term.Mula mula
               && mula.formula() instanceof Formula.Lit<?> lit
               && lit.isLeft() == eq.isLeft();
             satisfied = satisfied && matchy;
           }
+          if (satisfied) yield true;
         }
+        yield false;
       }
-      if (satisfied) return true;
-    }
-    return false;
+    };
   }
 
-  private Term transp(LocalVar i, Term cover, Boundary.Psi<Term> psi) {
+  private Term transp(LocalVar i, Term cover, Restr<Term> restr) {
     return switch (cover.app(new Term.Ref(i))) {
       case Term.DT dt && dt.isPi() -> Term.mkLam("f", u0 -> Term.mkLam("x", v -> {
-        var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), psi);
+        var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), restr);
         var w = laptop.invFill(i).app(v);
         // w0 = w.subst(i, 0), according to Minghao Liu
         var w0 = laptop.inv().app(v);
         var cod = rename(new Term.Lam(i, dt.codomain(w)));
-        return new Term.Transp(cod, psi).app(u0.app(w0));
+        return new Term.Transp(cod, restr).app(u0.app(w0));
       }));
       case Term.UI u && u.isU() -> Term.id("u");
       case Term.DT dt /*&& !dt.isPi()*/ -> Term.mkLam("t", u0 -> {
-        var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), psi);
+        var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), restr);
         // Simon Huber wrote u0.1 both with and without parentheses, extremely confusing!!
         var v = laptop.fill(i).app(u0.proj(true));
         return new Term.Two(false, laptop.mk().app(u0.proj(true)),
-          new Term.Transp(rename(new Term.Lam(i, dt.codomain(v))), psi).app(u0.proj(false)));
+          new Term.Transp(rename(new Term.Lam(i, dt.codomain(v))), restr).app(u0.proj(false)));
       });
-      default -> new Term.Transp(cover, psi);
+      default -> new Term.Transp(cover, restr);
     };
   }
 
@@ -191,7 +188,7 @@ public record Normalizer(
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
         case Term.Mula f -> new Term.Mula(f.formula().fmap(this::term));
         case Term.Transp transp -> new Term.Transp(term(transp.cover()),
-          transp.psi().rename(v -> map.getOrDefault(v, v), this::term));
+          transp.restr().rename(v -> map.getOrDefault(v, v), this::term));
       };
     }
 

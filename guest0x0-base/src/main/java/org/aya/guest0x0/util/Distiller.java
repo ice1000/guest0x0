@@ -2,10 +2,7 @@ package org.aya.guest0x0.util;
 
 import kala.collection.Seq;
 import kala.collection.mutable.MutableList;
-import org.aya.guest0x0.syntax.Boundary;
-import org.aya.guest0x0.syntax.Expr;
-import org.aya.guest0x0.syntax.Formula;
-import org.aya.guest0x0.syntax.Term;
+import org.aya.guest0x0.syntax.*;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
@@ -44,10 +41,10 @@ public interface Distiller {
       }
       case Expr.Hole ignored -> Doc.symbol("_");
       case Expr.Mula e -> formulae(Distiller::expr, e.formula(), envPrec);
-      case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.psi());
+      case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.restr());
     };
   }
-  private static <E> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Boundary.Psi<?> psi) {
+  private static <E> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Restr<?> restr) {
     return Doc.empty();
     // var doc = Doc.sep(f.apply(cover, Transp), Doc.symbol("#{"), f.apply(psi, Transp), Doc.symbol("}"));
     // return envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
@@ -108,7 +105,7 @@ public interface Distiller {
         yield Doc.parened(Doc.sep(docs));
       }
       case Term.Mula f -> formulae(Distiller::term, f.formula(), envPrec);
-      case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.psi());
+      case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.restr());
     };
   }
 }

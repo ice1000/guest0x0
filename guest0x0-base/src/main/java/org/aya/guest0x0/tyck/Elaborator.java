@@ -195,11 +195,7 @@ public record Elaborator(
         var detective = new AltF7(new LocalVar("?"));
         var sample = cover.app(new Term.Ref(detective.var()));
         var ty = Term.mkPi(cover.app(Term.end(true)), cover.app(Term.end(false)));
-        var psi = new Boundary.Psi<>(transp.psi().orz().map(and ->
-          new Boundary.Cofib<>(and.ands().map(or -> switch (or) {
-            case Boundary.Cond.Eq<?> eq -> Term.cond(eq);
-            case Boundary.Cond.Const c -> new Boundary.Cond.Const<>(c.isTrue());
-          }))));
+        var psi = transp.restr().mapCond(Term::cond);
         // TODO: you know it
         yield new Synth(new Term.Transp(cover, psi), ty);
       }

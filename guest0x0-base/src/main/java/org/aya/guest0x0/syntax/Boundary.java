@@ -14,30 +14,6 @@ public record Boundary<E>(@NotNull Face face, @NotNull E body) {
     LEFT, RIGHT, VAR
   }
 
-  public sealed interface Cond<E> {
-    Cond<E> rename(@NotNull Function<LocalVar, LocalVar> f, @NotNull Function<E, E> g);
-    record Eq<E>(@NotNull LocalVar i, @NotNull E inst, boolean isLeft) implements Cond<E> {
-      @Override public Eq<E> rename(@NotNull Function<LocalVar, LocalVar> f, @NotNull Function<E, E> g) {
-        return new Eq<>(f.apply(i), g.apply(inst), isLeft);
-      }
-    }
-    record Const<E>(boolean isTrue) implements Cond<E> {
-      @Override public Const<E> rename(@NotNull Function<LocalVar, LocalVar> f, @NotNull Function<E, E> g) {
-        return this;
-      }
-    }
-  }
-  public record Cofib<E>(@NotNull ImmutableSeq<Cond<E>> ands) {
-    public Cofib<E> rename(@NotNull Function<LocalVar, LocalVar> f, @NotNull Function<E, E> g) {
-      return new Cofib<>(ands.map(c -> c.rename(f, g)));
-    }
-  }
-  public record Psi<E>(@NotNull ImmutableSeq<Cofib<E>> orz) {
-    public @NotNull Psi<E> rename(@NotNull Function<LocalVar, LocalVar> f, @NotNull Function<E, E> g) {
-      return new Psi<>(orz.map(x -> x.rename(f, g)));
-    }
-  }
-
   public record Face(@NotNull ImmutableSeq<Case> pats) implements Docile {
     @Override public @NotNull Doc toDoc() {
       var zesen = MutableList.of(Doc.symbol("|"));

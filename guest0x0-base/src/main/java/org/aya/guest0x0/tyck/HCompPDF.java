@@ -1,7 +1,6 @@
 package org.aya.guest0x0.tyck;
 
-import kala.collection.immutable.ImmutableSeq;
-import org.aya.guest0x0.syntax.Boundary;
+import org.aya.guest0x0.syntax.Restr;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.LocalVar;
 import org.jetbrains.annotations.NotNull;
@@ -16,23 +15,22 @@ import static org.aya.guest0x0.syntax.Term.*;
  * </ul>
  */
 public interface HCompPDF {
-  record Transps(@NotNull Term cover, @NotNull Boundary.Psi<Term> psi) {
+  record Transps(@NotNull Term cover, @NotNull Restr<Term> restr) {
     public @NotNull Term inv() {
-      return new Transp(mkLam("i", i -> cover.app(neg(i))), psi);
+      return new Transp(mkLam("i", i -> cover.app(neg(i))), restr);
     }
 
     /** Marisa Kirisame!! */
-    public @NotNull Term mk() {return new Transp(cover, psi);}
+    public @NotNull Term mk() {return new Transp(cover, restr);}
 
     public @NotNull Term fill(@NotNull LocalVar i) {
       var ri = new Ref(i);
-      return new Transp(mkLam("j", j -> cover.app(and(ri, j))),
-        new Boundary.Psi<>(psi.orz().appended(new Boundary.Cofib<>(ImmutableSeq.of(new Boundary.Cond.Eq<>(i, ri, true))))));
+      return new Transp(mkLam("j", j -> cover.app(and(ri, j))), restr.or(new Restr.Cond<>(i, ri, true)));
     }
 
     public @NotNull Term invFill(@NotNull LocalVar i) {
       var ri = new Ref(i);
-      return new Transp(mkLam("j", j -> cover.app(neg(and(neg(ri), j)))), new Boundary.Psi<>(psi.orz().appended(new Boundary.Cofib<>(ImmutableSeq.of(new Boundary.Cond.Eq<>(i, ri, false))))));
+      return new Transp(mkLam("j", j -> cover.app(neg(and(neg(ri), j)))), restr.or(new Restr.Cond<>(i, ri, false)));
     }
   }
 }

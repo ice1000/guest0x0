@@ -40,6 +40,6 @@ public sealed interface Expr extends Docile {
   record Mula(@Override @NotNull SourcePos pos, @NotNull Formula<Expr> formula) implements Expr {}
   record Transp(
     @Override @NotNull SourcePos pos,
-    @NotNull Expr cover, @NotNull Boundary.Psi<SourcePos> psi
+    @NotNull Expr cover, @NotNull Restr<SourcePos> restr
   ) implements Expr {}
 }

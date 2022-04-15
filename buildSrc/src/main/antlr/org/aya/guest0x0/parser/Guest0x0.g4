@@ -29,14 +29,15 @@ expr
 
  // Cubical features
  | '[|' ID+ '|]' expr '{' boundary* '}' # cube
- | expr '#{' (cof (OR cof)*)? '}' # trans
+ | expr '#{' psi '}' # trans
  | iPat # iLit
  | '~' expr # inv
  | expr (AND | OR) expr # iConn
  ;
 
 cond : ID '=' (LEFT | RIGHT);
-cof : cond (AND cond)* | TRUTH | ABSURD;
+cof : cond (AND cond)*;
+psi : cof (OR cof)* | TRUTH | ABSURD;
 iPat : LEFT | RIGHT | '_';
 AND : '/\\' | '\u2227';
 OR : '\\/' | '\u2228';
