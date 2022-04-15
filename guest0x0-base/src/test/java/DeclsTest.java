@@ -93,14 +93,13 @@ public class DeclsTest {
 
   @Test public void transportTyping() {
     tyck("""
-            
-      def trans (A : I -> U) (a : A 0) : A 1 => A ~@ {} a
-      def transInv (A : I -> U) (a : A 1) : A 0 => (\\i. A (~ i)) ~@ {} a
+      def trans (A : I -> U) (a : A 0) : A 1 => A #{0} a
+      def transInv (A : I -> U) (a : A 1) : A 0 => (\\i. A (~ i)) #{0} a
       def transFn (A B : I -> U) (f : A 0 -> B 0) : A 1 -> B 1 =>
         \\a. trans B (f (trans (\\i. A (~ i)) a))
       def transPi (A : I -> U) (B : Pi (i : I) -> A i -> U)
         (f : Pi (x : A 0) -> B 0 x) : Pi (x : A 1) -> B 1 x =>
-          \\x. trans (\\j. B j ((\\i. A (j \\/ ~ i)) ~@ j { | 1 } x))
+          \\x. trans (\\j. B j ((\\i. A (j \\/ ~ i)) #{j} x))
                (f (trans (\\i. A (~ i)) x))
       def Eq (A : U) (a b : A) : U =>
         [| j |] A { | 0 => a | 1 => b }
@@ -112,7 +111,7 @@ public class DeclsTest {
       def transSigma (A : I -> U) (B : Pi (i : I) -> A i -> U)
           (t : Sig (x : A 0) ** B 0 x) : Sig (x : A 1) ** B 1 x =>
         << trans A (t.1),
-           trans (\\j. B j ((\\i. A (j /\\ i)) ~@ j { | 0 } (t.1))) (t.2) >>
+           trans (\\j. B j ((\\i. A (j /\\ i)) #{~ j} (t.1))) (t.2) >>
       def transSigmaEq (A : I -> U) (B : Pi (i : I) -> A i -> U)
           : Eq ((Sig (x : A 0) ** B 0 x) -> (Sig (x : A 1) ** B 1 x))
                (transSigma A B)

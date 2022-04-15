@@ -194,13 +194,10 @@ public record Elaborator(
         var cover = inherit(transp.cover(), Term.mkPi(Term.I, Term.U));
         var detective = new AltF7(new LocalVar("?"));
         var sample = cover.app(new Term.Ref(detective.var()));
-        for (var face : transp.cof().faces()) {
-          if (detective.press(jonSterling(transp.cof().vars().view(), face).term(sample)))
-            throw new SPE(transp.pos(), Doc.english("Expects constant for"), face);
-        }
         var ty = Term.mkPi(cover.app(Term.end(true)), cover.app(Term.end(false)));
-        yield new Synth(new Term.Transp(cover, new Term.TranspData(transp.cof(),
-          transp.cof().vars().map(Term.Ref::new), HCompPDF.powerBottom(transp.cof()))), ty);
+        var psi = inherit(transp.psi(), Term.I);
+        // TODO: you know it
+        yield new Synth(new Term.Transp(cover, psi), ty);
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };

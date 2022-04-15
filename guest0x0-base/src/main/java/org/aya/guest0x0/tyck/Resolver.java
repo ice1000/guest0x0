@@ -3,7 +3,6 @@ package org.aya.guest0x0.tyck;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import kala.control.Option;
-import org.aya.guest0x0.syntax.Boundary;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.util.LocalVar;
@@ -74,9 +73,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
       }
       case Expr.Mula f -> new Expr.Mula(f.pos(), f.formula().fmap(this::expr));
       case Expr.Transp transp -> {
-        var v = transp.cof().vars().map(vv -> env.getOrThrow(vv.name(), () ->
-          new SPE(transp.pos(), Doc.english("Unresolved: " + vv.name()))));
-        yield new Expr.Transp(transp.pos(), expr(transp.cover()), new Boundary.Cof(v, transp.cof().faces()));
+        yield new Expr.Transp(transp.pos(), expr(transp.cover()), expr(transp.psi()));
       }
     };
   }

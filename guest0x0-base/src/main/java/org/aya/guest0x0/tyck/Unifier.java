@@ -38,7 +38,7 @@ public class Unifier {
         untyped(lpcall.p(), rpcall.p()) && unifySeq(lpcall.i(), rpcall.i());
       case Term.Mula lf && r instanceof Term.Mula rf -> formulae(lf.formula(), rf.formula());
       case Term.Transp ltp && r instanceof Term.Transp rtp ->
-        untyped(ltp.cover(), rtp.cover()) && untyped(ltp.data().psi(), rtp.data().psi());
+        untyped(ltp.cover(), rtp.cover()) && untyped(ltp.psi(), rtp.psi());
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };
