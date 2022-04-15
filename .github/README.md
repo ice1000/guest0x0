@@ -18,6 +18,7 @@ Experimenting with some basic programming in Java 17 and see the following:
 
 + A "de Morgan flavored" cubical type theory with redtt flavored cubes (the so-called "extension types")'
 + A ✨new syntax✨ for cofibration theory that is more convenient for confluence checking and hopefully is equivalent to existing ones
+  + Update: it's not. The new syntax is implemented, tested, and removed.
 + Inductive types with pattern matching (hopefully) and "simpler indices" (see my TyDe paper)
 + An equalizer of the first projection of evaluation and just the first projection :trollface:
 
@@ -48,7 +49,7 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ![image](https://user-images.githubusercontent.com/16398479/163501950-c9820f2c-4b69-4133-ace8-2d561c298823.png)
 
-Elementary support for `hcomp`.
+Overhauled the cofibration syntax. It is now similar to a combination of CCHM and ABCFHL.
 
 ### v0.8
 

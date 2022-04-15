@@ -2,6 +2,7 @@ package org.aya.guest0x0.util;
 
 import kala.collection.Seq;
 import kala.collection.mutable.MutableList;
+import org.aya.guest0x0.syntax.Boundary;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Formula;
 import org.aya.guest0x0.syntax.Term;
@@ -46,9 +47,10 @@ public interface Distiller {
       case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.psi());
     };
   }
-  private static <E> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, E psi) {
-    var doc = Doc.sep(f.apply(cover, Transp), Doc.symbol("#{"), f.apply(psi, Transp), Doc.symbol("}"));
-    return envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
+  private static <E> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Boundary.Psi<?> psi) {
+    return Doc.empty();
+    // var doc = Doc.sep(f.apply(cover, Transp), Doc.symbol("#{"), f.apply(psi, Transp), Doc.symbol("}"));
+    // return envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
   }
   private static @NotNull Doc dependentType(boolean isPi, Param<?> param, Docile cod) {
     return Doc.sep(Doc.plain(isPi ? "Pi" : "Sig"),

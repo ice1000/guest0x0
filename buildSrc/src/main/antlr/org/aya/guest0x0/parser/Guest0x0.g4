@@ -29,17 +29,20 @@ expr
 
  // Cubical features
  | '[|' ID+ '|]' expr '{' boundary* '}' # cube
- | expr '#{' expr '}' # trans
+ | expr '#{' (cof (OR cof)*)? '}' # trans
  | iPat # iLit
  | '~' expr # inv
  | expr (AND | OR) expr # iConn
  ;
 
+cond : ID '=' (LEFT | RIGHT);
+cof : cond (AND cond)* | TRUTH | ABSURD;
 iPat : LEFT | RIGHT | '_';
 AND : '/\\' | '\u2227';
 OR : '\\/' | '\u2228';
-boundary : face ARROW2 expr;
-face : '|' iPat* ;
+TRUTH : '0=0' | '1=1';
+ABSURD : '1=0' | '0=1';
+boundary : '|' iPat* ARROW2 expr;
 
 LPAIR : '<<';
 RPAIR : '>>';

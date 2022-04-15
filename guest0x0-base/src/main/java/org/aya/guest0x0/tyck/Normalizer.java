@@ -12,6 +12,8 @@ import org.aya.guest0x0.util.Param;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Function;
+
 public record Normalizer(
   @NotNull MutableMap<LocalVar, Def<Term>> sigma,
   @NotNull MutableMap<LocalVar, Term> rho
@@ -67,17 +69,34 @@ public record Normalizer(
       }
       case Term.Mula f -> formulae(f.formula().fmap(this::term));
       case Term.Transp transp -> {
-        var parkerLiu = term(transp.psi()); // Because of his talk about lax 2-functors!
-        if (parkerLiu instanceof Term.Mula f
-          && f.formula() instanceof Formula.Lit<Term> lit
-          && !lit.isLeft() // "IsOne" criteria
-        ) yield Term.id("x");
+        // Because of his talk about lax 2-functors!
+        var parkerLiu = transp.psi().rename(Function.identity(), this::term);
+        if (satisfied(parkerLiu)) yield Term.id("x");
         yield transp(new LocalVar("i"), term(transp.cover()), parkerLiu);
       }
     };
   }
 
-  private Term transp(LocalVar i, Term cover, Term psi) {
+  private boolean satisfied(Boundary.Psi<Term> psi) {
+    for (var and : psi.orz()) {
+      var satisfied = true;
+      for (var or : and.ands()) {
+        switch (or) {
+          case Boundary.Cond.Const<?> c -> satisfied = satisfied && c.isTrue();
+          case Boundary.Cond.Eq<Term> eq -> {
+            var matchy = eq.inst() instanceof Term.Mula mula
+              && mula.formula() instanceof Formula.Lit<?> lit
+              && lit.isLeft() == eq.isLeft();
+            satisfied = satisfied && matchy;
+          }
+        }
+      }
+      if (satisfied) return true;
+    }
+    return false;
+  }
+
+  private Term transp(LocalVar i, Term cover, Boundary.Psi<Term> psi) {
     return switch (cover.app(new Term.Ref(i))) {
       case Term.DT dt && dt.isPi() -> Term.mkLam("f", u0 -> Term.mkLam("x", v -> {
         var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), psi);
@@ -171,7 +190,8 @@ public record Normalizer(
         }
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
         case Term.Mula f -> new Term.Mula(f.formula().fmap(this::term));
-        case Term.Transp transp -> new Term.Transp(term(transp.cover()), term(transp.psi()));
+        case Term.Transp transp -> new Term.Transp(term(transp.cover()),
+          transp.psi().rename(v -> map.getOrDefault(v, v), this::term));
       };
     }
 

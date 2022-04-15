@@ -6,7 +6,10 @@ import kala.collection.immutable.ImmutableSeq;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.aya.guest0x0.parser.Guest0x0Parser;
-import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.syntax.Boundary;
+import org.aya.guest0x0.syntax.Def;
+import org.aya.guest0x0.syntax.Expr;
+import org.aya.guest0x0.syntax.Formula;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
 import org.aya.repl.antlr.AntlrUtil;
@@ -35,15 +38,21 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SimpFunContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.expr(0)), expr(pi.expr(1)));
       case Guest0x0Parser.SimpTupContext si -> new Expr.DT(false, sourcePosOf(si), param(si.expr(0)), expr(si.expr(1)));
       case Guest0x0Parser.ILitContext il -> iPat(il.iPat());
-      case Guest0x0Parser.TransContext tp -> new Expr.Transp(sourcePosOf(tp), expr(tp.expr(0)), expr(tp.expr(1)));
+      case Guest0x0Parser.TransContext tp -> new Expr.Transp(sourcePosOf(tp), expr(tp.expr()),
+        new Boundary.Psi<>(Seq.wrapJava(tp.cof()).map(this::cof)));
       case Guest0x0Parser.InvContext in -> new Expr.Mula(sourcePosOf(in), new Formula.Inv<>(expr(in.expr())));
       case Guest0x0Parser.IConnContext ic -> new Expr.Mula(sourcePosOf(ic),
         new Formula.Conn<>(ic.AND() != null, expr(ic.expr(0)), expr(ic.expr(1))));
       case Guest0x0Parser.CubeContext cube -> new Expr.Path(sourcePosOf(cube), new Boundary.Data<>(
         localVars(cube.ID()), expr(cube.expr()),
-        Seq.wrapJava(cube.boundary()).map(b -> new Boundary<>(face(b.face()), expr(b.expr())))));
+        Seq.wrapJava(cube.boundary()).map(b -> new Boundary<>(face(b), expr(b.expr())))));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
+  }
+
+  private Boundary.Cofib<SourcePos> cof(Guest0x0Parser.CofContext cof) {
+    return new Boundary.Cofib<>(Seq.wrapJava(cof.cond())
+      .map(c -> new Boundary.Cond.Eq<>(new LocalVar(c.ID().getText()), sourcePosOf(c), c.LEFT() != null)));
   }
 
   @NotNull private ImmutableSeq<LocalVar> localVars(List<TerminalNode> ids) {
@@ -57,8 +66,8 @@ public record Parser(@NotNull SourceFile source) {
       : new Expr.Hole(pos, ImmutableSeq.empty());
   }
 
-  private @NotNull Boundary.Face face(Guest0x0Parser.FaceContext face) {
-    return new Boundary.Face(Seq.wrapJava(face.iPat()).map(i ->
+  private @NotNull Boundary.Face face(Guest0x0Parser.BoundaryContext boundary) {
+    return new Boundary.Face(Seq.wrapJava(boundary.iPat()).map(i ->
       i.LEFT() != null ? Boundary.Case.LEFT : i.RIGHT() != null
         ? Boundary.Case.RIGHT : Boundary.Case.VAR));
   }
