@@ -45,19 +45,9 @@ public class Unifier {
   }
 
   private boolean restr(Restr<Term> ll, Restr<Term> rr) {
-    return switch (ll) {
-      case Restr.Const<Term> l && rr instanceof Restr.Const<Term> r -> l.isTrue() == r.isTrue();
-      case Restr.Vary<Term> l
-        && rr instanceof Restr.Vary<Term> r
-        && l.orz().sizeEquals(r.orz()) -> l.orz().zipView(r.orz()).allMatch(t -> cof(t._1, t._2));
-      default -> false;
-    };
-  }
-
-  private boolean cof(Restr.Cofib<Term> l, Restr.Cofib<Term> r) {
-    if (!l.ands().sizeEquals(r.ands())) return false;
-    return l.ands().zipView(r.ands()).allMatch(t ->
-      t._1.isLeft() == t._2.isLeft() && untyped(t._1.inst(), t._2.inst()));
+    var initial = new Normalizer(MutableMap.create(), MutableMap.create());
+    return new CofThy(ll).propExt(initial, normalizer -> new CofThy(normalizer.restr(rr)).satisfied())
+      && new CofThy(rr).propExt(initial, normalizer -> new CofThy(normalizer.restr(ll)).satisfied());
   }
 
   private boolean unifySeq(@NotNull ImmutableSeq<Term> l, @NotNull ImmutableSeq<Term> r) {

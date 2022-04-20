@@ -70,12 +70,15 @@ public record Normalizer(
       }
       case Term.Mula f -> formulae(f.formula().fmap(this::term));
       case Term.Transp transp -> {
-        // Because of his talk about lax 2-functors!
-        var parkerLiu = transp.restr().rename(Function.identity(), this::term);
+        var parkerLiu = restr(transp.restr());
         if (new CofThy(parkerLiu).satisfied()) yield Term.id("x");
         yield transp(new LocalVar("i"), term(transp.cover()), parkerLiu);
       }
     };
+  }
+
+  public Restr<Term> restr(@NotNull Restr<Term> restr) { // Because of his talk about lax 2-functors!
+    return restr.rename(Function.identity(), this::term);
   }
 
   private Term transp(LocalVar i, Term cover, Restr<Term> restr) {

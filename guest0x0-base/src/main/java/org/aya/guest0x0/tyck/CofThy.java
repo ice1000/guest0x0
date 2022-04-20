@@ -26,9 +26,10 @@ public record CofThy(@NotNull Restr<Term> restriction) {
               derived.rho().put(ref.var(), Term.end(eq.isLeft()));
             }
           }
-          if (!unsat && sat.test(derived)) yield true;
+          if (unsat) continue; // Skip unsatisfiable cases
+          if (!sat.test(derived)) yield false;
         }
-        yield false;
+        yield true;
       }
     };
   }
