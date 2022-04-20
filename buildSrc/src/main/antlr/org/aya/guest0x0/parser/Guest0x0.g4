@@ -12,8 +12,7 @@ expr
  | expr '.2' # snd
 
  // Type formers
- | 'U' # trebor // McBride universe a la Trebor
- | 'I' # interval
+ | (UNIV | INTERVAL | FACE_TY) # keyword
  | <assoc=right> expr ARROW expr # simpFun
  | <assoc=right> expr TIMES expr # simpTup
  | PI param ARROW expr # pi
@@ -55,6 +54,9 @@ LAM : '\\' | '\u03BB';
 PI : 'Pi' | '\u03A0';
 RIGHT : '1';
 LEFT : '0';
+UNIV : 'U' | 'Type';
+INTERVAL : 'I';
+FACE_TY : 'F';
 
 // Below are copy-and-paste from Aya. Plagiarism!! LOL
 

@@ -131,7 +131,8 @@ public record Elaborator(
 
   public Synth synth(Expr expr) {
     var synth = switch (expr) {
-      case Expr.UI u -> new Synth(new Term.UI(u.isU()), Term.U);
+      // TODO implement face type in core
+      case Expr.PrimTy u -> new Synth(new Term.UI(u.keyword() == Expr.Keyword.U), Term.U);
       case Expr.Resolved resolved -> {
         var type = gamma.getOrNull(resolved.ref());
         if (type != null) yield new Synth(new Term.Ref(resolved.ref()), type);
@@ -196,7 +197,7 @@ public record Elaborator(
         var sample = cover.app(new Term.Ref(detective.var()));
         var ty = Term.mkPi(cover.app(Term.end(true)), cover.app(Term.end(false)));
         var psi = transp.restr().mapCond(Term::cond);
-        // TODO: you know it
+        // TODO: check the cover to be constant on the cofibration
         yield new Synth(new Term.Transp(cover, psi), ty);
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
