@@ -29,8 +29,7 @@ public sealed interface Restr<E> {
     }
 
     @Override public Restr<E> or(Cond<E> cond) {
-      var cofib = new Cofib<E>(ImmutableSeq.of(cond));
-      return isTrue ? this : new Vary<>(ImmutableSeq.of(cofib));
+      return isTrue ? this : new Vary<>(ImmutableSeq.of(new Cofib<>(ImmutableSeq.of(cond))));
     }
 
     @Override public <T> Const<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f) {

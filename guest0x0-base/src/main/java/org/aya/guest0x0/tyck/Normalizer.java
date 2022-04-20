@@ -23,6 +23,10 @@ public record Normalizer(
     return new Param<>(param.x(), term(param.type()));
   }
 
+  public @NotNull Normalizer derive() {
+    return new Normalizer(sigma, MutableMap.from(rho));
+  }
+
   public Term term(Term term) {
     return switch (term) {
       case Term.Ref ref -> rho.getOption(ref.var())
@@ -68,7 +72,7 @@ public record Normalizer(
       case Term.Transp transp -> {
         // Because of his talk about lax 2-functors!
         var parkerLiu = transp.restr().rename(Function.identity(), this::term);
-        if (CofThy.satisfied(parkerLiu)) yield Term.id("x");
+        if (new CofThy(parkerLiu).satisfied()) yield Term.id("x");
         yield transp(new LocalVar("i"), term(transp.cover()), parkerLiu);
       }
     };
@@ -134,7 +138,7 @@ public record Normalizer(
 
   /** A piper that will lead us to reason. */
   private Normalizer piper(ImmutableSeq<Term> word, Boundary.Face face, ImmutableSeq<LocalVar> dims) {
-    var sign = new Normalizer(sigma, MutableMap.from(rho));
+    var sign = derive();
     for (var ct : face.pats().zipView(dims.zipView(word))) {
       if (ct._1 == Boundary.Case.VAR) sign.rho.put(ct._2);
       else if (!(ct._2._2 instanceof Term.Mula mula
