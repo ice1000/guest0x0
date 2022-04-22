@@ -3,12 +3,9 @@ package org.aya.guest0x0.tyck;
 import org.aya.guest0x0.syntax.Formula;
 import org.aya.guest0x0.syntax.Restr;
 import org.aya.guest0x0.syntax.Term;
-import org.aya.guest0x0.util.SPE;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /** This is a reference to cooltt's codebase */
 public record CofThy(@NotNull Restr<Term> restriction) {
@@ -20,8 +17,7 @@ public record CofThy(@NotNull Restr<Term> restriction) {
           var derived = initial.derive();
           var unsat = false;
           for (var eq : or.ands()) {
-            if (eq.inst() instanceof Term.Mula mula
-              && mula.formula() instanceof Formula.Lit<?> lit
+            if (Restr.formulaOf(eq) instanceof Formula.Lit<?> lit
               && lit.isLeft() != eq.isLeft()
             ) {
               unsat = true;
@@ -44,8 +40,7 @@ public record CofThy(@NotNull Restr<Term> restriction) {
         for (var or : restr.orz()) {
           var satisfied = true;
           for (var eq : or.ands()) {
-            var matchy = eq.inst() instanceof Term.Mula mula
-              && mula.formula() instanceof Formula.Lit<?> lit
+            var matchy = Restr.formulaOf(eq) instanceof Formula.Lit<?> lit
               && lit.isLeft() == eq.isLeft();
             satisfied = satisfied && matchy;
           }

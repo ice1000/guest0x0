@@ -3,6 +3,7 @@ package org.aya.guest0x0.syntax;
 import kala.collection.immutable.ImmutableSeq;
 import org.aya.guest0x0.util.LocalVar;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -40,6 +41,9 @@ public sealed interface Restr<E> {
     public Cond<E> rename(@NotNull Function<LocalVar, LocalVar> f, @NotNull Function<E, E> g) {
       return new Cond<>(f.apply(i), g.apply(inst), isLeft);
     }
+  }
+  static @Nullable Formula<Term> formulaOf(@NotNull Cond<Term> cond) {
+    return cond.inst instanceof Term.Mula mula ? mula.formula() : null;
   }
   record Cofib<E>(@NotNull ImmutableSeq<Cond<E>> ands) {
     public Cofib<E> rename(@NotNull Function<LocalVar, LocalVar> f, @NotNull Function<E, E> g) {

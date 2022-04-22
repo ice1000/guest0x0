@@ -84,16 +84,21 @@ public record Normalizer(
     return switch (restr.rename(Function.identity(), this::term)) {
       case Restr.Vary<Term> vary -> {
         var orz = MutableArrayList.<Restr.Cofib<Term>>create(vary.orz().size());
-        vary.orz().forEach(cof -> cofib(cof, orz));
+        for (var cof : vary.orz()) {
+          if (cofib(cof, orz)) yield new Restr.Const<>(false);
+        }
+        if (orz.isEmpty()) yield new Restr.Const<>(true);
         yield new Restr.Vary<>(orz.toImmutableArray());
       }
       case Restr.Const<Term> c -> c;
     };
   }
 
-  private void cofib(Restr.Cofib<Term> cof, MutableList<Restr.Cofib<Term>> orz) {
+  /** @return false if this is constantly false */
+  private boolean cofib(Restr.Cofib<Term> cof, MutableList<Restr.Cofib<Term>> orz) {
     // TODO: implement expansion
     orz.append(cof);
+    return false;
   }
 
   private Term transp(LocalVar i, Term cover, Restr<Term> restr) {
