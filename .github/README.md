@@ -41,7 +41,7 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
     + [ ] Higher inductive type
     + [ ] Glue/V
   + Homogenous composition
-    + [x] Pi, Sigma, Universe
+    + [ ] Pi, Sigma, Universe
     + [ ] Higher inductive type
     + [ ] Glue/V
 

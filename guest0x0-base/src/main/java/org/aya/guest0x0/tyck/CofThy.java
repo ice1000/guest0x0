@@ -3,6 +3,7 @@ package org.aya.guest0x0.tyck;
 import org.aya.guest0x0.syntax.Formula;
 import org.aya.guest0x0.syntax.Restr;
 import org.aya.guest0x0.syntax.Term;
+import org.aya.guest0x0.util.SPE;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
@@ -21,10 +22,12 @@ public record CofThy(@NotNull Restr<Term> restriction) {
           for (var eq : or.ands()) {
             if (eq.inst() instanceof Term.Mula mula
               && mula.formula() instanceof Formula.Lit<?> lit
-              && lit.isLeft() != eq.isLeft()) unsat = true;
-            else if (eq.inst() instanceof Term.Ref ref) {
+              && lit.isLeft() != eq.isLeft()
+            ) {
+              unsat = true;
+            } else if (eq.inst() instanceof Term.Ref ref) {
               derived.rho().put(ref.var(), Term.end(eq.isLeft()));
-            }
+            } else yield false;
           }
           if (unsat) continue; // Skip unsatisfiable cases
           if (!sat.test(derived)) yield false;
