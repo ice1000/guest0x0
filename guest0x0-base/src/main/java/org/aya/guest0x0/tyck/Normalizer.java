@@ -1,6 +1,8 @@
 package org.aya.guest0x0.tyck;
 
 import kala.collection.immutable.ImmutableSeq;
+import kala.collection.mutable.MutableArrayList;
+import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.tyck.HCompPDF.Transps;
@@ -71,14 +73,27 @@ public record Normalizer(
       case Term.Mula f -> formulae(f.formula().fmap(this::term));
       case Term.Transp transp -> {
         var parkerLiu = restr(transp.restr());
+        // Because of his talk about lax 2-functors!
         if (new CofThy(parkerLiu).satisfied()) yield Term.id("x");
         yield transp(new LocalVar("i"), term(transp.cover()), parkerLiu);
       }
     };
   }
 
-  public Restr<Term> restr(@NotNull Restr<Term> restr) { // Because of his talk about lax 2-functors!
-    return restr.rename(Function.identity(), this::term);
+  public Restr<Term> restr(@NotNull Restr<Term> restr) {
+    return switch (restr.rename(Function.identity(), this::term)) {
+      case Restr.Vary<Term> vary -> {
+        var orz = MutableArrayList.<Restr.Cofib<Term>>create(vary.orz().size());
+        vary.orz().forEach(cof -> cofib(cof, orz));
+        yield new Restr.Vary<>(orz.toImmutableArray());
+      }
+      case Restr.Const<Term> c -> c;
+    };
+  }
+
+  private void cofib(Restr.Cofib<Term> cof, MutableList<Restr.Cofib<Term>> orz) {
+    // TODO: implement expansion
+    orz.append(cof);
   }
 
   private Term transp(LocalVar i, Term cover, Restr<Term> restr) {
