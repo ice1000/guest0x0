@@ -50,11 +50,11 @@ public record Parser(@NotNull SourceFile source) {
     };
   }
 
-  private Restr<SourcePos> cof(Guest0x0Parser.PsiContext psi) {
+  private Restr<Expr> cof(Guest0x0Parser.PsiContext psi) {
     if (psi.ABSURD() != null) return new Restr.Const<>(false);
     if (psi.TRUTH() != null) return new Restr.Const<>(true);
     return new Restr.Vary<>(Seq.wrapJava(psi.cof()).map(cof -> new Restr.Cofib<>(Seq.wrapJava(cof.cond())
-      .map(c -> new Restr.Cond<>(new LocalVar(c.ID().getText()), sourcePosOf(c), c.LEFT() != null)))));
+      .map(c -> new Restr.Cond<>(new Expr.Unresolved(sourcePosOf(c), c.ID().getText()), c.LEFT() != null)))));
   }
 
   @NotNull private ImmutableSeq<LocalVar> localVars(List<TerminalNode> ids) {

@@ -25,12 +25,12 @@ public interface HCompPDF {
 
     public @NotNull Term fill(@NotNull LocalVar i) {
       var ri = new Ref(i);
-      return new Transp(mkLam("j", j -> cover.app(and(ri, j))), restr.or(new Restr.Cond<>(i, ri, true)));
+      return new Transp(mkLam("j", j -> cover.app(and(ri, j))), restr.or(new Restr.Cond<>(ri, true)));
     }
 
     public @NotNull Term invFill(@NotNull LocalVar i) {
       var ri = new Ref(i);
-      return new Transp(mkLam("j", j -> cover.app(neg(and(neg(ri), j)))), restr.or(new Restr.Cond<>(i, ri, false)));
+      return new Transp(mkLam("j", j -> cover.app(neg(and(neg(ri), j)))), restr.or(new Restr.Cond<>(ri, false)));
     }
   }
 }

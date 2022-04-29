@@ -197,7 +197,7 @@ public record Elaborator(
         var detective = new AltF7(new LocalVar("?"));
         var sample = cover.app(new Term.Ref(detective.var()));
         var ty = Term.mkPi(cover.app(Term.end(true)), cover.app(Term.end(false)));
-        var psi = transp.restr().mapCond(Term::cond);
+        var psi = transp.restr().mapCond(c -> new Restr.Cond<>(inherit(c.inst(), Term.I), c.isLeft()));
         // TODO: check the cover to be constant on the cofibration
         yield new Synth(new Term.Transp(cover, psi), ty);
       }

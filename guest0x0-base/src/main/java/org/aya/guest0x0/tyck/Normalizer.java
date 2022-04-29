@@ -11,8 +11,6 @@ import org.aya.guest0x0.util.Param;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Function;
-
 public record Normalizer(
   @NotNull MutableMap<LocalVar, Def<Term>> sigma,
   @NotNull MutableMap<LocalVar, Term> rho
@@ -85,7 +83,7 @@ public record Normalizer(
    * f1, f2 are like "a /\ b /\ ...".
    */
   public Restr<Term> restr(@NotNull Restr<Term> restr) {
-    return switch (restr.rename(Function.identity(), this::term)) {
+    return switch (restr.fmap(this::term)) {
       case Restr.Vary<Term> vary -> {
         var orz = MutableArrayList.<Restr.Cofib<Term>>create(vary.orz().size());
         for (var cof : vary.orz()) {
@@ -142,13 +140,13 @@ public record Normalizer(
         case Formula.Inv<Term> inv -> ands.append(and);
         // a /\ b = 1 ==> a = 1 /\ b = 1
         case Formula.Conn<Term> conn && conn.isAnd() && !and.isLeft() -> {
-          todoAnds.push(new Restr.Cond<>(and.i(), conn.l(), false));
-          todoAnds.push(new Restr.Cond<>(and.i(), conn.r(), false));
+          todoAnds.push(new Restr.Cond<>(conn.l(), false));
+          todoAnds.push(new Restr.Cond<>(conn.r(), false));
         }
         // a \/ b = 0 ==> a = 0 /\ b = 0
         case Formula.Conn<Term> conn && !conn.isAnd() && and.isLeft() -> {
-          todoAnds.push(new Restr.Cond<>(and.i(), conn.l(), true));
-          todoAnds.push(new Restr.Cond<>(and.i(), conn.r(), true));
+          todoAnds.push(new Restr.Cond<>(conn.l(), true));
+          todoAnds.push(new Restr.Cond<>(conn.r(), true));
         }
         // a /\ b = 0 ==> a = 0 \/ b = 0
         case Formula.Conn<Term> conn && conn.isAnd() && !and.isLeft() -> localOrz.append(conn);
@@ -259,8 +257,7 @@ public record Normalizer(
         }
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
         case Term.Mula f -> new Term.Mula(f.formula().fmap(this::term));
-        case Term.Transp transp -> new Term.Transp(term(transp.cover()),
-          transp.restr().rename(v -> map.getOrDefault(v, v), this::term));
+        case Term.Transp transp -> new Term.Transp(term(transp.cover()), transp.restr().fmap(this::term));
       };
     }
 

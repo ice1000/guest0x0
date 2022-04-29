@@ -11,8 +11,6 @@ import org.aya.guest0x0.util.SPE;
 import org.aya.pretty.doc.Doc;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
-
 public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
   private @NotNull TeleCache mkCache(int initialCapacity) {
     return new TeleCache(this, MutableArrayList.create(initialCapacity), MutableArrayList.create(initialCapacity));
@@ -75,8 +73,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
       }
       case Expr.Mula f -> new Expr.Mula(f.pos(), f.formula().fmap(this::expr));
       case Expr.Transp transp -> {
-        var ands = transp.restr().rename(vv -> env.getOrThrow(vv.name(), () ->
-          new SPE(transp.pos(), Doc.english("Unresolved: " + vv.name()))), Function.identity());
+        var ands = transp.restr().fmap(this::expr);
         yield new Expr.Transp(transp.pos(), expr(transp.cover()), ands);
       }
     };

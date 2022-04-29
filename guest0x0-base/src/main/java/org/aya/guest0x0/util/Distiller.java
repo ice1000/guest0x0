@@ -44,14 +44,12 @@ public interface Distiller {
       case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.restr());
     };
   }
-  private static <E> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Restr<?> restr) {
+  private static <E> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Restr<E> restr) {
     var doc = Doc.sep(f.apply(cover, Transp), Doc.symbol("#{"), switch (restr) {
       case Restr.Const c -> Doc.symbol(c.isTrue() ? "0=0" : "0=1");
-      case Restr.Vary<?> v -> Doc.join(Doc.symbol("\\/"), v.orz().view().map(or -> {
-        var orDoc = Doc.join(Doc.symbol("/\\"), or.ands().view().map(and -> {
-          var expr = and.inst() instanceof Term t ? t.toDoc() : Doc.plain(and.i().name());
-          return Doc.sep(expr, Doc.symbol("="), and.isLeft() ? Doc.symbol("0") : Doc.symbol("1"));
-        }));
+      case Restr.Vary<E> v -> Doc.join(Doc.symbol("\\/"), v.orz().view().map(or -> {
+        var orDoc = Doc.join(Doc.symbol("/\\"), or.ands().view().map(and ->
+          Doc.sep(f.apply(and.inst(), Free), Doc.symbol("="), Doc.symbol(and.isLeft() ? "0" : "1"))));
         return or.ands().sizeGreaterThan(1) ? Doc.parened(orDoc) : orDoc;
       }));
     }, Doc.symbol("}"));
