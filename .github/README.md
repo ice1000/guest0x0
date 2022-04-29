@@ -50,6 +50,17 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 ![image](https://user-images.githubusercontent.com/16398479/163501950-c9820f2c-4b69-4133-ace8-2d561c298823.png)
 
 Overhauled the cofibration syntax. It is now similar to a combination of CCHM and ABCFHL.
+The code base is growing larger and larger to 1285. Some small useful lemmata:
+
+```
+def subst (A : Type) (P : A -> Type) (p : I -> A)
+          (lhs : P (p 0)) : P (p 1) =>
+  trans (\i. P (p i)) lhs
+
+def =-trans (A : Type) (p : I -> A) (q : [| i |] A { | 0 => p 1 })
+    : [| i |] A { | 0 => p 0 | 1 => q 1 } =>
+  subst A (Eq A (p 0)) (\i. q i) (\i. p i)
+```
 
 ### v0.8
 

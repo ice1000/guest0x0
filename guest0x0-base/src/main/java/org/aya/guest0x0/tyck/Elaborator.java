@@ -37,7 +37,7 @@ public record Elaborator(
           var tyDims = path.data().dims();
           var lamDims = MutableArrayList.<LocalVar>create(tyDims.size());
           var unlam = Expr.unlam(lamDims, tyDims.size(), lam);
-          if (unlam == null) throw new SPE(lam.pos(), Doc.english("Expected (path) lambda"));
+          if (unlam == null) throw new SPE(lam.pos(), Doc.english("Expected path lambda"));
           yield boundaries(lamDims, () -> inherit(unlam,
             new Normalizer(sigma, MutableMap.from(
               lamDims.zipView(tyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
@@ -183,6 +183,7 @@ public record Elaborator(
         }
         var data = new Boundary.Data<>(dims, ty, boundaries.toImmutableArray());
         YouTrack.jesperCockx(data, path.pos());
+        for (var dim : dims) gamma.remove(dim);
         yield new Synth(new Term.Path(data), Term.U);
       }
       case Expr.Mula f -> switch (f.formula()) {

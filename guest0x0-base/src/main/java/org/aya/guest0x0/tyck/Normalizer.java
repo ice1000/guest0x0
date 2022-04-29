@@ -80,6 +80,10 @@ public record Normalizer(
     };
   }
 
+  /**
+   * Normalizes a "restriction" which looks like "f1 \/ f2 \/ ..." where
+   * f1, f2 are like "a /\ b /\ ...".
+   */
   public Restr<Term> restr(@NotNull Restr<Term> restr) {
     return switch (restr.rename(Function.identity(), this::term)) {
       case Restr.Vary<Term> vary -> {
@@ -94,10 +98,18 @@ public record Normalizer(
     };
   }
 
-  /** @return false if this is constantly false */
+  /**
+   * Normalizes a list of "a /\ b /\ ..." into orz.
+   *
+   * @return true if this is constantly false
+   */
   private boolean cofib(Restr.Cofib<Term> cof, MutableList<Restr.Cofib<Term>> orz) {
+    var ands = MutableArrayList.<Restr.Cond<Term>>create(cof.ands().size());
+    for (var and : cof.ands()) {
+      ands.append(and);
+    }
     // TODO: implement expansion
-    orz.append(cof);
+    orz.append(new Restr.Cofib<>(ands.toImmutableArray()));
     return false;
   }
 

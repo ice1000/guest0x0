@@ -114,6 +114,13 @@ public class DeclsTest {
                (transSigma A B)
                (trans (\\i. Sig (x : A i) ** B i x))
           => \\i. transSigma A B
+
+      def subst (A : Type) (P : A -> Type) (p : I -> A)
+                (lhs : P (p 0)) : P (p 1) =>
+        trans (\\i. P (p i)) lhs
+      def =-trans (A : Type) (p : I -> A) (q : [| i |] A { | 0 => p 1 })
+          : [| i |] A { | 0 => p 0 | 1 => q 1 } =>
+        subst A (Eq A (p 0)) (\\i. q i) (\\i. p i)
       """);
   }
 
