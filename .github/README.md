@@ -36,16 +36,19 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
   + [ ] Inductive type and pattern matching
 + CHM
   + [x] Extension type (generalized path type)
-  + Generalized transport
+  + [ ] Cofibration theory
+  + [ ] Generalized transport
     + [x] Pi, Sigma, Universe
     + [ ] Higher inductive type
     + [ ] Glue/V
-  + Homogenous composition
+  + [ ] Homogenous composition
     + [ ] Pi, Sigma, Universe
     + [ ] Higher inductive type
     + [ ] Glue/V
 
 ### Untagged
+
+![image](https://user-images.githubusercontent.com/16398479/165893441-23c02472-d363-45fb-b460-9869552714a7.png)
 
 ### v0.9
 
