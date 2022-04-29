@@ -1,12 +1,43 @@
 package org.aya.guest0x0.syntax;
 
+import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
+import kala.collection.mutable.MutableList;
+import kala.collection.mutable.MutableStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
 public sealed interface Restr<E> {
+  /** I'm sorry, I'm just too bad at writing while loops */
+  static <T> void combineRecursively(
+    SeqView<Formula.Conn<T>> localOrz,
+    MutableStack<Cond<T>> conds,
+    MutableList<Cofib<T>> combined
+  ) {
+    if (localOrz.isEmpty()) {
+      combined.append(new Cofib<>(conds.toImmutableArray()));
+      return;
+    }
+    var conn = localOrz.first();
+    var lateDropped = localOrz.drop(1);
+    if (conn.isAnd()) { // a /\ b = 0 ==> a = 0 \/ b = 0
+      conds.push(new Cond<>(conn.l(), true));
+      combineRecursively(lateDropped, conds, combined);
+      conds.pop();
+      conds.push(new Cond<>(conn.r(), true));
+      combineRecursively(lateDropped, conds, combined);
+      conds.pop();
+    } else { // a \/ b = 1 ==> a = 1 \/ b = 1
+      conds.push(new Cond<>(conn.l(), false));
+      combineRecursively(lateDropped, conds, combined);
+      conds.pop();
+      conds.push(new Cond<>(conn.r(), false));
+      combineRecursively(lateDropped, conds, combined);
+      conds.pop();
+    }
+  }
   Restr<E> fmap(@NotNull Function<E, E> g);
   Restr<E> or(Cond<E> cond);
   <T> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f);

@@ -109,7 +109,11 @@ public record Normalizer(
     // If a false is found, do not modify orz
     if (collectAnds(cof, ands, localOrz)) return false;
     if (localOrz.isNotEmpty()) {
-      throw new UnsupportedOperationException("TODO");
+      var combined = MutableArrayList.<Restr.Cofib<Term>>create(1 << localOrz.size());
+      Restr.combineRecursively(localOrz.view(), ands.asMutableStack(), combined);
+      // `cofib` has side effects, so you must first traverse them and then call `allMatch`
+      // Can I do this without recursion?
+      return combined.map(cofib -> cofib(cofib, orz)).allMatch(b -> b);
     }
     if (ands.isNotEmpty()) {
       orz.append(new Restr.Cofib<>(ands.toImmutableArray()));
@@ -120,11 +124,15 @@ public record Normalizer(
   /**
    * Only when we cannot simplify an LHS do we add it to "ands".
    * Unsimplifiable terms are basically non-formulae (e.g. variable references, neutrals, etc.)
-   * In case of \/, we add them to "localOrz" and do not add to "ands".
+   * In case of \/, we add them to "orz" and do not add to "ands".
    *
    * @return true if this is constant false
    */
-  private boolean collectAnds(Restr.Cofib<Term> cof, MutableList<Restr.Cond<Term>> ands, MutableList<Formula.Conn<Term>> localOrz) {
+  private boolean collectAnds(
+    Restr.Cofib<Term> cof,
+    MutableList<Restr.Cond<Term>> ands,
+    MutableList<Formula.Conn<Term>> orz
+  ) {
     var todoAnds = MutableList.from(cof.ands()).asMutableStack();
     while (todoAnds.isNotEmpty()) {
       var and = todoAnds.pop();
@@ -147,9 +155,9 @@ public record Normalizer(
           todoAnds.push(new Restr.Cond<>(conn.r(), true));
         }
         // a /\ b = 0 ==> a = 0 \/ b = 0
-        case Formula.Conn<Term> conn && conn.isAnd() && !and.isLeft() -> localOrz.append(conn);
+        case Formula.Conn<Term> conn && conn.isAnd() && !and.isLeft() -> orz.append(conn);
         // a \/ b = 1 ==> a = 1 \/ b = 1
-        case Formula.Conn<Term> conn /*&& !conn.isAnd() && and.isLeft()*/ -> localOrz.append(conn);
+        case Formula.Conn<Term> conn /*&& !conn.isAnd() && and.isLeft()*/ -> orz.append(conn);
       }
       else ands.append(and);
     }
