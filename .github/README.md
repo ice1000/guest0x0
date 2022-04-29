@@ -49,8 +49,20 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ![image](https://user-images.githubusercontent.com/16398479/163501950-c9820f2c-4b69-4133-ace8-2d561c298823.png)
 
-Overhauled the cofibration syntax. It is now similar to a combination of CCHM and ABCFHL.
-The code base is growing larger and larger to 1285. Some small useful lemmata:
+Overhauled the cofibration syntax. It is now similar to a combination of CCHM and ABCFHL
+(I used `1=0`, `0=1` for empty face and `1=1`, `0=0` for truth face because I'm cool).
+
+```
+def trans (A : I -> U) (a : A 0) : A 1 => A #{0=1} a
+def transPi (A : I -> U) (B : Pi (i : I) -> A i -> U)
+    (f : Pi (x : A 0) -> B 0 x) : Pi (x : A 1) -> B 1 x =>
+  \x. trans (\j. B j ((\i. A (j \/ ~ i)) #{j = 1} x))
+    (f (trans (\i. A (~ i)) x))
+```
+
+Two things are yet to be done: split disjunctions in conjunctions and make `i = 0 \/ i = 1` false.
+Also, some small bugs are fixed (like dim vars are not removed from scope, causing bloated hole info)
+The code base is growing larger and larger to 1335. Some small useful lemmata:
 
 ```
 def subst (A : Type) (P : A -> Type) (p : I -> A)

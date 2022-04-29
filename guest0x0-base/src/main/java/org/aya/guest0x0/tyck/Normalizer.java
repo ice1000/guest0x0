@@ -106,10 +106,8 @@ public record Normalizer(
   private boolean cofib(Restr.Cofib<Term> cof, MutableList<Restr.Cofib<Term>> orz) {
     var ands = MutableArrayList.<Restr.Cond<Term>>create(cof.ands().size());
     var localOrz = MutableList.<Formula.Conn<Term>>create();
-    if (collectAnds(cof, ands, localOrz)) {
-      // Found a false, do not modify orz
-      return false;
-    }
+    // If a false is found, do not modify orz
+    if (collectAnds(cof, ands, localOrz)) return false;
     if (localOrz.isNotEmpty()) {
       throw new UnsupportedOperationException("TODO");
     }
@@ -121,7 +119,7 @@ public record Normalizer(
 
   /**
    * Only when we cannot simplify an LHS do we add it to "ands".
-   * Unsimplifiable terms include negations and non-formulae (e.g. variable references, neutrals, etc.)
+   * Unsimplifiable terms are basically non-formulae (e.g. variable references, neutrals, etc.)
    * In case of \/, we add them to "localOrz" and do not add to "ands".
    *
    * @return true if this is constant false
@@ -135,9 +133,9 @@ public record Normalizer(
           if (lit.isLeft() != and.isLeft()) return true;
           // Skip truth
         }
-        // Do nothing, due to normalization (already done in restr),
-        // this must not be a simplifiable involution
-        case Formula.Inv<Term> inv -> ands.append(and);
+        // ~ a = j ==> a = ~ j for j \in {0, 1}
+        // According to CCHM, the canonical map takes (1-i) to (i=0)
+        case Formula.Inv<Term> inv -> todoAnds.push(new Restr.Cond<>(inv.i(), !and.isLeft()));
         // a /\ b = 1 ==> a = 1 /\ b = 1
         case Formula.Conn<Term> conn && conn.isAnd() && !and.isLeft() -> {
           todoAnds.push(new Restr.Cond<>(conn.l(), false));
