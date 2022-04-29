@@ -105,11 +105,40 @@ public record Normalizer(
    */
   private boolean cofib(Restr.Cofib<Term> cof, MutableList<Restr.Cofib<Term>> orz) {
     var ands = MutableArrayList.<Restr.Cond<Term>>create(cof.ands().size());
-    for (var and : cof.ands()) {
+    var localOrz = MutableList.<Formula.Conn<Term>>create();
+    var todoAnds = MutableList.from(cof.ands()).asMutableStack();
+    while (todoAnds.isNotEmpty()) {
+      var and = todoAnds.pop();
+      if (and.inst() instanceof Term.Mula mula) switch (mula.formula()) {
+        case Formula.Lit<Term> lit -> {
+          if (lit.isLeft() != and.isLeft()) return true;
+          else continue; // Skip truth
+        }
+        case Formula.Inv<Term> inv -> {
+          // Do nothing, due to normalization (already done in restr),
+          // this must not be a simplifiable involution
+        }
+        case Formula.Conn<Term> conn && conn.isAnd() && !and.isLeft() -> {
+          // a /\ b = 1 ==> a = 1 /\ b = 1
+          todoAnds.push(new Restr.Cond<>(and.i(), conn.l(), false));
+          todoAnds.push(new Restr.Cond<>(and.i(), conn.r(), false));
+        }
+        case Formula.Conn<Term> conn && !conn.isAnd() && and.isLeft() -> {
+          // a \/ b = 0 ==> a = 0 /\ b = 0
+          todoAnds.push(new Restr.Cond<>(and.i(), conn.l(), true));
+          todoAnds.push(new Restr.Cond<>(and.i(), conn.r(), true));
+        }
+        // a /\ b = 0 ==> a = 0 \/ b = 0
+        case Formula.Conn<Term> conn && conn.isAnd() && !and.isLeft() -> localOrz.append(conn);
+        // a \/ b = 1 ==> a = 1 \/ b = 1
+        case Formula.Conn<Term> conn /*&& !conn.isAnd() && and.isLeft()*/ -> localOrz.append(conn);
+      }
       ands.append(and);
     }
-    // TODO: implement expansion
-    orz.append(new Restr.Cofib<>(ands.toImmutableArray()));
+    if (localOrz.isNotEmpty()) {
+      throw new UnsupportedOperationException("TODO");
+    }
+    if (ands.isNotEmpty()) orz.append(new Restr.Cofib<>(ands.toImmutableArray()));
     return false;
   }
 
@@ -138,18 +167,23 @@ public record Normalizer(
   // https://github.com/mortberg/cubicaltt/blob/a5c6f94bfc0da84e214641e0b87aa9649ea114ea/Connections.hs#L178-L197
   private Term formulae(Formula<Term> formula) {
     return switch (formula) { // de Morgan laws
+      // ~ 1 = 0, ~ 0 = 1
       case Formula.Inv<Term> inv && inv.i() instanceof Term.Mula i
         && i.formula() instanceof Formula.Lit<Term> lit -> Term.end(!lit.isLeft());
+      // ~ (~ a) = a
       case Formula.Inv<Term> inv && inv.i() instanceof Term.Mula i
         && i.formula() instanceof Formula.Inv<Term> ii -> ii.i(); // DNE!! :fear:
+      // ~ (a /\ b) = (~ a \/ ~ b), ~ (a \/ b) = (~ a /\ ~ b)
       case Formula.Inv<Term> inv && inv.i() instanceof Term.Mula i
         && i.formula() instanceof Formula.Conn<Term> conn -> new Term.Mula(new Formula.Conn<>(!conn.isAnd(),
         formulae(new Formula.Inv<>(conn.l())),
         formulae(new Formula.Inv<>(conn.r()))));
+      // 0 /\ a = 0, 1 /\ a = a, 0 \/ a = a, 1 \/ a = 1
       case Formula.Conn<Term> conn && conn.l() instanceof Term.Mula lf
         && lf.formula() instanceof Formula.Lit<Term> l -> l.isLeft()
         ? (conn.isAnd() ? lf : conn.r())
         : (conn.isAnd() ? conn.r() : lf);
+      // a /\ 0 = 0, a /\ 1 = a, a \/ 0 = a, a \/ 1 = 1
       case Formula.Conn<Term> conn && conn.r() instanceof Term.Mula rf
         && rf.formula() instanceof Formula.Lit<Term> r -> r.isLeft()
         ? (conn.isAnd() ? rf : conn.l())
