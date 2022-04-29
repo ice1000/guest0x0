@@ -89,9 +89,10 @@ public record Normalizer(
       case Restr.Vary<Term> vary -> {
         var orz = MutableArrayList.<Restr.Cofib<Term>>create(vary.orz().size());
         for (var cof : vary.orz()) {
-          if (cofib(cof, orz)) yield new Restr.Const<>(false);
+          // This is a sequence of "or"s, so if any cof is true, the whole thing is true
+          if (cofib(cof, orz)) yield new Restr.Const<>(true);
         }
-        if (orz.isEmpty()) yield new Restr.Const<>(true);
+        if (orz.isEmpty()) yield new Restr.Const<>(false);
         yield new Restr.Vary<>(orz.toImmutableArray());
       }
       case Restr.Const<Term> c -> c;
@@ -100,31 +101,52 @@ public record Normalizer(
 
   /**
    * Normalizes a list of "a /\ b /\ ..." into orz.
+   * If it is false (implied by any of them being false), orz is unmodified.
    *
-   * @return true if this is constantly false
+   * @return true if this is constantly true
    */
   private boolean cofib(Restr.Cofib<Term> cof, MutableList<Restr.Cofib<Term>> orz) {
     var ands = MutableArrayList.<Restr.Cond<Term>>create(cof.ands().size());
     var localOrz = MutableList.<Formula.Conn<Term>>create();
+    if (collectAnds(cof, ands, localOrz)) {
+      // Found a false, do not modify orz
+      return false;
+    }
+    if (localOrz.isNotEmpty()) {
+      throw new UnsupportedOperationException("TODO");
+    }
+    if (ands.isNotEmpty()) {
+      orz.append(new Restr.Cofib<>(ands.toImmutableArray()));
+      return false;
+    } else return true;
+  }
+
+  /**
+   * Only when we cannot simplify an LHS do we add it to "ands".
+   * Unsimplifiable terms include negations and non-formulae (e.g. variable references, neutrals, etc.)
+   * In case of \/, we add them to "localOrz" and do not add to "ands".
+   *
+   * @return true if this is constant false
+   */
+  private boolean collectAnds(Restr.Cofib<Term> cof, MutableList<Restr.Cond<Term>> ands, MutableList<Formula.Conn<Term>> localOrz) {
     var todoAnds = MutableList.from(cof.ands()).asMutableStack();
     while (todoAnds.isNotEmpty()) {
       var and = todoAnds.pop();
       if (and.inst() instanceof Term.Mula mula) switch (mula.formula()) {
         case Formula.Lit<Term> lit -> {
           if (lit.isLeft() != and.isLeft()) return true;
-          else continue; // Skip truth
+          // Skip truth
         }
-        case Formula.Inv<Term> inv -> {
-          // Do nothing, due to normalization (already done in restr),
-          // this must not be a simplifiable involution
-        }
+        // Do nothing, due to normalization (already done in restr),
+        // this must not be a simplifiable involution
+        case Formula.Inv<Term> inv -> ands.append(and);
+        // a /\ b = 1 ==> a = 1 /\ b = 1
         case Formula.Conn<Term> conn && conn.isAnd() && !and.isLeft() -> {
-          // a /\ b = 1 ==> a = 1 /\ b = 1
           todoAnds.push(new Restr.Cond<>(and.i(), conn.l(), false));
           todoAnds.push(new Restr.Cond<>(and.i(), conn.r(), false));
         }
+        // a \/ b = 0 ==> a = 0 /\ b = 0
         case Formula.Conn<Term> conn && !conn.isAnd() && and.isLeft() -> {
-          // a \/ b = 0 ==> a = 0 /\ b = 0
           todoAnds.push(new Restr.Cond<>(and.i(), conn.l(), true));
           todoAnds.push(new Restr.Cond<>(and.i(), conn.r(), true));
         }
@@ -133,12 +155,8 @@ public record Normalizer(
         // a \/ b = 1 ==> a = 1 \/ b = 1
         case Formula.Conn<Term> conn /*&& !conn.isAnd() && and.isLeft()*/ -> localOrz.append(conn);
       }
-      ands.append(and);
+      else ands.append(and);
     }
-    if (localOrz.isNotEmpty()) {
-      throw new UnsupportedOperationException("TODO");
-    }
-    if (ands.isNotEmpty()) orz.append(new Restr.Cofib<>(ands.toImmutableArray()));
     return false;
   }
 
