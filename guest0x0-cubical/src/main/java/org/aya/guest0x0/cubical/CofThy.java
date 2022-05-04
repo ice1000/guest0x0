@@ -5,12 +5,15 @@ import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Predicate;
 
 /**
- * Utilities for face restrictions (cofibrations in cartesian cubical type theory),
+ * Operations on face restrictions (cofibrations in cartesian cubical type theory),
  * for normalization, simplification, satisfaction, etc.
  */
-public interface RestrUtil {
+public interface CofThy {
   /** I'm sorry, I'm just too bad at writing while loops */
   static <T> void combineRecursively(
     SeqView<Formula.Conn<T>> localOrz,
@@ -36,6 +39,49 @@ public interface RestrUtil {
     }
     combineRecursively(lateDropped, conds, combined);
     conds.pop();
+  }
+
+  /**
+   * Equality-checking (any procedure that returns a boolean) under a cofibration.
+   *
+   * @see SubstObj
+   */
+  static <E extends Restr.TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
+  vdash(@NotNull Restr<E> r, @NotNull Subst initial, @NotNull Predicate<Subst> sat) {
+    return switch (r) {
+      case Restr.Const c -> !c.isTrue() || sat.test(initial);
+      case Restr.Vary<E> restr -> {
+        for (var or : restr.orz()) {
+          var derived = initial.derive();
+          var unsat = false;
+          for (var eq : or.ands()) {
+            if (eq.inst().asFormula() instanceof Formula.Lit<?> lit && lit.isLeft() != eq.isLeft())
+              unsat = true;
+            else {
+              var castVar = initial.asRef(eq.inst());
+              if (castVar != null) {
+                derived.put(castVar, eq.isLeft());
+              } else yield false;
+            }
+          }
+          if (unsat) continue; // Skip unsatisfiable cases
+          if (!sat.test(derived)) yield false;
+        }
+        yield true;
+      }
+    };
+  }
+
+  /**
+   * Representation of a generic <strong>interval</strong> substitution object.
+   *
+   * @param <E> "terms"
+   * @param <V> "variables" -- assuming capture-avoiding substitution instead of indices
+   */
+  interface SubstObj<E, V, Subst extends SubstObj<E, V, Subst>> {
+    void put(V var, boolean isLeft);
+    @Nullable V asRef(@NotNull E term);
+    @NotNull Subst derive();
   }
 
   /**
@@ -116,6 +162,7 @@ public interface RestrUtil {
       return false;
     } else return true;
   }
+
   static boolean satisfied(@NotNull Restr<?> restriction) {
     return switch (restriction) {
       case Restr.Const c -> c.isTrue();

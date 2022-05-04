@@ -12,7 +12,7 @@ import java.util.function.Function;
  * Face restrictions.
  *
  * @param <E> "terms"
- * @see RestrUtil for cofibration operations
+ * @see CofThy for cofibration operations
  */
 public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
   interface TermLike<E extends TermLike<E>> extends Docile {

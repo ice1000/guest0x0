@@ -3,9 +3,9 @@ package org.aya.guest0x0.tyck;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.cubical.Boundary;
+import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
-import org.aya.guest0x0.cubical.RestrUtil;
 import org.aya.guest0x0.syntax.BdryData;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Term;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 public record Normalizer(
   @NotNull MutableMap<LocalVar, Def<Term>> sigma,
   @NotNull MutableMap<LocalVar, Term> rho
-) {
+) implements CofThy.SubstObj<Term, LocalVar, Normalizer> {
   public static @NotNull Term rename(@NotNull Term term) {
     return new Renamer(MutableMap.create()).term(term);
   }
@@ -27,7 +27,15 @@ public record Normalizer(
     return new Param<>(param.x(), term(param.type()));
   }
 
-  public @NotNull Normalizer derive() {
+  @Override public void put(LocalVar var, boolean isLeft) {
+    rho.put(var, Term.end(isLeft));
+  }
+
+  @Override public @Nullable LocalVar asRef(@NotNull Term term) {
+    return term instanceof Term.Ref ref ? ref.var() : null;
+  }
+
+  @Override public @NotNull Normalizer derive() {
     return new Normalizer(sigma, MutableMap.from(rho));
   }
 
@@ -76,7 +84,7 @@ public record Normalizer(
       case Term.Transp transp -> {
         var parkerLiu = restr(transp.restr());
         // Because of his talk about lax 2-functors!
-        if (RestrUtil.satisfied(parkerLiu)) yield Term.id("x");
+        if (CofThy.satisfied(parkerLiu)) yield Term.id("x");
         yield transp(new LocalVar("i"), term(transp.cover()), parkerLiu);
       }
     };
@@ -84,7 +92,7 @@ public record Normalizer(
 
   public Restr<Term> restr(@NotNull Restr<Term> restr) {
     return switch (restr.fmap(this::term)) {
-      case Restr.Vary<Term> vary -> RestrUtil.normalizeRestr(vary);
+      case Restr.Vary<Term> vary -> CofThy.normalizeRestr(vary);
       case Restr.Const<Term> c -> c;
     };
   }
