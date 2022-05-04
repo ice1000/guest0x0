@@ -1,4 +1,4 @@
-package org.aya.guest0x0.syntax;
+package org.aya.guest0x0.cubical;
 
 import org.jetbrains.annotations.NotNull;
 

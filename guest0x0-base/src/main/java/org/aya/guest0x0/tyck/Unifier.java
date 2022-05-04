@@ -3,6 +3,7 @@ package org.aya.guest0x0.tyck;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
 import kala.tuple.Tuple;
+import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.LocalVar;
 import org.jetbrains.annotations.NotNull;

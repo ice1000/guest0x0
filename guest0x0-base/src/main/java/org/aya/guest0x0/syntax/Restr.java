@@ -5,6 +5,7 @@ import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableStack;
+import org.aya.guest0x0.cubical.Formula;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

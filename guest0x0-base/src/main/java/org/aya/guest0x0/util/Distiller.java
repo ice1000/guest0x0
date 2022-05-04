@@ -2,6 +2,7 @@ package org.aya.guest0x0.util;
 
 import kala.collection.Seq;
 import kala.collection.mutable.MutableList;
+import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.syntax.*;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
