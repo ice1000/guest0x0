@@ -48,10 +48,13 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+### v0.10
+
 ![image](https://user-images.githubusercontent.com/16398479/165893441-23c02472-d363-45fb-b460-9869552714a7.png)
 
 Refactored the implementation of restrictions, finished splitting disjunctions.
-Total lines of Java code is 1366, quite a lot.
+The number of lines of Java code is 1366 now, quite a lot.
+There aren't many new features, so no new code snippet this time.
 
 ### v0.9
 
@@ -70,7 +73,7 @@ def transPi (A : I -> U) (B : Pi (i : I) -> A i -> U)
 
 Two things are yet to be done: split disjunctions in conjunctions and make `i = 0 \/ i = 1` false.
 Also, some small bugs are fixed (like dim vars are not removed from scope, causing bloated hole info)
-The code base is growing larger and larger to 1335. Some small useful lemmata:
+The codebase is growing larger and larger, to 1335 lines of code. Some small useful lemmata:
 
 ```
 def subst (A : Type) (P : A -> Type) (p : I -> A)
