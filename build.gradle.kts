@@ -78,6 +78,8 @@ subprojects {
     useJUnitPlatform()
     enableAssertions = true
     reports.junitXml.mergeReruns.set(true)
+    testLogging.showStandardStreams = true
+    testLogging.showCauses = true
   }
 
   tasks.withType<JavaExec>().configureEach {

@@ -7,7 +7,3 @@ dependencies {
   testImplementation("org.hamcrest", "hamcrest", version = deps.getProperty("version.hamcrest"))
 }
 
-tasks.named<Test>("test") {
-  testLogging.showStandardStreams = true
-  testLogging.showCauses = true
-}
