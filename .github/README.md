@@ -50,6 +50,9 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ![image](https://user-images.githubusercontent.com/16398479/165893441-23c02472-d363-45fb-b460-9869552714a7.png)
 
+Refactored the implementation of restrictions, finished splitting disjunctions.
+Total lines of Java code is 1366, quite a lot.
+
 ### v0.9
 
 ![image](https://user-images.githubusercontent.com/16398479/163501950-c9820f2c-4b69-4133-ace8-2d561c298823.png)
