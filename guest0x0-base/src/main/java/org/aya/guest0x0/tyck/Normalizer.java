@@ -2,7 +2,6 @@ package org.aya.guest0x0.tyck;
 
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
-import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.tyck.HCompPDF.Transps;
@@ -88,37 +87,13 @@ public record Normalizer(
         var orz = MutableArrayList.<Restr.Cofib<Term>>create(vary.orz().size());
         for (var cof : vary.orz()) {
           // This is a sequence of "or"s, so if any cof is true, the whole thing is true
-          if (cofib(cof, orz)) yield new Restr.Const<>(true);
+          if (Restr.normalizeCof(cof, orz, Term::asFormula)) yield new Restr.Const<>(true);
         }
         if (orz.isEmpty()) yield new Restr.Const<>(false);
         yield new Restr.Vary<>(orz.toImmutableArray());
       }
       case Restr.Const<Term> c -> c;
     };
-  }
-
-  /**
-   * Normalizes a list of "a /\ b /\ ..." into orz.
-   * If it is false (implied by any of them being false), orz is unmodified.
-   *
-   * @return true if this is constantly true
-   */
-  public static boolean cofib(Restr.Cofib<Term> cof, MutableList<Restr.Cofib<Term>> orz) {
-    var ands = MutableArrayList.<Restr.Cond<Term>>create(cof.ands().size());
-    var localOrz = MutableList.<Formula.Conn<Term>>create();
-    // If a false is found, do not modify orz
-    if (Restr.collectAnds(cof, ands, localOrz, Term::asFormula)) return false;
-    if (localOrz.isNotEmpty()) {
-      var combined = MutableArrayList.<Restr.Cofib<Term>>create(1 << localOrz.size());
-      Restr.combineRecursively(localOrz.view(), ands.asMutableStack(), combined);
-      // `cofib` has side effects, so you must first traverse them and then call `allMatch`
-      // Can I do this without recursion?
-      return combined.map(cofib -> cofib(cofib, orz)).allMatch(b -> b);
-    }
-    if (ands.isNotEmpty()) {
-      orz.append(new Restr.Cofib<>(ands.toImmutableArray()));
-      return false;
-    } else return true;
   }
 
   private Term transp(LocalVar i, Term cover, Restr<Term> restr) {

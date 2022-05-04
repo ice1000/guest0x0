@@ -2,6 +2,7 @@ package org.aya.guest0x0.syntax;
 
 import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
+import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableStack;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 
 public sealed interface Restr<E> {
+  @FunctionalInterface
+  interface TermLike<E> {
+    @Nullable Formula<E> cast(@NotNull E e);
+  }
   /** I'm sorry, I'm just too bad at writing while loops */
   static <T> void combineRecursively(
     SeqView<Formula.Conn<T>> localOrz,
@@ -27,16 +32,14 @@ public sealed interface Restr<E> {
       combineRecursively(lateDropped, conds, combined);
       conds.pop();
       conds.push(new Cond<>(conn.r(), true));
-      combineRecursively(lateDropped, conds, combined);
-      conds.pop();
     } else { // a \/ b = 1 ==> a = 1 \/ b = 1
       conds.push(new Cond<>(conn.l(), false));
       combineRecursively(lateDropped, conds, combined);
       conds.pop();
       conds.push(new Cond<>(conn.r(), false));
-      combineRecursively(lateDropped, conds, combined);
-      conds.pop();
     }
+    combineRecursively(lateDropped, conds, combined);
+    conds.pop();
   }
   /**
    * Only when we cannot simplify an LHS do we add it to "ands".
@@ -49,12 +52,12 @@ public sealed interface Restr<E> {
     Cofib<E> cof,
     MutableList<Cond<E>> ands,
     MutableList<Formula.Conn<E>> orz,
-    Function<E, @Nullable Formula<E>> cast
+    TermLike<E> cast
   ) {
     var todoAnds = MutableList.from(cof.ands()).asMutableStack();
     while (todoAnds.isNotEmpty()) {
       var and = todoAnds.pop();
-      switch (cast.apply(and.inst())) {
+      switch (cast.cast(and.inst())) {
         case Formula.Lit<E> lit -> {
           if (lit.isLeft() != and.isLeft()) return true;
           // Skip truth
@@ -80,6 +83,29 @@ public sealed interface Restr<E> {
       }
     }
     return false;
+  }
+  /**
+   * Normalizes a list of "a /\ b /\ ..." into orz.
+   * If it is false (implied by any of them being false), orz is unmodified.
+   *
+   * @return true if this is constantly true
+   */
+  static <E> boolean normalizeCof(Cofib<E> cof, MutableList<Cofib<E>> orz, TermLike<E> cast) {
+    var ands = MutableArrayList.<Cond<E>>create(cof.ands().size());
+    var localOrz = MutableList.<Formula.Conn<E>>create();
+    // If a false is found, do not modify orz
+    if (collectAnds(cof, ands, localOrz, cast)) return false;
+    if (localOrz.isNotEmpty()) {
+      var combined = MutableArrayList.<Cofib<E>>create(1 << localOrz.size());
+      combineRecursively(localOrz.view(), ands.asMutableStack(), combined);
+      // `cofib` has side effects, so you must first traverse them and then call `allMatch`
+      // Can I do this without recursion?
+      return combined.map(cofib -> normalizeCof(cofib, orz, cast)).allMatch(b -> b);
+    }
+    if (ands.isNotEmpty()) {
+      orz.append(new Cofib<>(ands.toImmutableArray()));
+      return false;
+    } else return true;
   }
   Restr<E> fmap(@NotNull Function<E, E> g);
   Restr<E> or(Cond<E> cond);
