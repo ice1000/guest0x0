@@ -50,6 +50,10 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ![image](https://user-images.githubusercontent.com/16398479/166701476-d3cddf78-c621-4bbf-9b8a-9ef3f43d80b7.png)
 
+The project is now split into three subprojects instead of two.
+The new subproject `guest0x0-cubical` contains some generic utilities for face restrictions
+(cofibrations in cartesian cubical type theory) and boundaries.
+
 ### v0.10
 
 ![image](https://user-images.githubusercontent.com/16398479/165893441-23c02472-d363-45fb-b460-9869552714a7.png)

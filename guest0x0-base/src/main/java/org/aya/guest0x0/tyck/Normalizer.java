@@ -115,16 +115,14 @@ public record Normalizer(
   private Term formulae(Formula<Term> formula) {
     return switch (formula) { // de Morgan laws
       // ~ 1 = 0, ~ 0 = 1
-      case Formula.Inv<Term> inv && inv.i() instanceof Term.Mula i
-        && i.asFormula() instanceof Formula.Lit<Term> lit -> Term.end(!lit.isLeft());
+      case Formula.Inv<Term> inv && inv.i().asFormula() instanceof Formula.Lit<Term> lit -> Term.end(!lit.isLeft());
       // ~ (~ a) = a
-      case Formula.Inv<Term> inv && inv.i() instanceof Term.Mula i
-        && i.asFormula() instanceof Formula.Inv<Term> ii -> ii.i(); // DNE!! :fear:
+      case Formula.Inv<Term> inv && inv.i().asFormula() instanceof Formula.Inv<Term> ii -> ii.i(); // DNE!! :fear:
       // ~ (a /\ b) = (~ a \/ ~ b), ~ (a \/ b) = (~ a /\ ~ b)
-      case Formula.Inv<Term> inv && inv.i() instanceof Term.Mula i
-        && i.asFormula() instanceof Formula.Conn<Term> conn -> new Term.Mula(new Formula.Conn<>(!conn.isAnd(),
-        formulae(new Formula.Inv<>(conn.l())),
-        formulae(new Formula.Inv<>(conn.r()))));
+      case Formula.Inv<Term> inv && inv.i().asFormula() instanceof Formula.Conn<Term> conn ->
+        new Term.Mula(new Formula.Conn<>(!conn.isAnd(),
+          formulae(new Formula.Inv<>(conn.l())),
+          formulae(new Formula.Inv<>(conn.r()))));
       // 0 /\ a = 0, 1 /\ a = a, 0 \/ a = a, 1 \/ a = 1
       case Formula.Conn<Term> conn && conn.l() instanceof Term.Mula lf
         && lf.asFormula() instanceof Formula.Lit<Term> l -> l.isLeft()
@@ -157,8 +155,7 @@ public record Normalizer(
     var sign = derive();
     for (var ct : face.pats().zipView(dims.zipView(word))) {
       if (ct._1 == Boundary.Case.VAR) sign.rho.put(ct._2);
-      else if (!(ct._2._2 instanceof Term.Mula mula
-        && mula.asFormula() instanceof Formula.Lit<Term> lit
+      else if (!(ct._2._2.asFormula() instanceof Formula.Lit<Term> lit
         && lit.isLeft() == (ct._1 == Boundary.Case.LEFT))) return null;
     }
     return sign;
