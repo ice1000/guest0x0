@@ -5,6 +5,7 @@ import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.tyck.Normalizer;
 import org.aya.guest0x0.util.Distiller;
 import org.aya.guest0x0.util.LocalVar;
@@ -78,9 +79,9 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
   }
   @NotNull Term U = new UI(true), I = new UI(false);
   record UI(boolean isU) implements Term {}
-  record Path(@NotNull Boundary.Data<Term> data) implements Term {}
+  record Path(@NotNull BdryData<Term> data) implements Term {}
   record PLam(@NotNull ImmutableSeq<LocalVar> dims, @NotNull Term fill) implements Term {}
-  record PCall(@NotNull Term p, @NotNull ImmutableSeq<Term> i, @NotNull Boundary.Data<Term> b) implements Term {}
+  record PCall(@NotNull Term p, @NotNull ImmutableSeq<Term> i, @NotNull BdryData<Term> b) implements Term {}
   record Mula(@Override @NotNull Formula<Term> asFormula) implements Term {}
   static @NotNull Term end(boolean isLeft) {return new Mula(new Formula.Lit<>(isLeft));}
   static @NotNull Term neg(@NotNull Term term) {return new Mula(new Formula.Inv<>(term));}

@@ -1,6 +1,6 @@
 package org.aya.guest0x0.util;
 
-import org.aya.guest0x0.syntax.Boundary;
+import org.aya.guest0x0.syntax.BdryData;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +23,7 @@ public record AltF7(@NotNull LocalVar var) {
     };
   }
 
-  private boolean boundaries(Boundary.Data<Term> data) {
+  private boolean boundaries(BdryData<Term> data) {
     return press(data.type()) || data.boundaries().anyMatch(b -> press(b.body()));
   }
 

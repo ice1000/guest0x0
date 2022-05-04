@@ -5,7 +5,9 @@ import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
 import kala.tuple.Tuple;
+import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.AltF7;
 import org.aya.guest0x0.util.LocalVar;
@@ -115,7 +117,7 @@ public record Elaborator(
   private @NotNull Term boundaries(
     @NotNull MutableList<LocalVar> lamDims,
     @NotNull Supplier<Term> coreSupplier,
-    SourcePos pos, Boundary.Data<Term> data
+    SourcePos pos, BdryData<Term> data
   ) {
     lamDims.forEach(t -> gamma.put(t, Term.I));
     var core = coreSupplier.get();
@@ -182,7 +184,7 @@ public record Elaborator(
           var term = inherit(boundary.body(), jonSterling(dims.view(), boundary.face()).term(ty));
           boundaries.append(new Boundary<>(boundary.face(), term));
         }
-        var data = new Boundary.Data<>(dims, ty, boundaries.toImmutableArray());
+        var data = new BdryData<>(dims, ty, boundaries.toImmutableArray());
         YouTrack.jesperCockx(data, path.pos());
         for (var dim : dims) gamma.remove(dim);
         yield new Synth(new Term.Path(data), Term.U);

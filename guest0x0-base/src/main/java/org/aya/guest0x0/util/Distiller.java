@@ -3,7 +3,9 @@ package org.aya.guest0x0.util;
 import kala.collection.Seq;
 import kala.collection.mutable.MutableList;
 import org.aya.guest0x0.cubical.Formula;
-import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.cubical.Restr;
+import org.aya.guest0x0.syntax.Expr;
+import org.aya.guest0x0.syntax.Term;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
@@ -46,14 +48,7 @@ public interface Distiller {
     };
   }
   private static <E extends Restr.TermLike<E>> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Restr<E> restr) {
-    var doc = Doc.sep(f.apply(cover, Transp), Doc.symbol("#{"), switch (restr) {
-      case Restr.Const c -> Doc.symbol(c.isTrue() ? "0=0" : "0=1");
-      case Restr.Vary<E> v -> Doc.join(Doc.symbol("\\/"), v.orz().view().map(or -> {
-        var orDoc = Doc.join(Doc.symbol("/\\"), or.ands().view().map(and ->
-          Doc.sep(f.apply(and.inst(), Free), Doc.symbol("="), Doc.symbol(and.isLeft() ? "0" : "1"))));
-        return or.ands().sizeGreaterThan(1) ? Doc.parened(orDoc) : orDoc;
-      }));
-    }, Doc.symbol("}"));
+    var doc = Doc.sep(f.apply(cover, Transp), Doc.symbol("#{"), restr.toDoc(), Doc.symbol("}"));
     return envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
   }
   private static @NotNull Doc dependentType(boolean isPi, Param<?> param, Docile cod) {

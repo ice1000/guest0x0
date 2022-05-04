@@ -2,7 +2,9 @@ package org.aya.guest0x0.tyck;
 
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
+import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.tyck.HCompPDF.Transps;
 import org.aya.guest0x0.util.LocalVar;
@@ -136,7 +138,7 @@ public record Normalizer(
 
   /** She's buying a stairway to heaven. */
   private @Nullable Term stairway(
-    @NotNull Boundary.Data<Term> thoughts,
+    @NotNull BdryData<Term> thoughts,
     @NotNull ImmutableSeq<Term> word // With a word she can get what she came for.
   ) {
     assert word.sizeEquals(thoughts.dims().size());
@@ -187,7 +189,7 @@ public record Normalizer(
       };
     }
 
-    private @NotNull Boundary.Data<Term> boundaries(@NotNull Boundary.Data<Term> data) {
+    private @NotNull BdryData<Term> boundaries(@NotNull BdryData<Term> data) {
       return data.fmap(this::term, data.dims().map(this::param));
     }
 

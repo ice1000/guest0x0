@@ -1,7 +1,7 @@
 package org.aya.guest0x0.tyck;
 
 import org.aya.guest0x0.cubical.Formula;
-import org.aya.guest0x0.syntax.Restr;
+import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
 

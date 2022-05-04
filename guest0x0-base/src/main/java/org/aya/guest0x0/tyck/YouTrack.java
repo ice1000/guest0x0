@@ -6,7 +6,8 @@ import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import kala.tuple.primitive.IntObjTuple2;
-import org.aya.guest0x0.syntax.Boundary;
+import org.aya.guest0x0.syntax.BdryData;
+import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.SPE;
@@ -17,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 /** YouTrack checks Confluence. */
 public interface YouTrack {
-  static void jesperCockx(@NotNull Boundary.Data<Term> d, @NotNull SourcePos pos) {
+  static void jesperCockx(@NotNull BdryData<Term> d, @NotNull SourcePos pos) {
     celebrate(d.dims().view(), d.boundaries().mapIndexed((i, b) -> new MCT.SubPats<>(b.face().pats().view(), i)))
       .forEach(cls -> {
         var contents = cls.contents().map(i -> IntObjTuple2.of(i, d.boundaries().get(i)));

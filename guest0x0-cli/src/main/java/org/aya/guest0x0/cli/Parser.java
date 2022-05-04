@@ -5,7 +5,9 @@ import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.LocalVar;
@@ -44,7 +46,7 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.InvContext in -> new Expr.Mula(sourcePosOf(in), new Formula.Inv<>(expr(in.expr())));
       case Guest0x0Parser.IConnContext ic -> new Expr.Mula(sourcePosOf(ic),
         new Formula.Conn<>(ic.AND() != null, expr(ic.expr(0)), expr(ic.expr(1))));
-      case Guest0x0Parser.CubeContext cube -> new Expr.Path(sourcePosOf(cube), new Boundary.Data<>(
+      case Guest0x0Parser.CubeContext cube -> new Expr.Path(sourcePosOf(cube), new BdryData<>(
         localVars(cube.ID()), expr(cube.expr()),
         Seq.wrapJava(cube.boundary()).map(b -> new Boundary<>(face(b), expr(b.expr())))));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());

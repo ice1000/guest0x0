@@ -1,18 +1,19 @@
-package org.aya.guest0x0.syntax;
+package org.aya.guest0x0.cubical;
 
 import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableStack;
-import org.aya.guest0x0.cubical.Formula;
+import org.aya.pretty.doc.Doc;
+import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public sealed interface Restr<E extends Restr.TermLike<E>> {
-  interface TermLike<E extends TermLike<E>> {
+public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
+  interface TermLike<E extends TermLike<E>> extends Docile {
     default @Nullable Formula<E> asFormula() {return null;}
   }
   /** I'm sorry, I'm just too bad at writing while loops */
@@ -132,10 +133,22 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
     @Override public <T extends TermLike<T>> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f) {
       return new Vary<>(orz.map(x -> new Cofib<>(x.ands.map(f))));
     }
+
+    @Override public @NotNull Doc toDoc() {
+      return Doc.join(Doc.symbol("\\/"), orz().view().map(or -> {
+        var orDoc = Doc.join(Doc.symbol("/\\"), or.ands.view().map(and ->
+          Doc.sep(and.inst.toDoc(), Doc.symbol("="), Doc.symbol(and.isLeft() ? "0" : "1"))));
+        return or.ands.sizeGreaterThan(1) ? Doc.parened(orDoc) : orDoc;
+      }));
+    }
   }
   record Const<E extends TermLike<E>>(boolean isTrue) implements Restr<E> {
     @Override public Const<E> fmap(@NotNull Function<E, E> g) {
       return this;
+    }
+
+    @Override public @NotNull Doc toDoc() {
+      return Doc.symbol(isTrue ? "0=0" : "0=1");
     }
 
     @Override public Restr<E> or(Cond<E> cond) {
