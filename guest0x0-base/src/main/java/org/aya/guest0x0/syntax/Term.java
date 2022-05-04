@@ -25,6 +25,7 @@ public sealed interface Term extends Docile {
   default @NotNull Term subst(@NotNull MutableMap<LocalVar, Term> map) {
     return new Normalizer(MutableMap.create(), map).term(this);
   }
+  default @Nullable Formula<Term> asFormula() {return null;}
 
   record Ref(@NotNull LocalVar var) implements Term {}
   record Call(@NotNull LocalVar fn, @NotNull ImmutableSeq<Term> args) implements Term {}
@@ -80,7 +81,11 @@ public sealed interface Term extends Docile {
   record Path(@NotNull Boundary.Data<Term> data) implements Term {}
   record PLam(@NotNull ImmutableSeq<LocalVar> dims, @NotNull Term fill) implements Term {}
   record PCall(@NotNull Term p, @NotNull ImmutableSeq<Term> i, @NotNull Boundary.Data<Term> b) implements Term {}
-  record Mula(@NotNull Formula<Term> formula) implements Term {}
+  record Mula(@NotNull Formula<Term> formula) implements Term {
+    @Override public @NotNull Formula<Term> asFormula() {
+      return formula;
+    }
+  }
   static @NotNull Term end(boolean isLeft) {return new Mula(new Formula.Lit<>(isLeft));}
   static @NotNull Term neg(@NotNull Term term) {return new Mula(new Formula.Inv<>(term));}
   static @NotNull Term conn(boolean isAnd, @NotNull Term l, @NotNull Term r) {return new Mula(new Formula.Conn<>(isAnd, l, r));}
