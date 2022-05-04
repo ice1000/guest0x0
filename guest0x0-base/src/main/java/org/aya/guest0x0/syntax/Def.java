@@ -17,4 +17,14 @@ public sealed interface Def<Term extends Docile> {
     @NotNull Term result,
     @NotNull Term body
   ) implements Def<Term> {}
+
+  record Print<Term extends Docile>(
+    @Override @NotNull ImmutableSeq<Param<Term>> telescope,
+    @NotNull Term result,
+    @NotNull Term body
+  ) implements Def<Term> {
+    public static final @NotNull LocalVar UNUSED = new LocalVar("_");
+
+    @Override public @NotNull LocalVar name() {return UNUSED;}
+  }
 }

@@ -79,6 +79,10 @@ public record Parser(@NotNull SourceFile source) {
 
   public @NotNull Def<Expr> def(@NotNull Guest0x0Parser.DeclContext decl) {
     return switch (decl) {
+      case Guest0x0Parser.PrintDeclContext def -> new Def.Print<>(
+        Seq.wrapJava(def.param()).flatMap(this::param),
+        expr(def.expr(0)),
+        expr(def.expr(1)));
       case Guest0x0Parser.FnDeclContext def -> new Def.Fn<>(
         new LocalVar(def.ID().getText()),
         Seq.wrapJava(def.param()).flatMap(this::param),

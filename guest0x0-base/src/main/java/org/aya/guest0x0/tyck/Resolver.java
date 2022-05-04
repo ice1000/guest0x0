@@ -1,8 +1,11 @@
 package org.aya.guest0x0.tyck;
 
+import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import kala.control.Option;
+import kala.tuple.Tuple;
+import kala.tuple.Tuple2;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.util.LocalVar;
@@ -34,21 +37,31 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
   }
 
   public @NotNull Def<Expr> def(@NotNull Def<Expr> def) {
+    var tele = tele(def);
+    var result = expr(def.result());
     return switch (def) {
       case Def.Fn<Expr> fn -> {
-        var telescope = MutableArrayList.<Param<Expr>>create(fn.telescope().size());
-        var cache = mkCache(fn.telescope().size());
-        for (var param : fn.telescope()) {
-          telescope.append(new Param<>(param.x(), expr(param.type())));
-          cache.add(param.x());
-        }
-        var result = expr(fn.result());
         put(fn.name());
         var body = expr(fn.body());
-        cache.purge();
-        yield new Def.Fn<>(fn.name(), telescope.toImmutableArray(), result, body);
+        tele._2.purge();
+        yield new Def.Fn<>(fn.name(), tele._1, result, body);
+      }
+      case Def.Print<Expr> print -> {
+        var body = expr(print.body());
+        tele._2.purge();
+        yield new Def.Print<>(tele._1, result, body);
       }
     };
+  }
+
+  @NotNull private Tuple2<ImmutableSeq<Param<Expr>>, TeleCache> tele(Def<Expr> def) {
+    var telescope = MutableArrayList.<Param<Expr>>create(def.telescope().size());
+    var cache = mkCache(def.telescope().size());
+    for (var param : def.telescope()) {
+      telescope.append(new Param<>(param.x(), expr(param.type())));
+      cache.add(param.x());
+    }
+    return Tuple.of(telescope.toImmutableArray(), cache);
   }
 
   public @NotNull Expr expr(@NotNull Expr expr) {

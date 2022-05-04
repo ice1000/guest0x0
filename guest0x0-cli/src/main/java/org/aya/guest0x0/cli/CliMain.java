@@ -9,6 +9,7 @@ import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.prelude.GeneratedVersion;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Expr;
+import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Resolver;
 import org.aya.util.error.SourceFile;
@@ -81,8 +82,12 @@ public class CliMain implements Callable<Integer> {
     var akJr = andrasKovacs();
     for (var def : artifact) {
       var tycked = akJr.def(def);
-      akJr.sigma().put(tycked.name(), tycked);
-      if (verbose) System.out.println(tycked.name());
+      if (tycked instanceof Def.Print<Term> print) {
+        System.out.println(print.body().toDoc().commonRender());
+      } else {
+        akJr.sigma().put(tycked.name(), tycked);
+        if (verbose) System.out.println(tycked.name());
+      }
     }
     return akJr;
   }

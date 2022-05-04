@@ -3,6 +3,7 @@ grammar Guest0x0;
 program : decl+;
 decl
  : 'def' ID param* ':' expr ARROW2 expr # fnDecl
+ | 'print' param* ':' expr ARROW2 expr # printDecl
  ;
 param : '(' ID+ ':' expr ')';
 expr

@@ -1,6 +1,7 @@
 package org.aya.guest0x0.tyck;
 
 import kala.collection.SeqView;
+import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
@@ -152,6 +153,7 @@ public record Elaborator(
         yield switch (def) {
           case Def.Fn<Term> fn -> new Synth(Normalizer.rename(Term.mkLam(
             fn.telescope().view().map(Param::x), fn.body())), pi);
+          case Def.Print<Term> print -> throw new AssertionError("unreachable: " + print);
         };
       }
       case Expr.Proj proj -> {
@@ -247,19 +249,29 @@ public record Elaborator(
   }
 
   public Def<Term> def(Def<Expr> def) {
+    var telescope = telescope(def);
+    var result = inherit(def.result(), Term.U);
     return switch (def) {
       case Def.Fn<Expr> fn -> {
-        var telescope = MutableArrayList.<Param<Term>>create(fn.telescope().size());
-        for (var param : def.telescope()) {
-          var ty = inherit(param.type(), Term.U);
-          telescope.append(new Param<>(param.x(), ty));
-          gamma.put(param.x(), ty);
-        }
-        var result = inherit(fn.result(), Term.U);
         var body = inherit(fn.body(), result);
         telescope.forEach(key -> gamma.remove(key.x()));
-        yield new Def.Fn<>(def.name(), telescope.toImmutableArray(), result, body);
+        yield new Def.Fn<>(def.name(), telescope, result, body);
+      }
+      case Def.Print<Expr> print -> {
+        var body = inherit(print.body(), result);
+        telescope.forEach(key -> gamma.remove(key.x()));
+        yield new Def.Print<>(telescope, result, body);
       }
     };
+  }
+
+  private @NotNull ImmutableSeq<Param<Term>> telescope(Def<Expr> def) {
+    var telescope = MutableArrayList.<Param<Term>>create(def.telescope().size());
+    for (var param : def.telescope()) {
+      var ty = inherit(param.type(), Term.U);
+      telescope.append(new Param<>(param.x(), ty));
+      gamma.put(param.x(), ty);
+    }
+    return telescope.toImmutableArray();
   }
 }
