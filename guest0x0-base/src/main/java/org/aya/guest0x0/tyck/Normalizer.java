@@ -11,8 +11,6 @@ import org.aya.guest0x0.util.Param;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Function;
-
 public record Normalizer(
   @NotNull MutableMap<LocalVar, Def<Term>> sigma,
   @NotNull MutableMap<LocalVar, Term> rho
@@ -105,11 +103,11 @@ public record Normalizer(
    *
    * @return true if this is constantly true
    */
-  private boolean cofib(Restr.Cofib<Term> cof, MutableList<Restr.Cofib<Term>> orz) {
+  public static boolean cofib(Restr.Cofib<Term> cof, MutableList<Restr.Cofib<Term>> orz) {
     var ands = MutableArrayList.<Restr.Cond<Term>>create(cof.ands().size());
     var localOrz = MutableList.<Formula.Conn<Term>>create();
     // If a false is found, do not modify orz
-    if (collectAnds(cof, ands, localOrz, Term::asFormula)) return false;
+    if (Restr.collectAnds(cof, ands, localOrz, Term::asFormula)) return false;
     if (localOrz.isNotEmpty()) {
       var combined = MutableArrayList.<Restr.Cofib<Term>>create(1 << localOrz.size());
       Restr.combineRecursively(localOrz.view(), ands.asMutableStack(), combined);
@@ -121,50 +119,6 @@ public record Normalizer(
       orz.append(new Restr.Cofib<>(ands.toImmutableArray()));
       return false;
     } else return true;
-  }
-
-  /**
-   * Only when we cannot simplify an LHS do we add it to "ands".
-   * Unsimplifiable terms are basically non-formulae (e.g. variable references, neutrals, etc.)
-   * In case of \/, we add them to "orz" and do not add to "ands".
-   *
-   * @return true if this is constant false
-   */
-  public static <E> boolean collectAnds(
-    Restr.Cofib<E> cof,
-    MutableList<Restr.Cond<E>> ands,
-    MutableList<Formula.Conn<E>> orz,
-    Function<E, @Nullable Formula<E>> cast
-  ) {
-    var todoAnds = MutableList.from(cof.ands()).asMutableStack();
-    while (todoAnds.isNotEmpty()) {
-      var and = todoAnds.pop();
-      switch (cast.apply(and.inst())) {
-        case Formula.Lit<E> lit -> {
-          if (lit.isLeft() != and.isLeft()) return true;
-          // Skip truth
-        }
-        // ~ a = j ==> a = ~ j for j \in {0, 1}
-        // According to CCHM, the canonical map takes (1-i) to (i=0)
-        case Formula.Inv<E> inv -> todoAnds.push(new Restr.Cond<>(inv.i(), !and.isLeft()));
-        // a /\ b = 1 ==> a = 1 /\ b = 1
-        case Formula.Conn<E> conn && conn.isAnd() && !and.isLeft() -> {
-          todoAnds.push(new Restr.Cond<>(conn.l(), false));
-          todoAnds.push(new Restr.Cond<>(conn.r(), false));
-        }
-        // a \/ b = 0 ==> a = 0 /\ b = 0
-        case Formula.Conn<E> conn && !conn.isAnd() && and.isLeft() -> {
-          todoAnds.push(new Restr.Cond<>(conn.l(), true));
-          todoAnds.push(new Restr.Cond<>(conn.r(), true));
-        }
-        // a /\ b = 0 ==> a = 0 \/ b = 0
-        case Formula.Conn<E> conn && conn.isAnd() /*&& and.isLeft()*/ -> orz.append(conn);
-        // a \/ b = 1 ==> a = 1 \/ b = 1
-        case Formula.Conn<E> conn /*&& !conn.isAnd() && !and.isLeft()*/ -> orz.append(conn);
-        case null -> ands.append(and);
-      }
-    }
-    return false;
   }
 
   private Term transp(LocalVar i, Term cover, Restr<Term> restr) {

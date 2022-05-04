@@ -38,6 +38,49 @@ public sealed interface Restr<E> {
       conds.pop();
     }
   }
+  /**
+   * Only when we cannot simplify an LHS do we add it to "ands".
+   * Unsimplifiable terms are basically non-formulae (e.g. variable references, neutrals, etc.)
+   * In case of \/, we add them to "orz" and do not add to "ands".
+   *
+   * @return true if this is constant false
+   */
+  static <E> boolean collectAnds(
+    Cofib<E> cof,
+    MutableList<Cond<E>> ands,
+    MutableList<Formula.Conn<E>> orz,
+    Function<E, @Nullable Formula<E>> cast
+  ) {
+    var todoAnds = MutableList.from(cof.ands()).asMutableStack();
+    while (todoAnds.isNotEmpty()) {
+      var and = todoAnds.pop();
+      switch (cast.apply(and.inst())) {
+        case Formula.Lit<E> lit -> {
+          if (lit.isLeft() != and.isLeft()) return true;
+          // Skip truth
+        }
+        // ~ a = j ==> a = ~ j for j \in {0, 1}
+        // According to CCHM, the canonical map takes (1-i) to (i=0)
+        case Formula.Inv<E> inv -> todoAnds.push(new Cond<>(inv.i(), !and.isLeft()));
+        // a /\ b = 1 ==> a = 1 /\ b = 1
+        case Formula.Conn<E> conn && conn.isAnd() && !and.isLeft() -> {
+          todoAnds.push(new Cond<>(conn.l(), false));
+          todoAnds.push(new Cond<>(conn.r(), false));
+        }
+        // a \/ b = 0 ==> a = 0 /\ b = 0
+        case Formula.Conn<E> conn && !conn.isAnd() && and.isLeft() -> {
+          todoAnds.push(new Cond<>(conn.l(), true));
+          todoAnds.push(new Cond<>(conn.r(), true));
+        }
+        // a /\ b = 0 ==> a = 0 \/ b = 0
+        case Formula.Conn<E> conn && conn.isAnd() /*&& and.isLeft()*/ -> orz.append(conn);
+        // a \/ b = 1 ==> a = 1 \/ b = 1
+        case Formula.Conn<E> conn /*&& !conn.isAnd() && !and.isLeft()*/ -> orz.append(conn);
+        case null -> ands.append(and);
+      }
+    }
+    return false;
+  }
   Restr<E> fmap(@NotNull Function<E, E> g);
   Restr<E> or(Cond<E> cond);
   <T> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f);
