@@ -1,7 +1,6 @@
 package org.aya.guest0x0.tyck;
 
 import kala.collection.immutable.ImmutableSeq;
-import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.tyck.HCompPDF.Transps;
@@ -77,21 +76,9 @@ public record Normalizer(
     };
   }
 
-  /**
-   * Normalizes a "restriction" which looks like "f1 \/ f2 \/ ..." where
-   * f1, f2 are like "a /\ b /\ ...".
-   */
   public Restr<Term> restr(@NotNull Restr<Term> restr) {
     return switch (restr.fmap(this::term)) {
-      case Restr.Vary<Term> vary -> {
-        var orz = MutableArrayList.<Restr.Cofib<Term>>create(vary.orz().size());
-        for (var cof : vary.orz()) {
-          // This is a sequence of "or"s, so if any cof is true, the whole thing is true
-          if (Restr.normalizeCof(cof, orz, Term::asFormula)) yield new Restr.Const<>(true);
-        }
-        if (orz.isEmpty()) yield new Restr.Const<>(false);
-        yield new Restr.Vary<>(orz.toImmutableArray());
-      }
+      case Restr.Vary<Term> vary -> Restr.normalizeRestr(vary, Term::asFormula);
       case Restr.Const<Term> c -> c;
     };
   }

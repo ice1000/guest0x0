@@ -42,6 +42,19 @@ public sealed interface Restr<E> {
     conds.pop();
   }
   /**
+   * Normalizes a "restriction" which looks like "f1 \/ f2 \/ ..." where
+   * f1, f2 are like "a /\ b /\ ...".
+   */
+  static @NotNull Restr<Term> normalizeRestr(Vary<Term> vary, TermLike<Term> asFormula) {
+    var orz = MutableArrayList.<Cofib<Term>>create(vary.orz().size());
+    for (var cof : vary.orz()) {
+      // This is a sequence of "or"s, so if any cof is true, the whole thing is true
+      if (normalizeCof(cof, orz, asFormula)) return new Const<>(true);
+    }
+    if (orz.isEmpty()) return new Const<>(false);
+    return new Vary<>(orz.toImmutableArray());
+  }
+  /**
    * Only when we cannot simplify an LHS do we add it to "ands".
    * Unsimplifiable terms are basically non-formulae (e.g. variable references, neutrals, etc.)
    * In case of \/, we add them to "orz" and do not add to "ands".
