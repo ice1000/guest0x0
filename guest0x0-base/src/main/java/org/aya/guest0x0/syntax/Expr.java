@@ -40,8 +40,5 @@ public sealed interface Expr extends Docile, Restr.TermLike<Expr> {
   record DT(boolean isPi, @Override @NotNull SourcePos pos, Param<Expr> param, Expr cod) implements Expr {}
   record Path(@Override @NotNull SourcePos pos, @NotNull BdryData<Expr> data) implements Expr {}
   record Mula(@Override @NotNull SourcePos pos, @Override @NotNull Formula<Expr> asFormula) implements Expr {}
-  record Transp(
-    @Override @NotNull SourcePos pos,
-    @NotNull Expr cover, @NotNull Restr<Expr> restr
-  ) implements Expr {}
+  record Transp(@Override @NotNull SourcePos pos, @NotNull Expr cover, @NotNull Restr<Expr> restr) implements Expr {}
 }

@@ -44,6 +44,7 @@ public interface CofThy {
   /**
    * Equality-checking (any procedure that returns a boolean) under a cofibration.
    *
+   * @return true if the cofibration is false, <code>sat.test(subst)</code> otherwise
    * @see SubstObj
    */
   static <E extends Restr.TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean

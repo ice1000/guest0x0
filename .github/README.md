@@ -53,6 +53,22 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 The project is now split into three subprojects instead of two.
 The new subproject `guest0x0-cubical` contains some generic utilities for face restrictions
 (cofibrations in cartesian cubical type theory) and boundaries.
+The constant check for generalized transport has finally been implemented :tada:.
+Consider the snippet below:
+
+```
+def trauma (A : I -> U) (a : A 0) (i : I) : A i => (\j. A (i /\ j)) #{i = 1} a
+```
+
+Under the cofibration `i = 1`, `A (i /\ j)` reduces to `A j` according to de Morgan laws,
+so Guest0x0 will reject the code with the following message:
+
+```
+The cover \j. A (i /\ j) has to be constant under the cofibration i = 1 but applying
+a variable `?` to it results in A ? which contains a reference to `?`, oh no
+```
+
+Replacing the cofibration with `i = 0` makes `A (i /\ j)` reduce to `A 0`, which is a constant.
 
 ### v0.10
 

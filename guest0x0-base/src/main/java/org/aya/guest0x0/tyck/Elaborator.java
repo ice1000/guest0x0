@@ -6,9 +6,13 @@ import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
 import kala.tuple.Tuple;
 import org.aya.guest0x0.cubical.Boundary;
+import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
-import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.syntax.BdryData;
+import org.aya.guest0x0.syntax.Def;
+import org.aya.guest0x0.syntax.Expr;
+import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.AltF7;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
@@ -25,7 +29,11 @@ public record Elaborator(
   @NotNull MutableMap<LocalVar, Term> gamma
 ) {
   @NotNull public Term normalize(@NotNull Term term) {
-    return new Normalizer(sigma, MutableMap.create()).term(term);
+    return normalizer().term(term);
+  }
+
+  private @NotNull Normalizer normalizer() {
+    return new Normalizer(sigma, MutableMap.create());
   }
 
   public record Synth(@NotNull Term wellTyped, @NotNull Term type) {}
@@ -201,7 +209,17 @@ public record Elaborator(
         var sample = cover.app(new Term.Ref(detective.var()));
         var ty = Term.mkPi(cover.app(Term.end(true)), cover.app(Term.end(false)));
         var psi = transp.restr().mapCond(c -> new Restr.Cond<>(inherit(c.inst(), Term.I), c.isLeft()));
-        // TODO: check the cover to be constant on the cofibration
+        // I believe find-usages is slightly more efficient than what Huber wrotes in hcomp.pdf
+        var capture = new Object() {
+          Term under = sample;
+        };
+        // I want it to have no references, so !detective.press(), and if it returns true, it means no problem
+        // So if it returns false then we're in trouble
+        if (!CofThy.vdash(psi, normalizer(), n -> !detective.press(capture.under = n.term(sample))))
+          throw new SPE(transp.pos(), Doc.english("The cover"), cover,
+            Doc.english("has to be constant under the cofibration"), psi,
+            Doc.english("but applying a variable `?` to it results in"), capture.under,
+            Doc.english("which contains a reference to `?`, oh no"));
         yield new Synth(new Term.Transp(cover, psi), ty);
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
