@@ -104,7 +104,8 @@ public interface Distiller {
         pLam.dims().forEach(d -> docs.append(Doc.symbol(d.name())));
         docs.append(Doc.plain("."));
         docs.append(term(pLam.fill(), Free));
-        yield Doc.parened(Doc.sep(docs));
+        var doc = Doc.sep(docs);
+        yield envPrec.ordinal() > Free.ordinal() ? Doc.parened(doc) : doc;
       }
       case Term.Mula f -> formulae(Distiller::term, f.asFormula(), envPrec);
       case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.restr());
