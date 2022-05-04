@@ -19,7 +19,7 @@ public record AltF7(@NotNull LocalVar var) {
       case Term.UI ignored -> false;
       case Term.DT dt -> press(dt.param().type()) || press(dt.cod());
       case Term.Path path -> boundaries(path.data());
-      case Term.Mula mula -> formula(mula.formula());
+      case Term.Mula mula -> formula(mula.asFormula());
     };
   }
 

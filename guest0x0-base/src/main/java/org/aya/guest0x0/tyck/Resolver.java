@@ -71,7 +71,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
         state.purge();
         yield new Expr.Path(path.pos(), data);
       }
-      case Expr.Mula f -> new Expr.Mula(f.pos(), f.formula().fmap(this::expr));
+      case Expr.Mula f -> new Expr.Mula(f.pos(), f.asFormula().fmap(this::expr));
       case Expr.Transp transp -> {
         var ands = transp.restr().fmap(this::expr);
         yield new Expr.Transp(transp.pos(), expr(transp.cover()), ands);

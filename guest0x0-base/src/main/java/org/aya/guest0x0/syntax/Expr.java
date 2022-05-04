@@ -11,7 +11,7 @@ import org.aya.util.error.SourcePos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public sealed interface Expr extends Docile {
+public sealed interface Expr extends Docile, Restr.TermLike<Expr> {
   @NotNull SourcePos pos();
   @Override default @NotNull Doc toDoc() {
     return Distiller.expr(this, Distiller.Prec.Free);
@@ -37,7 +37,7 @@ public sealed interface Expr extends Docile {
   /** @param isPi it's a sigma if false */
   record DT(boolean isPi, @Override @NotNull SourcePos pos, Param<Expr> param, Expr cod) implements Expr {}
   record Path(@Override @NotNull SourcePos pos, @NotNull Boundary.Data<Expr> data) implements Expr {}
-  record Mula(@Override @NotNull SourcePos pos, @NotNull Formula<Expr> formula) implements Expr {}
+  record Mula(@Override @NotNull SourcePos pos, @Override @NotNull Formula<Expr> asFormula) implements Expr {}
   record Transp(
     @Override @NotNull SourcePos pos,
     @NotNull Expr cover, @NotNull Restr<Expr> restr

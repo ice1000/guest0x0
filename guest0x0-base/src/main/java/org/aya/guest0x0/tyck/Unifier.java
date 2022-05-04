@@ -33,7 +33,7 @@ public class Unifier {
           pram.dims().zip(plam.dims()).map(p -> Tuple.of(p._1, new Term.Ref(p._2))))));
       case Term.PCall lpcall && r instanceof Term.PCall rpcall ->
         untyped(lpcall.p(), rpcall.p()) && unifySeq(lpcall.i(), rpcall.i());
-      case Term.Mula lf && r instanceof Term.Mula rf -> formulae(lf.formula(), rf.formula());
+      case Term.Mula lf && r instanceof Term.Mula rf -> formulae(lf.asFormula(), rf.asFormula());
       case Term.Transp ltp && r instanceof Term.Transp rtp ->
         untyped(ltp.cover(), rtp.cover()) && restr(ltp.restr(), rtp.restr());
       // Cubical subtyping?? Are we ever gonna unify cubes?

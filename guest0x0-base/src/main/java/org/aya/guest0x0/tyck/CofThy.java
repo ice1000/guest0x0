@@ -17,7 +17,7 @@ public record CofThy(@NotNull Restr<Term> restriction) {
           var derived = initial.derive();
           var unsat = false;
           for (var eq : or.ands()) {
-            if (Restr.formulaOf(eq) instanceof Formula.Lit<?> lit
+            if (eq.inst().asFormula() instanceof Formula.Lit<?> lit
               && lit.isLeft() != eq.isLeft()
             ) {
               unsat = true;
@@ -40,7 +40,7 @@ public record CofThy(@NotNull Restr<Term> restriction) {
         for (var or : restr.orz()) {
           var satisfied = true;
           for (var eq : or.ands()) {
-            var matchy = Restr.formulaOf(eq) instanceof Formula.Lit<?> lit
+            var matchy = eq.inst().asFormula() instanceof Formula.Lit<?> lit
               && lit.isLeft() == eq.isLeft();
             satisfied = satisfied && matchy;
           }

@@ -186,7 +186,7 @@ public record Elaborator(
         for (var dim : dims) gamma.remove(dim);
         yield new Synth(new Term.Path(data), Term.U);
       }
-      case Expr.Mula f -> switch (f.formula()) {
+      case Expr.Mula f -> switch (f.asFormula()) {
         case Formula.Inv<Expr> inv -> new Synth(Term.neg(inherit(inv.i(), Term.I)), Term.I);
         case Formula.Conn<Expr> conn -> new Synth(new Term.Mula(
           new Formula.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);

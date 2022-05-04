@@ -10,10 +10,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public sealed interface Restr<E> {
-  @FunctionalInterface
-  interface TermLike<E> {
-    @Nullable Formula<E> cast(@NotNull E e);
+public sealed interface Restr<E extends Restr.TermLike<E>> {
+  interface TermLike<E extends TermLike<E>> {
+    default @Nullable Formula<E> asFormula() {return null;}
   }
   /** I'm sorry, I'm just too bad at writing while loops */
   static <T> void combineRecursively(
@@ -45,11 +44,11 @@ public sealed interface Restr<E> {
    * Normalizes a "restriction" which looks like "f1 \/ f2 \/ ..." where
    * f1, f2 are like "a /\ b /\ ...".
    */
-  static @NotNull Restr<Term> normalizeRestr(Vary<Term> vary, TermLike<Term> asFormula) {
-    var orz = MutableArrayList.<Cofib<Term>>create(vary.orz().size());
+  static <E extends TermLike<E>> @NotNull Restr<E> normalizeRestr(Vary<E> vary) {
+    var orz = MutableArrayList.<Cofib<E>>create(vary.orz().size());
     for (var cof : vary.orz()) {
       // This is a sequence of "or"s, so if any cof is true, the whole thing is true
-      if (normalizeCof(cof, orz, asFormula)) return new Const<>(true);
+      if (normalizeCof(cof, orz)) return new Const<>(true);
     }
     if (orz.isEmpty()) return new Const<>(false);
     return new Vary<>(orz.toImmutableArray());
@@ -61,16 +60,15 @@ public sealed interface Restr<E> {
    *
    * @return true if this is constant false
    */
-  static <E> boolean collectAnds(
+  static <E extends TermLike<E>> boolean collectAnds(
     Cofib<E> cof,
     MutableList<Cond<E>> ands,
-    MutableList<Formula.Conn<E>> orz,
-    TermLike<E> cast
+    MutableList<Formula.Conn<E>> orz
   ) {
     var todoAnds = MutableList.from(cof.ands()).asMutableStack();
     while (todoAnds.isNotEmpty()) {
       var and = todoAnds.pop();
-      switch (cast.cast(and.inst())) {
+      switch (and.inst().asFormula()) {
         case Formula.Lit<E> lit -> {
           if (lit.isLeft() != and.isLeft()) return true;
           // Skip truth
@@ -103,17 +101,17 @@ public sealed interface Restr<E> {
    *
    * @return true if this is constantly true
    */
-  static <E> boolean normalizeCof(Cofib<E> cof, MutableList<Cofib<E>> orz, TermLike<E> cast) {
+  static <E extends TermLike<E>> boolean normalizeCof(Cofib<E> cof, MutableList<Cofib<E>> orz) {
     var ands = MutableArrayList.<Cond<E>>create(cof.ands().size());
     var localOrz = MutableList.<Formula.Conn<E>>create();
     // If a false is found, do not modify orz
-    if (collectAnds(cof, ands, localOrz, cast)) return false;
+    if (collectAnds(cof, ands, localOrz)) return false;
     if (localOrz.isNotEmpty()) {
       var combined = MutableArrayList.<Cofib<E>>create(1 << localOrz.size());
       combineRecursively(localOrz.view(), ands.asMutableStack(), combined);
       // `cofib` has side effects, so you must first traverse them and then call `allMatch`
       // Can I do this without recursion?
-      return combined.map(cofib -> normalizeCof(cofib, orz, cast)).allMatch(b -> b);
+      return combined.map(cofib -> normalizeCof(cofib, orz)).allMatch(b -> b);
     }
     if (ands.isNotEmpty()) {
       orz.append(new Cofib<>(ands.toImmutableArray()));
@@ -122,8 +120,8 @@ public sealed interface Restr<E> {
   }
   Restr<E> fmap(@NotNull Function<E, E> g);
   Restr<E> or(Cond<E> cond);
-  <T> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f);
-  record Vary<E>(@NotNull ImmutableSeq<Cofib<E>> orz) implements Restr<E> {
+  <T extends TermLike<T>> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f);
+  record Vary<E extends TermLike<E>>(@NotNull ImmutableSeq<Cofib<E>> orz) implements Restr<E> {
     @Override public Vary<E> fmap(@NotNull Function<E, E> g) {
       return new Vary<>(orz.map(x -> x.rename(g)));
     }
@@ -132,11 +130,11 @@ public sealed interface Restr<E> {
       return new Vary<>(orz.appended(new Cofib<>(ImmutableSeq.of(cond))));
     }
 
-    @Override public <T> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f) {
+    @Override public <T extends TermLike<T>> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f) {
       return new Vary<>(orz.map(x -> new Cofib<>(x.ands.map(f))));
     }
   }
-  record Const<E>(boolean isTrue) implements Restr<E> {
+  record Const<E extends TermLike<E>>(boolean isTrue) implements Restr<E> {
     @Override public Const<E> fmap(@NotNull Function<E, E> g) {
       return this;
     }
@@ -145,7 +143,7 @@ public sealed interface Restr<E> {
       return isTrue ? this : new Vary<>(ImmutableSeq.of(new Cofib<>(ImmutableSeq.of(cond))));
     }
 
-    @Override public <T> Const<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f) {
+    @Override public <T extends TermLike<T>> Const<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f) {
       return new Const<>(isTrue);
     }
   }
@@ -153,9 +151,6 @@ public sealed interface Restr<E> {
     public Cond<E> rename(@NotNull Function<E, E> g) {
       return new Cond<>(g.apply(inst), isLeft);
     }
-  }
-  static @Nullable Formula<Term> formulaOf(@NotNull Cond<Term> cond) {
-    return cond.inst instanceof Term.Mula mula ? mula.formula() : null;
   }
   record Cofib<E>(@NotNull ImmutableSeq<Cond<E>> ands) {
     public Cofib<E> rename(@NotNull Function<E, E> g) {

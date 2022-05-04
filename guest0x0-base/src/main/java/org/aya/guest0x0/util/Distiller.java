@@ -40,11 +40,11 @@ public interface Distiller {
         yield envPrec.ordinal() > Cod.ordinal() ? Doc.parened(doc) : doc;
       }
       case Expr.Hole ignored -> Doc.symbol("_");
-      case Expr.Mula e -> formulae(Distiller::expr, e.formula(), envPrec);
+      case Expr.Mula e -> formulae(Distiller::expr, e.asFormula(), envPrec);
       case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.restr());
     };
   }
-  private static <E> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Restr<E> restr) {
+  private static <E extends Restr.TermLike<E>> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Restr<E> restr) {
     var doc = Doc.sep(f.apply(cover, Transp), Doc.symbol("#{"), switch (restr) {
       case Restr.Const c -> Doc.symbol(c.isTrue() ? "0=0" : "0=1");
       case Restr.Vary<E> v -> Doc.join(Doc.symbol("\\/"), v.orz().view().map(or -> {
@@ -110,7 +110,7 @@ public interface Distiller {
         docs.append(term(pLam.fill(), Free));
         yield Doc.parened(Doc.sep(docs));
       }
-      case Term.Mula f -> formulae(Distiller::term, f.formula(), envPrec);
+      case Term.Mula f -> formulae(Distiller::term, f.asFormula(), envPrec);
       case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.restr());
     };
   }
