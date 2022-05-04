@@ -76,7 +76,7 @@ public record Normalizer(
       case Term.Transp transp -> {
         var parkerLiu = restr(transp.restr());
         // Because of his talk about lax 2-functors!
-        if (new CofThy(parkerLiu).satisfied()) yield Term.id("x");
+        if (RestrUtil.satisfied(parkerLiu)) yield Term.id("x");
         yield transp(new LocalVar("i"), term(transp.cover()), parkerLiu);
       }
     };

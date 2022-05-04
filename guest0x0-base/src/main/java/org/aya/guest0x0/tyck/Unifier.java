@@ -6,7 +6,9 @@ import kala.tuple.Tuple;
 import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
-import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.cubical.RestrUtil;
+import org.aya.guest0x0.syntax.Def;
+import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.LocalVar;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,8 +51,8 @@ public class Unifier {
 
   private boolean restr(Restr<Term> ll, Restr<Term> rr) {
     var initial = new Normalizer(MutableMap.create(), MutableMap.create());
-    return new CofThy(ll).propExt(initial, normalizer -> new CofThy(normalizer.restr(rr)).satisfied())
-      && new CofThy(rr).propExt(initial, normalizer -> new CofThy(normalizer.restr(ll)).satisfied());
+    return new CofThy(ll).propExt(initial, normalizer -> RestrUtil.satisfied(normalizer.restr(rr)))
+      && new CofThy(rr).propExt(initial, normalizer -> RestrUtil.satisfied(normalizer.restr(ll)));
   }
 
   private boolean unifySeq(@NotNull ImmutableSeq<Term> l, @NotNull ImmutableSeq<Term> r) {
