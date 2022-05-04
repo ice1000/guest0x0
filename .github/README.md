@@ -54,6 +54,8 @@ Below is a snippet that already works in old versions:
 
 ```
 def transId (A : U) (a : A) : Eq A a ((\i. A) #{1=1} a) => refl A a
+def forward (A : I -> Type) (r : I) : A r -> A 1 =>
+  (\i. A (r \/ i)) #{r = 1}
 ```
 
 ### v0.11
