@@ -55,6 +55,11 @@ public class DeclsTest {
       "def feizhu (A : U) (a b : A) : [| i |] A { | 0 => a | 1 => b } => \\i. a"));
   }
 
+  @Test public void constantViolation() {
+    assertThrowsExactly(SPE.class, () -> tyck(
+      "def trauma (A : I -> U) (a : A 0) (i : I) : A i => (\\j. A (i /\\ j)) #{i = 1} a\n"));
+  }
+
   @Test public void connections() {
     tyck("def f (i j : I) : I => (j /\\ i) \\/ j /\\ ~ i");
     tyck("""
