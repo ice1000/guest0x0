@@ -5,7 +5,10 @@ import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
-import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.cubical.RestrUtil;
+import org.aya.guest0x0.syntax.BdryData;
+import org.aya.guest0x0.syntax.Def;
+import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.tyck.HCompPDF.Transps;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
@@ -81,7 +84,7 @@ public record Normalizer(
 
   public Restr<Term> restr(@NotNull Restr<Term> restr) {
     return switch (restr.fmap(this::term)) {
-      case Restr.Vary<Term> vary -> Restr.normalizeRestr(vary);
+      case Restr.Vary<Term> vary -> RestrUtil.normalizeRestr(vary);
       case Restr.Const<Term> c -> c;
     };
   }

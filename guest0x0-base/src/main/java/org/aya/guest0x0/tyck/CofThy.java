@@ -2,6 +2,7 @@ package org.aya.guest0x0.tyck;
 
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
+import org.aya.guest0x0.cubical.RestrUtil;
 import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,20 +33,6 @@ public record CofThy(@NotNull Restr<Term> restriction) {
   }
 
   public boolean satisfied() {
-    return switch (restriction) {
-      case Restr.Const c -> c.isTrue();
-      case Restr.Vary<Term> restr -> {
-        for (var or : restr.orz()) {
-          var satisfied = true;
-          for (var eq : or.ands()) {
-            var matchy = eq.inst().asFormula() instanceof Formula.Lit<?> lit
-              && lit.isLeft() == eq.isLeft();
-            satisfied = satisfied && matchy;
-          }
-          if (satisfied) yield true;
-        }
-        yield false;
-      }
-    };
+    return RestrUtil.satisfied(restriction);
   }
 }
