@@ -46,10 +46,8 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
    */
   static <E extends TermLike<E>> @NotNull Restr<E> normalizeRestr(Vary<E> vary) {
     var orz = MutableArrayList.<Cofib<E>>create(vary.orz().size());
-    for (var cof : vary.orz()) {
-      // This is a sequence of "or"s, so if any cof is true, the whole thing is true
-      if (normalizeCof(cof, orz)) return new Const<>(true);
-    }
+    // This is a sequence of "or"s, so if any cof is true, the whole thing is true
+    for (var cof : vary.orz()) if (normalizeCof(cof, orz)) return new Const<>(true);
     if (orz.isEmpty()) return new Const<>(false);
     return new Vary<>(orz.toImmutableArray());
   }

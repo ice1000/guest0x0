@@ -17,13 +17,11 @@ public record CofThy(@NotNull Restr<Term> restriction) {
           var derived = initial.derive();
           var unsat = false;
           for (var eq : or.ands()) {
-            if (eq.inst().asFormula() instanceof Formula.Lit<?> lit
-              && lit.isLeft() != eq.isLeft()
-            ) {
+            if (eq.inst().asFormula() instanceof Formula.Lit<?> lit && lit.isLeft() != eq.isLeft())
               unsat = true;
-            } else if (eq.inst() instanceof Term.Ref ref) {
+            else if (eq.inst() instanceof Term.Ref ref)
               derived.rho().put(ref.var(), Term.end(eq.isLeft()));
-            } else yield false;
+            else yield false;
           }
           if (unsat) continue; // Skip unsatisfiable cases
           if (!sat.test(derived)) yield false;
