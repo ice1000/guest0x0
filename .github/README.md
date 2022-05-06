@@ -18,7 +18,7 @@ Experimenting with some basic programming in Java 17 and see the following:
 
 + A "de Morgan flavored" cubical type theory with redtt flavored cubes (the so-called "extension types")'
 + A ✨new syntax✨ for cofibration theory that is more convenient for confluence checking and hopefully is equivalent to existing ones
-  + Update: it's not. The new syntax is implemented, tested, and removed.
+  + Update: it's not. The new syntax is implemented, tested, and removed for not working well with substitutions.
 + Inductive types with pattern matching (hopefully) and "simpler indices" (see my TyDe paper)
 + An equalizer of the first projection of evaluation and just the first projection :trollface:
 
@@ -50,7 +50,7 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ![image](https://user-images.githubusercontent.com/16398479/166834889-07041e0e-db7b-41b4-9081-282ab40b8e70.png)
 
-Below is a snippet that already works in old versions:
+Added some tests for cofibration substitution, fixed some pretty-printing bugs. Below is a snippet that already works in old versions:
 
 ```
 def transId (A : U) (a : A) : Eq A a ((\i. A) #{1=1} a) => refl A a

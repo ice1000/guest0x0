@@ -60,4 +60,19 @@ public class CofTest {
     assertDoc("(l = 0 /\\ k = 0) \\/ j = 1", substCof(
       "i = 0 \\/ j = 1", "i", "k \\/ l", "i", "j", "k", "l"));
   }
+
+  @Test public void substWithMin() {
+    // (i = 1 \/ j = 1) [i |-> k /\ l]
+    assertDoc("(l = 1 /\\ k = 1) \\/ j = 1", substCof(
+      "i = 1 \\/ j = 1", "i", "k /\\ l", "i", "j", "k", "l"));
+    // (i = 0 \/ j = 1) [i |-> k /\ l]
+    assertDoc("(k = 0 /\\ j = 1) \\/ (l = 0 /\\ j = 1)", substCof(
+      "i = 0 /\\ j = 1", "i", "k /\\ l", "i", "j", "k", "l"));
+    // (i = 1 \/ j = 1) [i |-> k /\ l]
+    assertDoc("j = 1 /\\ l = 1 /\\ k = 1", substCof(
+      "i = 1 /\\ j = 1", "i", "k /\\ l", "i", "j", "k", "l"));
+    // (i = 0 \/ j = 1) [i |-> k /\ l]
+    assertDoc("k = 0 \\/ l = 0 \\/ j = 1", substCof(
+      "i = 0 \\/ j = 1", "i", "k /\\ l", "i", "j", "k", "l"));
+  }
 }

@@ -13,7 +13,7 @@ expr
  | expr '.2' # snd
 
  // Type formers
- | (UNIV | INTERVAL | FACE_TY) # keyword
+ | (UNIV | INTERVAL) # keyword
  | <assoc=right> expr ARROW expr # simpFun
  | <assoc=right> expr TIMES expr # simpTup
  | PI param ARROW expr # pi
@@ -57,7 +57,6 @@ RIGHT : '1';
 LEFT : '0';
 UNIV : 'U' | 'Type';
 INTERVAL : 'I';
-FACE_TY : 'F';
 
 // Below are copy-and-paste from Aya. Plagiarism!! LOL
 

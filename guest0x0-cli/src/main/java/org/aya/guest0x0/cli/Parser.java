@@ -30,8 +30,7 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SndContext snd -> new Expr.Proj(sourcePosOf(snd), expr(snd.expr()), false);
       case Guest0x0Parser.KeywordContext trebor -> {
         var pos = sourcePosOf(trebor);
-        if (trebor.FACE_TY() != null) yield new Expr.PrimTy(pos, Expr.Keyword.F);
-        else if (trebor.UNIV() != null) yield new Expr.PrimTy(pos, Expr.Keyword.U);
+        if (trebor.UNIV() != null) yield new Expr.PrimTy(pos, Expr.Keyword.U);
         else /*if (trebor.INTERVAL() != null)*/ yield new Expr.PrimTy(pos, Expr.Keyword.I);
       }
       case Guest0x0Parser.LamContext lam -> buildLam(sourcePosOf(lam), Seq.wrapJava(lam.ID()).view()

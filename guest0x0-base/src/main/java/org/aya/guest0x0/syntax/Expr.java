@@ -34,7 +34,7 @@ public sealed interface Expr extends Docile, Restr.TermLike<Expr> {
   /** @param isOne it's a second projection if false */
   record Proj(@Override @NotNull SourcePos pos, @NotNull Expr t, boolean isOne) implements Expr {}
   record PrimTy(@Override @NotNull SourcePos pos, Keyword keyword) implements Expr {}
-  enum Keyword {U, I, F}
+  enum Keyword {U, I}
   record Hole(@Override @NotNull SourcePos pos, ImmutableSeq<LocalVar> accessible) implements Expr {}
   /** @param isPi it's a sigma if false */
   record DT(boolean isPi, @Override @NotNull SourcePos pos, Param<Expr> param, Expr cod) implements Expr {}
