@@ -44,4 +44,20 @@ public class CofTest {
     var cof = substCof("i = 0 \\/ j = 1", "i", "k", "i", "j", "k");
     assertDoc("k = 0 \\/ j = 1", cof);
   }
+
+  @Test public void substWithMax() {
+    // (i = 1 \/ j = 1) [i |-> k \/ l]
+    assertDoc("k = 1 \\/ l = 1 \\/ j = 1", substCof(
+      "i = 1 \\/ j = 1", "i", "k \\/ l", "i", "j", "k", "l"));
+    // (i = 0 \/ j = 1) [i |-> k \/ l]
+    assertDoc("(j = 1 /\\ l = 0 /\\ k = 0)", substCof(
+      "i = 0 /\\ j = 1", "i", "k \\/ l", "i", "j", "k", "l"));
+    // Counter-intuitive but correct!
+    // (i = 1 \/ j = 1) [i |-> k \/ l]
+    assertDoc("(k = 1 /\\ j = 1) \\/ (l = 1 /\\ j = 1)", substCof(
+      "i = 1 /\\ j = 1", "i", "k \\/ l", "i", "j", "k", "l"));
+    // (i = 0 \/ j = 1) [i |-> k \/ l]
+    assertDoc("(l = 0 /\\ k = 0) \\/ j = 1", substCof(
+      "i = 0 \\/ j = 1", "i", "k \\/ l", "i", "j", "k", "l"));
+  }
 }
