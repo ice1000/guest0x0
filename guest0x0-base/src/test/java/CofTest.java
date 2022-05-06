@@ -50,9 +50,9 @@ public class CofTest {
     assertDoc("k = 1 \\/ l = 1 \\/ j = 1", substCof(
       "i = 1 \\/ j = 1", "i", "k \\/ l", "i", "j", "k", "l"));
     // (i = 0 \/ j = 1) [i |-> k \/ l]
-    assertDoc("(j = 1 /\\ l = 0 /\\ k = 0)", substCof(
+    assertDoc("j = 1 /\\ l = 0 /\\ k = 0", substCof(
       "i = 0 /\\ j = 1", "i", "k \\/ l", "i", "j", "k", "l"));
-    // Counter-intuitive but correct!
+    // Counter-intuitive for people unfamiliar with lattice theory:
     // (i = 1 \/ j = 1) [i |-> k \/ l]
     assertDoc("(k = 1 /\\ j = 1) \\/ (l = 1 /\\ j = 1)", substCof(
       "i = 1 /\\ j = 1", "i", "k \\/ l", "i", "j", "k", "l"));

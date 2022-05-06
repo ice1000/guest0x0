@@ -37,10 +37,11 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
 
 
     @Override public @NotNull Doc toDoc() {
-      return Doc.join(spaced(Doc.symbol("\\/")), orz().view().map(or -> {
+      return Doc.join(spaced(Doc.symbol("\\/")), orz.view().map(or -> {
         var orDoc = Doc.join(spaced(Doc.symbol("/\\")), or.ands.view().map(and ->
           Doc.sep(and.inst.toDoc(), Doc.symbol("="), Doc.symbol(and.isLeft() ? "0" : "1"))));
-        return or.ands.sizeGreaterThan(1) ? Doc.parened(orDoc) : orDoc;
+        return or.ands.sizeGreaterThan(1) && orz.sizeGreaterThan(1)
+          ? Doc.parened(orDoc) : orDoc;
       }));
     }
 

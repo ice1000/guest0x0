@@ -14,9 +14,12 @@ import java.util.function.Predicate;
  * for normalization, simplification, satisfaction, etc.
  */
 public interface CofThy {
-  /** I'm sorry, I'm just too bad at writing while loops */
+  /**
+   * I'm sorry, I'm just too bad at writing while loops.
+   * Add <code>localOrz</code> into <code>conds</code>, and push the results into <code>combined</code>.
+   */
   static <T> void combineRecursively(
-    SeqView<Formula.Conn<T>> localOrz,
+    @NotNull SeqView<Formula.Conn<T>> localOrz,
     MutableStack<Restr.Cond<T>> conds,
     MutableList<Restr.Cofib<T>> combined
   ) {
@@ -171,9 +174,10 @@ public interface CofThy {
         for (var or : restr.orz()) {
           var satisfied = true;
           for (var eq : or.ands()) {
-            var matchy = eq.inst().asFormula() instanceof Formula.Lit<?> lit
-              && lit.isLeft() == eq.isLeft();
-            satisfied = satisfied && matchy;
+            if (!(eq.inst().asFormula() instanceof Formula.Lit<?> lit))
+              satisfied = false;
+            else if (lit.isLeft() != eq.isLeft())
+              satisfied = false;
           }
           if (satisfied) yield true;
         }
