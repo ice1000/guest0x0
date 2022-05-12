@@ -15,7 +15,7 @@ import static org.aya.guest0x0.syntax.Term.*;
  * </ul>
  */
 public interface HCompPDF {
-  record Transps(@NotNull Term cover, @NotNull Restr<Term> restr) {
+  record Transps(@NotNull Term cover, @NotNull Term.Cof restr) {
     public @NotNull Term inv() {
       return new Transp(mkLam("i", i -> cover.app(neg(i))), restr);
     }
@@ -25,12 +25,14 @@ public interface HCompPDF {
 
     public @NotNull Term fill(@NotNull LocalVar i) {
       var ri = new Ref(i);
-      return new Transp(mkLam("j", j -> cover.app(and(ri, j))), restr.or(new Restr.Cond<>(ri, true)));
+      return new Transp(mkLam("j", j -> cover.app(and(ri, j))),
+        new Cof(restr.restr().or(new Restr.Cond<>(ri, true))));
     }
 
     public @NotNull Term invFill(@NotNull LocalVar i) {
       var ri = new Ref(i);
-      return new Transp(mkLam("j", j -> cover.app(neg(and(neg(ri), j)))), restr.or(new Restr.Cond<>(ri, false)));
+      return new Transp(mkLam("j", j -> cover.app(neg(and(neg(ri), j)))),
+        new Cof(restr.restr().or(new Restr.Cond<>(ri, false))));
     }
   }
 }

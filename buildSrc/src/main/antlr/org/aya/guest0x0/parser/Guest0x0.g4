@@ -13,11 +13,12 @@ expr
  | expr '.2' # snd
 
  // Type formers
- | (UNIV | INTERVAL) # keyword
+ | (UNIV | INTERVAL | FACE_TY) # keyword
  | <assoc=right> expr ARROW expr # simpFun
  | <assoc=right> expr TIMES expr # simpTup
  | PI param ARROW expr # pi
  | SIG param TIMES expr # sig
+ | 'Sub' expr '[|' expr '|->' expr ']' # sub
 
  // Introduction lures
  | LAM ID+ '.' expr # lam
@@ -26,10 +27,11 @@ expr
  // Others
  | ID # ref
  | '(' expr ')' # paren
+ | (cof (OR cof)* | TRUTH | ABSURD) # restr
 
  // Cubical features
  | '[|' ID+ '|]' expr '{' boundary* '}' # cube
- | expr '#{' psi '}' # trans
+ | expr '#{' expr '}' # trans
  | iPat # iLit
  | '~' expr # inv
  | expr (AND | OR) expr # iConn
@@ -37,7 +39,6 @@ expr
 
 cond : ID '=' (LEFT | RIGHT);
 cof : cond (AND cond)*;
-psi : cof (OR cof)* | TRUTH | ABSURD;
 iPat : LEFT | RIGHT | '_';
 AND : '/\\' | '\u2227';
 OR : '\\/' | '\u2228';
@@ -57,6 +58,7 @@ RIGHT : '1';
 LEFT : '0';
 UNIV : 'U' | 'Type';
 INTERVAL : 'I';
+FACE_TY : 'F';
 
 // Below are copy-and-paste from Aya. Plagiarism!! LOL
 

@@ -6,7 +6,6 @@ import kala.tuple.Tuple;
 import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
-import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.LocalVar;
@@ -30,7 +29,7 @@ public class Unifier {
         && untyped(ldt.cod(), rhs(rdt.cod(), rdt.param().x(), ldt.param().x()));
       case Term.Proj lproj && r instanceof Term.Proj rproj ->
         lproj.isOne() == rproj.isOne() && untyped(lproj.t(), rproj.t());
-      case Term.UI lu && r instanceof Term.UI ru -> lu.isU() == ru.isU();
+      case Term.UI lu && r instanceof Term.UI ru -> lu.keyword() == ru.keyword();
       case Term.Call lcall && r instanceof Term.Call rcall -> lcall.fn() == rcall.fn()
         && lcall.args().sameElements(rcall.args(), true);
       case Term.PLam plam && r instanceof Term.PLam pram && plam.dims().sizeEquals(pram.dims()) ->
@@ -40,19 +39,20 @@ public class Unifier {
         untyped(lpcall.p(), rpcall.p()) && unifySeq(lpcall.i(), rpcall.i());
       case Term.Mula lf && r instanceof Term.Mula rf -> formulae(lf.asFormula(), rf.asFormula());
       case Term.Transp ltp && r instanceof Term.Transp rtp ->
-        untyped(ltp.cover(), rtp.cover()) && restr(ltp.restr(), rtp.restr());
+        untyped(ltp.cover(), rtp.cover()) && untyped(ltp.restr(), rtp.restr());
+      case Term.Cof lcof && r instanceof Term.Cof rcof -> {
+        var initial = new Normalizer(MutableMap.create(), MutableMap.create());
+        var ll = lcof.restr();
+        var rr = rcof.restr();
+        yield CofThy.vdash(ll, initial, normalizer -> CofThy.satisfied(normalizer.restr(rr)))
+          && CofThy.vdash(rr, initial, normalizer -> CofThy.satisfied(normalizer.restr(ll)));
+      }
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };
     if (!happy && data == null)
       data = new FailureData(l, r);
     return happy;
-  }
-
-  private boolean restr(Restr<Term> ll, Restr<Term> rr) {
-    var initial = new Normalizer(MutableMap.create(), MutableMap.create());
-    return CofThy.vdash(ll, initial, normalizer -> CofThy.satisfied(normalizer.restr(rr)))
-      && CofThy.vdash(rr, initial, normalizer -> CofThy.satisfied(normalizer.restr(ll)));
   }
 
   private boolean unifySeq(@NotNull ImmutableSeq<Term> l, @NotNull ImmutableSeq<Term> r) {

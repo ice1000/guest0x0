@@ -144,7 +144,7 @@ public record Elaborator(
   public Synth synth(Expr expr) {
     var synth = switch (expr) {
       // TODO implement face type in core
-      case Expr.PrimTy u -> new Synth(new Term.UI(u.keyword() == Expr.Keyword.U), Term.U);
+      case Expr.PrimTy u -> new Synth(new Term.UI(u.keyword()), Term.U);
       case Expr.Resolved resolved -> {
         var type = gamma.getOrNull(resolved.ref());
         if (type != null) yield new Synth(new Term.Ref(resolved.ref()), type);
@@ -186,7 +186,7 @@ public record Elaborator(
       case Expr.Path path -> {
         var dims = path.data().dims();
         for (var dim : dims) gamma.put(dim, Term.I);
-        var ty = inherit(path.data().type(), new Term.UI(true));
+        var ty = inherit(path.data().type(), Term.U);
         var boundaries = MutableArrayList.<Boundary<Term>>create(path.data().boundaries().size());
         for (var boundary : path.data().boundaries()) {
           if (!dims.sizeEquals(boundary.face().pats())) throw new SPE(path.pos(),
@@ -205,24 +205,30 @@ public record Elaborator(
           new Formula.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);
         case Formula.Lit lit -> new Synth(Term.end(lit.isLeft()), Term.I);
       };
+      case Expr.Cof cof -> new Synth(
+        new Term.Cof(cof.data().mapCond(c ->
+          new Restr.Cond<>(inherit(c.inst(), Term.I), c.isLeft()))
+        ), Term.F);
       case Expr.Transp transp -> {
         var cover = inherit(transp.cover(), Term.mkPi(Term.I, Term.U));
         var detective = new AltF7(new LocalVar("?"));
         var sample = cover.app(new Term.Ref(detective.var()));
         var ty = Term.mkPi(cover.app(Term.end(true)), cover.app(Term.end(false)));
-        var psi = transp.restr().mapCond(c -> new Restr.Cond<>(inherit(c.inst(), Term.I), c.isLeft()));
+        var restrRaw = inherit(transp.restr(), Term.F);
+        if (!(restrRaw instanceof Term.Cof cof))
+          throw new SPE(transp.restr().pos(), Doc.english("Expects a cofibration literal, got"), restrRaw);
         // I believe find-usages is slightly more efficient than what Huber wrotes in hcomp.pdf
         var capture = new Object() {
           Term under = sample;
         };
         // I want it to have no references, so !detective.press(), and if it returns true, it means no problem
         // So if it returns false then we're in trouble
-        if (!CofThy.vdash(psi, normalizer(), n -> !detective.press(capture.under = n.term(sample))))
+        if (!CofThy.vdash(cof.restr(), normalizer(), n -> !detective.press(capture.under = n.term(sample))))
           throw new SPE(transp.pos(), Doc.english("The cover"), cover,
-            Doc.english("has to be constant under the cofibration"), psi,
+            Doc.english("has to be constant under the cofibration"), cof,
             Doc.english("but applying a variable `?` to it results in"), capture.under,
             Doc.english("which contains a reference to `?`, oh no"));
-        yield new Synth(new Term.Transp(cover, psi), ty);
+        yield new Synth(new Term.Transp(cover, cof), ty);
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };

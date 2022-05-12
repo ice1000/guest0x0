@@ -77,8 +77,8 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
   static @NotNull Term mkPi(@NotNull Term dom, @NotNull Term cod) {
     return new Term.DT(true, new Param<>(new LocalVar("_"), dom), cod);
   }
-  @NotNull Term U = new UI(true), I = new UI(false);
-  record UI(boolean isU) implements Term {}
+  @NotNull Term U = new UI(Keyword.U), I = new UI(Keyword.I), F = new UI(Keyword.F);
+  record UI(@NotNull Keyword keyword) implements Term {}
   record Path(@NotNull BdryData<Term> data) implements Term {}
   record PLam(@NotNull ImmutableSeq<LocalVar> dims, @NotNull Term fill) implements Term {}
   record PCall(@NotNull Term p, @NotNull ImmutableSeq<Term> i, @NotNull BdryData<Term> b) implements Term {}
@@ -88,5 +88,10 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
   static @NotNull Term conn(boolean isAnd, @NotNull Term l, @NotNull Term r) {return new Mula(new Formula.Conn<>(isAnd, l, r));}
   static @NotNull Term and(@NotNull Term l, @NotNull Term r) {return conn(true, l, r);}
   static @NotNull Term or(@NotNull Term l, @NotNull Term r) {return conn(false, l, r);}
-  record Transp(@NotNull Term cover, @NotNull Restr<Term> restr) implements Term {}
+  record Transp(@NotNull Term cover, @NotNull Cof restr) implements Term {}
+  record Cof(@NotNull Restr<Term> restr) implements Term {
+    public @NotNull Cof fmap(@NotNull Function<Term, Term> f) {
+      return new Cof(restr.fmap(f));
+    }
+  }
 }

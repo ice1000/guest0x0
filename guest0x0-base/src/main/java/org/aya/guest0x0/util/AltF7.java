@@ -10,7 +10,7 @@ public record AltF7(@NotNull LocalVar var) {
     return switch (term) {
       case Term.Ref r -> r.var() == var;
       case Term.Lam lam -> press(lam.body());
-      case Term.Transp transp -> press(transp.cover());
+      case Term.Transp transp -> press(transp.cover()) || press(transp.restr());
       case Term.PCall pCall -> press(pCall.p()) || pCall.i().anyMatch(this::press) || boundaries(pCall.b());
       case Term.PLam pLam -> press(pLam.fill());
       case Term.Call call -> call.fn() == var || call.args().anyMatch(this::press);
@@ -20,6 +20,7 @@ public record AltF7(@NotNull LocalVar var) {
       case Term.DT dt -> press(dt.param().type()) || press(dt.cod());
       case Term.Path path -> boundaries(path.data());
       case Term.Mula mula -> formula(mula.asFormula());
+      case Term.Cof cof -> false; // TODO
     };
   }
 

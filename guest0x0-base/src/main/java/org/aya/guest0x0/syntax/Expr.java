@@ -33,12 +33,12 @@ public sealed interface Expr extends Docile, Restr.TermLike<Expr> {
   }
   /** @param isOne it's a second projection if false */
   record Proj(@Override @NotNull SourcePos pos, @NotNull Expr t, boolean isOne) implements Expr {}
-  record PrimTy(@Override @NotNull SourcePos pos, Keyword keyword) implements Expr {}
-  enum Keyword {U, I}
+  record PrimTy(@Override @NotNull SourcePos pos, @NotNull Keyword keyword) implements Expr {}
   record Hole(@Override @NotNull SourcePos pos, ImmutableSeq<LocalVar> accessible) implements Expr {}
   /** @param isPi it's a sigma if false */
   record DT(boolean isPi, @Override @NotNull SourcePos pos, Param<Expr> param, Expr cod) implements Expr {}
   record Path(@Override @NotNull SourcePos pos, @NotNull BdryData<Expr> data) implements Expr {}
   record Mula(@Override @NotNull SourcePos pos, @Override @NotNull Formula<Expr> asFormula) implements Expr {}
-  record Transp(@Override @NotNull SourcePos pos, @NotNull Expr cover, @NotNull Restr<Expr> restr) implements Expr {}
+  record Transp(@Override @NotNull SourcePos pos, @NotNull Expr cover, @NotNull Expr restr) implements Expr {}
+  record Cof(@Override @NotNull SourcePos pos, @NotNull Restr<Expr> data) implements Expr {}
 }

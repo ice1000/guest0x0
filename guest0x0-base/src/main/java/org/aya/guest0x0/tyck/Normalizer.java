@@ -8,6 +8,7 @@ import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.BdryData;
 import org.aya.guest0x0.syntax.Def;
+import org.aya.guest0x0.syntax.Keyword;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.tyck.HCompPDF.Transps;
 import org.aya.guest0x0.util.LocalVar;
@@ -81,11 +82,12 @@ public record Normalizer(
         yield heaven != null ? heaven : new Term.PCall(p, i, pApp.b().fmap(this::term));
       }
       case Term.Mula f -> formulae(f.asFormula().fmap(this::term));
+      case Term.Cof cof -> new Term.Cof(restr(cof.restr()));
       case Term.Transp transp -> {
-        var parkerLiu = restr(transp.restr());
+        var parkerLiu = restr(transp.restr().restr());
         // Because of his talk about lax 2-functors!
         if (CofThy.satisfied(parkerLiu)) yield Term.id("x");
-        yield transp(new LocalVar("i"), term(transp.cover()), parkerLiu);
+        yield transp(new LocalVar("i"), term(transp.cover()), new Term.Cof(parkerLiu));
       }
     };
   }
@@ -97,25 +99,25 @@ public record Normalizer(
     };
   }
 
-  private Term transp(LocalVar i, Term cover, Restr<Term> restr) {
+  private Term transp(LocalVar i, Term cover, Term.Cof cof) {
     return switch (cover.app(new Term.Ref(i))) {
       case Term.DT dt && dt.isPi() -> Term.mkLam("f", u0 -> Term.mkLam("x", v -> {
-        var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), restr);
+        var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), cof);
         var w = laptop.invFill(i).app(v);
         // w0 = w.subst(i, 0), according to Minghao Liu
         var w0 = laptop.inv().app(v);
         var cod = rename(new Term.Lam(i, dt.codomain(w)));
-        return new Term.Transp(cod, restr).app(u0.app(w0));
+        return new Term.Transp(cod, cof).app(u0.app(w0));
       }));
-      case Term.UI u && u.isU() -> Term.id("u");
+      case Term.UI u && u.keyword() == Keyword.U -> Term.id("u");
       case Term.DT dt /*&& !dt.isPi()*/ -> Term.mkLam("t", u0 -> {
-        var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), restr);
+        var laptop = new Transps(rename(new Term.Lam(i, dt.param().type())), cof);
         // Simon Huber wrote u0.1 both with and without parentheses, extremely confusing!!
         var v = laptop.fill(i).app(u0.proj(true));
         return new Term.Two(false, laptop.mk().app(u0.proj(true)),
-          new Term.Transp(rename(new Term.Lam(i, dt.codomain(v))), restr).app(u0.proj(false)));
+          new Term.Transp(rename(new Term.Lam(i, dt.codomain(v))), cof).app(u0.proj(false)));
       });
-      default -> new Term.Transp(cover, restr);
+      default -> new Term.Transp(cover, cof);
     };
   }
 
@@ -194,6 +196,7 @@ public record Normalizer(
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
         case Term.Mula f -> new Term.Mula(f.asFormula().fmap(this::term));
         case Term.Transp transp -> new Term.Transp(term(transp.cover()), transp.restr().fmap(this::term));
+        case Term.Cof cof -> cof.fmap(this::term);
       };
     }
 

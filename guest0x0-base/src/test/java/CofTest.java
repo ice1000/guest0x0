@@ -5,6 +5,7 @@ import kala.tuple.Tuple2;
 import org.aya.guest0x0.cli.CliMain;
 import org.aya.guest0x0.cli.Parser;
 import org.aya.guest0x0.cubical.Restr;
+import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Normalizer;
@@ -22,7 +23,8 @@ public class CofTest {
   public Restr<Term> substCof(@Language("TEXT") String s, String i, @Language("TEXT") String to, String... vars) {
     var context = context(vars);
     var parser = new Parser(SourceFile.NONE);
-    var raw = parser.restr(CliMain.parser(s).psi()).fmap(context._1::expr);
+    var raw = parser.restr((Guest0x0Parser.RestrContext) CliMain.parser(s).expr())
+      .fmap(context._1::expr);
     var cof = raw.mapCond(c -> new Restr.Cond<>(context._2.inherit(c.inst(), Term.I), c.isLeft()));
     var tot = context._2.inherit(context._1.expr(parser.expr(CliMain.parser(to).expr())), Term.I);
     var subst = new Normalizer(context._2.sigma(), MutableMap.of(context._1.env().get(i), tot));

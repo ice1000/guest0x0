@@ -45,9 +45,14 @@ public interface Distiller {
       case Expr.Hole ignored -> Doc.symbol("_");
       case Expr.Mula e -> formulae(Distiller::expr, e.asFormula(), envPrec);
       case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.restr());
+      case Expr.Cof cof -> {
+        var doc = cof.data().toDoc();
+        // Well, hopefully I guessed the precedence right.
+        yield envPrec.ordinal() > AppSpine.ordinal() ? Doc.parened(doc) : doc;
+      }
     };
   }
-  private static <E extends Restr.TermLike<E>> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Restr<E> restr) {
+  private static <E extends Restr.TermLike<E>> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Docile restr) {
     var doc = Doc.sep(f.apply(cover, Transp), Doc.symbol("#{"), restr.toDoc(), Doc.symbol("}"));
     return envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
   }
@@ -74,7 +79,7 @@ public interface Distiller {
         var doc = dependentType(dt.isPi(), dt.param(), term(dt.cod(), Cod));
         yield envPrec.ordinal() > Cod.ordinal() ? Doc.parened(doc) : doc;
       }
-      case Term.UI ui -> Doc.plain(ui.isU() ? "U" : "I");
+      case Term.UI ui -> Doc.plain(ui.keyword().name());
       case Term.Ref ref -> Doc.plain(ref.var().name());
       case Term.Path path -> path.data().toDoc();
       case Term.Lam lam -> {
@@ -109,6 +114,10 @@ public interface Distiller {
       }
       case Term.Mula f -> formulae(Distiller::term, f.asFormula(), envPrec);
       case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.restr());
+      case Term.Cof cof -> {
+        var doc = cof.restr().toDoc();
+        yield envPrec.ordinal() > AppSpine.ordinal() ? Doc.parened(doc) : doc;
+      }
     };
   }
 }

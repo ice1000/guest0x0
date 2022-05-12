@@ -85,10 +85,8 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
         yield new Expr.Path(path.pos(), data);
       }
       case Expr.Mula f -> new Expr.Mula(f.pos(), f.asFormula().fmap(this::expr));
-      case Expr.Transp transp -> {
-        var ands = transp.restr().fmap(this::expr);
-        yield new Expr.Transp(transp.pos(), expr(transp.cover()), ands);
-      }
+      case Expr.Transp transp -> new Expr.Transp(transp.pos(), expr(transp.cover()), expr(transp.restr()));
+      case Expr.Cof cof -> new Expr.Cof(cof.pos(), cof.data().fmap(this::expr));
     };
   }
 
