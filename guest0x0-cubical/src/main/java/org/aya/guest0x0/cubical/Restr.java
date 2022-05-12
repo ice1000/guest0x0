@@ -1,5 +1,6 @@
 package org.aya.guest0x0.cubical;
 
+import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
@@ -15,6 +16,7 @@ import java.util.function.Function;
  * @see CofThy for cofibration operations
  */
 public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
+  @NotNull SeqView<E> instView();
   interface TermLike<E extends TermLike<E>> extends Docile {
     default @Nullable Formula<E> asFormula() {return null;}
   }
@@ -22,6 +24,10 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
   Restr<E> or(Cond<E> cond);
   <T extends TermLike<T>> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f);
   record Vary<E extends TermLike<E>>(@NotNull ImmutableSeq<Cofib<E>> orz) implements Restr<E> {
+    @Override public @NotNull SeqView<E> instView() {
+      return orz.view().flatMap(Cofib::view);
+    }
+
     @Override public Vary<E> fmap(@NotNull Function<E, E> g) {
       return new Vary<>(orz.map(x -> x.rename(g)));
     }
@@ -33,7 +39,6 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
     @Override public <T extends TermLike<T>> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f) {
       return new Vary<>(orz.map(x -> new Cofib<>(x.ands.map(f))));
     }
-
 
 
     @Override public @NotNull Doc toDoc() {
@@ -50,6 +55,10 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
     }
   }
   record Const<E extends TermLike<E>>(boolean isTrue) implements Restr<E> {
+    @Override public @NotNull SeqView<E> instView() {
+      return SeqView.empty();
+    }
+
     @Override public Const<E> fmap(@NotNull Function<E, E> g) {
       return this;
     }
@@ -74,6 +83,10 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
   record Cofib<E>(@NotNull ImmutableSeq<Cond<E>> ands) {
     public Cofib<E> rename(@NotNull Function<E, E> g) {
       return new Cofib<>(ands.map(c -> c.rename(g)));
+    }
+
+    public @NotNull SeqView<E> view() {
+      return ands.view().map(and -> and.inst);
     }
   }
 }

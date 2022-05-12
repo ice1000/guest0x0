@@ -1,7 +1,7 @@
 package org.aya.guest0x0.util;
 
-import org.aya.guest0x0.syntax.BdryData;
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.syntax.BdryData;
 import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +20,7 @@ public record AltF7(@NotNull LocalVar var) {
       case Term.DT dt -> press(dt.param().type()) || press(dt.cod());
       case Term.Path path -> boundaries(path.data());
       case Term.Mula mula -> formula(mula.asFormula());
-      case Term.Cof cof -> false; // TODO
+      case Term.Cof cof -> cof.restr().instView().anyMatch(this::press);
     };
   }
 
