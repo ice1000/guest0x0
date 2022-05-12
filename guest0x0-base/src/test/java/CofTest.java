@@ -5,7 +5,7 @@ import kala.tuple.Tuple2;
 import org.aya.guest0x0.cli.CliMain;
 import org.aya.guest0x0.cli.Parser;
 import org.aya.guest0x0.cubical.Restr;
-import org.aya.guest0x0.parser.Guest0x0Parser;
+import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Normalizer;
@@ -20,11 +20,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CofTest {
-  public Restr<Term> substCof(@Language("TEXT") String s, String i, @Language("TEXT") String to, String... vars) {
+  public @NotNull Restr<Term> substCof(@Language("TEXT") String s, String i, @Language("TEXT") String to, String... vars) {
     var context = context(vars);
     var parser = new Parser(SourceFile.NONE);
-    var raw = parser.restr((Guest0x0Parser.RestrContext) CliMain.parser(s).expr())
-      .fmap(context._1::expr);
+    var parsed = parser.expr(CliMain.parser(s).expr());
+    var raw = ((Expr.Cof) parsed).data().fmap(context._1::expr);
     var cof = raw.mapCond(c -> new Restr.Cond<>(context._2.inherit(c.inst(), Term.I), c.isLeft()));
     var tot = context._2.inherit(context._1.expr(parser.expr(CliMain.parser(to).expr())), Term.I);
     var subst = new Normalizer(context._2.sigma(), MutableMap.of(context._1.env().get(i), tot));
@@ -39,42 +39,42 @@ public class CofTest {
   }
 
   private static void assertDoc(@Language("TEXT") String expected, Docile actual) {
-    assertEquals(expected, actual.toDoc().renderWithPageWidth(80, false));
+    assertEquals(expected, actual.toDoc().commonRender());
   }
 
   @Test public void simpleSubst() {
-    var cof = substCof("i = 0 \\/ j = 1", "i", "k", "i", "j", "k");
-    assertDoc("k = 0 \\/ j = 1", cof);
+    var cof = substCof("i = 0 ∨ j = 1", "i", "k", "i", "j", "k");
+    assertDoc("k = 0 ∨ j = 1", cof);
   }
 
   @Test public void substWithMax() {
     // (i = 1 \/ j = 1) [i |-> k \/ l]
-    assertDoc("k = 1 \\/ l = 1 \\/ j = 1", substCof(
-      "i = 1 \\/ j = 1", "i", "k \\/ l", "i", "j", "k", "l"));
+    assertDoc("k = 1 ∨ l = 1 ∨ j = 1", substCof(
+      "i = 1 ∨ j = 1", "i", "k ∨ l", "i", "j", "k", "l"));
     // (i = 0 \/ j = 1) [i |-> k \/ l]
-    assertDoc("j = 1 /\\ l = 0 /\\ k = 0", substCof(
-      "i = 0 /\\ j = 1", "i", "k \\/ l", "i", "j", "k", "l"));
+    assertDoc("j = 1 ∧ l = 0 ∧ k = 0", substCof(
+      "i = 0 ∧ j = 1", "i", "k ∨ l", "i", "j", "k", "l"));
     // Counter-intuitive for people unfamiliar with lattice theory:
     // (i = 1 \/ j = 1) [i |-> k \/ l]
-    assertDoc("(k = 1 /\\ j = 1) \\/ (l = 1 /\\ j = 1)", substCof(
-      "i = 1 /\\ j = 1", "i", "k \\/ l", "i", "j", "k", "l"));
+    assertDoc("(k = 1 ∧ j = 1) ∨ (l = 1 ∧ j = 1)", substCof(
+      "i = 1 ∧ j = 1", "i", "k ∨ l", "i", "j", "k", "l"));
     // (i = 0 \/ j = 1) [i |-> k \/ l]
-    assertDoc("(l = 0 /\\ k = 0) \\/ j = 1", substCof(
-      "i = 0 \\/ j = 1", "i", "k \\/ l", "i", "j", "k", "l"));
+    assertDoc("(l = 0 ∧ k = 0) ∨ j = 1", substCof(
+      "i = 0 ∨ j = 1", "i", "k ∨ l", "i", "j", "k", "l"));
   }
 
   @Test public void substWithMin() {
     // (i = 1 \/ j = 1) [i |-> k /\ l]
-    assertDoc("(l = 1 /\\ k = 1) \\/ j = 1", substCof(
-      "i = 1 \\/ j = 1", "i", "k /\\ l", "i", "j", "k", "l"));
+    assertDoc("(l = 1 ∧ k = 1) ∨ j = 1", substCof(
+      "i = 1 ∨ j = 1", "i", "k ∧ l", "i", "j", "k", "l"));
     // (i = 0 \/ j = 1) [i |-> k /\ l]
-    assertDoc("(k = 0 /\\ j = 1) \\/ (l = 0 /\\ j = 1)", substCof(
-      "i = 0 /\\ j = 1", "i", "k /\\ l", "i", "j", "k", "l"));
+    assertDoc("(k = 0 ∧ j = 1) ∨ (l = 0 ∧ j = 1)", substCof(
+      "i = 0 ∧ j = 1", "i", "k ∧ l", "i", "j", "k", "l"));
     // (i = 1 \/ j = 1) [i |-> k /\ l]
-    assertDoc("j = 1 /\\ l = 1 /\\ k = 1", substCof(
-      "i = 1 /\\ j = 1", "i", "k /\\ l", "i", "j", "k", "l"));
+    assertDoc("j = 1 ∧ l = 1 ∧ k = 1", substCof(
+      "i = 1 ∧ j = 1", "i", "k ∧ l", "i", "j", "k", "l"));
     // (i = 0 \/ j = 1) [i |-> k /\ l]
-    assertDoc("k = 0 \\/ l = 0 \\/ j = 1", substCof(
-      "i = 0 \\/ j = 1", "i", "k /\\ l", "i", "j", "k", "l"));
+    assertDoc("k = 0 ∨ l = 0 ∨ j = 1", substCof(
+      "i = 0 ∨ j = 1", "i", "k ∧ l", "i", "j", "k", "l"));
   }
 }
