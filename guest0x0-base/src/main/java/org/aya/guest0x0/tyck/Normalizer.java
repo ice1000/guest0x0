@@ -20,6 +20,10 @@ public record Normalizer(
   @NotNull MutableMap<LocalVar, Def<Term>> sigma,
   @NotNull MutableMap<LocalVar, Term> rho
 ) implements CofThy.SubstObj<Term, LocalVar, Normalizer> {
+  public static @NotNull Normalizer create() {
+    return new Normalizer(MutableMap.create(), MutableMap.create());
+  }
+
   public static @NotNull Term rename(@NotNull Term term) {
     return new Renamer(MutableMap.create()).term(term);
   }

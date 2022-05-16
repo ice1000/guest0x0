@@ -41,7 +41,7 @@ public class Unifier {
       case Term.Transp ltp && r instanceof Term.Transp rtp ->
         untyped(ltp.cover(), rtp.cover()) && untyped(ltp.restr(), rtp.restr());
       case Term.Cof lcof && r instanceof Term.Cof rcof -> {
-        var initial = new Normalizer(MutableMap.create(), MutableMap.create());
+        var initial = Normalizer.create();
         var ll = lcof.restr();
         var rr = rcof.restr();
         yield CofThy.vdash(ll, initial, normalizer -> CofThy.satisfied(normalizer.restr(rr)))
@@ -53,6 +53,11 @@ public class Unifier {
     if (!happy && data == null)
       data = new FailureData(l, r);
     return happy;
+  }
+
+  /** Daniel Gratzer used <code>N</code> when explaining these to me */
+  private boolean clause(@NotNull Term.SysClause clause, @NotNull Term n) {
+    return CofThy.vdash(clause.cof().restr(), Normalizer.create(), subst -> untyped(clause.u(), subst.term(n)));
   }
 
   private boolean unifySeq(@NotNull ImmutableSeq<Term> l, @NotNull ImmutableSeq<Term> r) {
