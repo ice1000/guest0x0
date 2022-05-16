@@ -9,7 +9,10 @@ import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.parser.Guest0x0Parser;
-import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.syntax.BdryData;
+import org.aya.guest0x0.syntax.Def;
+import org.aya.guest0x0.syntax.Expr;
+import org.aya.guest0x0.syntax.Keyword;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
 import org.aya.repl.antlr.AntlrUtil;
@@ -58,11 +61,19 @@ public record Parser(@NotNull SourceFile source) {
     };
   }
 
+  private @NotNull Expr.SysClause clause(@NotNull Guest0x0Parser.SubSystemContext clause) {
+    return new Expr.SysClause(cofib(clause.cof()), expr(clause.expr()));
+  }
+
   public @NotNull Restr<Expr> restr(Guest0x0Parser.RestrContext psi) {
     if (psi.ABSURD() != null) return new Restr.Const<>(false);
     if (psi.TRUTH() != null) return new Restr.Const<>(true);
-    return new Restr.Vary<>(Seq.wrapJava(psi.cof()).map(cof -> new Restr.Cofib<>(Seq.wrapJava(cof.cond())
-      .map(c -> new Restr.Cond<>(new Expr.Unresolved(sourcePosOf(c), c.ID().getText()), c.LEFT() != null)))));
+    return new Restr.Vary<>(Seq.wrapJava(psi.cof()).map(this::cofib));
+  }
+
+  private @NotNull Restr.Cofib<Expr> cofib(Guest0x0Parser.CofContext cof) {
+    return new Restr.Cofib<>(Seq.wrapJava(cof.cond())
+      .map(c -> new Restr.Cond<>(new Expr.Unresolved(sourcePosOf(c), c.ID().getText()), c.LEFT() != null)));
   }
 
   @NotNull private ImmutableSeq<LocalVar> localVars(List<TerminalNode> ids) {
