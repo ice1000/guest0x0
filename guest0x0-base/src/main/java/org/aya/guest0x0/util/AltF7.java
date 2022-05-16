@@ -22,6 +22,8 @@ public record AltF7(@NotNull LocalVar var) {
       case Term.Mula mula -> formula(mula.asFormula());
       case Term.Cof cof -> cof.restr().instView().anyMatch(this::press);
       case Term.PartTy par -> press(par.ty()) || press(par.restr());
+      case Term.PartEl par -> par.clauses().anyMatch(clause ->
+        press(clause.u()) || clause.cof().view().anyMatch(this::press));
     };
   }
 

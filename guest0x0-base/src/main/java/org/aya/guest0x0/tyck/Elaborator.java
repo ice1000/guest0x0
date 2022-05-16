@@ -206,6 +206,7 @@ public record Elaborator(
         case Formula.Lit lit -> new Synth(Term.end(lit.isLeft()), Term.I);
       };
       case Expr.Cof cof -> new Synth(new Term.Cof(cof.data().mapCond(this::condition)), Term.F);
+      case Expr.PartTy par -> new Synth(new Term.PartTy(inherit(par.ty(), Term.U), cof(par.restr())), Term.U);
       case Expr.Transp transp -> {
         var cover = inherit(transp.cover(), Term.mkPi(Term.I, Term.U));
         var detective = new AltF7(new LocalVar("?"));

@@ -1,6 +1,7 @@
 package org.aya.guest0x0.tyck;
 
 import kala.collection.immutable.ImmutableSeq;
+import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.cubical.CofThy;
@@ -95,6 +96,14 @@ public record Normalizer(
       }
       case Term.PartTy par -> new Term.PartTy(term(par.ty()),
         new Term.Cof(restr(par.restr().restr())));
+      case Term.PartEl par -> {
+        var clauses = MutableArrayList.<Term.SysClause>create();
+        for (var clause : par.clauses()) {
+          var u = term(clause.u());
+          CofThy.normalizeCof(clause.cof(), clauses, cofib -> new Term.SysClause(cofib, u));
+        }
+        yield new Term.PartEl(clauses.toImmutableArray());
+      }
     };
   }
 
@@ -204,6 +213,8 @@ public record Normalizer(
         case Term.Transp transp -> new Term.Transp(term(transp.cover()), transp.restr().fmap(this::term));
         case Term.Cof cof -> cof.fmap(this::term);
         case Term.PartTy par -> new Term.PartTy(term(par.ty()), par.restr().fmap(this::term));
+        case Term.PartEl par -> new Term.PartEl(par.clauses().map(clause ->
+          new Term.SysClause(clause.cof().rename(this::term), clause.u())));
       };
     }
 
