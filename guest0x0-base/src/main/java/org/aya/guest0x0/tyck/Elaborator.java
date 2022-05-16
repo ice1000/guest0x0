@@ -214,9 +214,7 @@ public record Elaborator(
         var detective = new AltF7(new LocalVar("?"));
         var sample = cover.app(new Term.Ref(detective.var()));
         var ty = Term.mkPi(cover.app(Term.end(true)), cover.app(Term.end(false)));
-        var restrRaw = inherit(transp.restr(), Term.F);
-        if (!(restrRaw instanceof Term.Cof cof))
-          throw new SPE(transp.restr().pos(), Doc.english("Expects a cofibration literal, got"), restrRaw);
+        var cof = cof(transp.restr());
         // I believe find-usages is slightly more efficient than what Huber wrotes in hcomp.pdf
         var capture = new Object() {
           Term under = sample;
@@ -240,6 +238,18 @@ public record Elaborator(
         Term.mkPi(dims.map(x -> new Param<>(x, Term.I)), path.data().type()));
     } else return new Synth(synth.wellTyped, type);
   }
+
+  private @NotNull Term.Cof cof(@NotNull Expr restr) {
+    var restrRaw = inherit(restr, Term.F);
+    if (!(restrRaw instanceof Term.Cof cof))
+      throw new SPE(restr.pos(), Doc.english("Expects a cofibration literal, got"), restrRaw);
+    return cof;
+  }
+
+  // private @NotNull Term.SysClause clause(@NotNull Expr.SysClause clause, @NotNull Term term) {
+  //   var cof = inherit(clause.phi(), Term.F);
+  //   return new Term.SysClause(cof, );
+  // }
 
   private @NotNull Normalizer jonSterling(SeqView<LocalVar> dims, Boundary.Face face) {
     return new Normalizer(sigma, MutableMap.from(dims

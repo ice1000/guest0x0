@@ -92,7 +92,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
   }
 
   private @NotNull Expr.SysClause clause(@NotNull Expr.SysClause clause) {
-    return new Expr.SysClause(expr(clause.phi()), expr(clause.u()));
+    return new Expr.SysClause(clause.phi().rename(this::expr), expr(clause.u()));
   }
 
   private @NotNull Expr bodied(LocalVar x, Expr expr) {

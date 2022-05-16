@@ -41,7 +41,7 @@ public sealed interface Expr extends Docile, Restr.TermLike<Expr> {
   record Mula(@Override @NotNull SourcePos pos, @Override @NotNull Formula<Expr> asFormula) implements Expr {}
   record Transp(@Override @NotNull SourcePos pos, @NotNull Expr cover, @NotNull Expr restr) implements Expr {}
   record Cof(@Override @NotNull SourcePos pos, @NotNull Restr<Expr> data) implements Expr {}
-  record SysClause(@NotNull Expr phi, @NotNull Expr u) {}
+  record SysClause(@NotNull Restr.Cofib<Expr> phi, @NotNull Expr u) {}
   // "Proper" cubical subtypes
   // record Sub(@Override @NotNull SourcePos pos, @NotNull Expr ty, @NotNull SysClause clause) implements Expr {}
 }
