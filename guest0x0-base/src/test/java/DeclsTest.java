@@ -100,10 +100,10 @@ public class DeclsTest {
     tyck("""
       def Eq (A : U) (a b : A) : U =>
         [| j |] A { | 0 => a | 1 => b }
-      def trans (A : I -> U) (a : A 0) : A 1 => A #{0=1} a
+      def trans (A : I -> U) (a : A 0) : A 1 => tr A #{0=1} a
       def transPi (A : I -> U) (B : Pi (i : I) -> A i -> U)
           (f : Pi (x : A 0) -> B 0 x) : Pi (x : A 1) -> B 1 x =>
-        \\x. trans (\\j. B j ((\\i. A (j \\/ ~ i)) #{j = 1} x))
+        \\x. trans (\\j. B j (tr (\\i. A (j \\/ ~ i)) #{j = 1} x))
           (f (trans (\\i. A (~ i)) x))
       def transPiEq (A : I -> U) (B : Pi (i : I) -> A i -> U)
           : Eq ((Pi (x : A 0) -> B 0 x) -> (Pi (x : A 1) -> B 1 x))
@@ -113,7 +113,7 @@ public class DeclsTest {
       def transSigma (A : I -> U) (B : Pi (i : I) -> A i -> U)
           (t : Sig (x : A 0) ** B 0 x) : Sig (x : A 1) ** B 1 x =>
         << trans A (t.1),
-           trans (\\j. B j ((\\i. A (j /\\ i)) #{j = 0} (t.1))) (t.2) >>
+           trans (\\j. B j (tr (\\i. A (j /\\ i)) #{j = 0} (t.1))) (t.2) >>
       def transSigmaEq (A : I -> U) (B : Pi (i : I) -> A i -> U)
           : Eq ((Sig (x : A 0) ** B 0 x) -> (Sig (x : A 1) ** B 1 x))
                (transSigma A B)
@@ -124,8 +124,12 @@ public class DeclsTest {
                 (lhs : P (p 0)) : P (p 1) =>
         trans (\\i. P (p i)) lhs
       def =-trans (A : Type) (p : I -> A) (q : [| i |] A { | 0 => p 1 })
-          : [| i |] A { | 0 => p 0 | 1 => q 1 } =>
+          : Eq A (p 0) (q 1) =>
         subst A (Eq A (p 0)) (\\i. q i) (\\i. p i)
+
+      def transId (A : U) (a : A) : Eq A a (tr (\\i. A) #{1=1} a) => \\i. a
+      def forward (A : I -> Type) (r : I) : A r -> A 1 =>
+        tr (\\i. A (r \\/ i)) #{r = 1}
       """);
   }
 

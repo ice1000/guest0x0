@@ -31,7 +31,8 @@ expr
 
  // Cubical features
  | '[|' ID+ '|]' expr '{' boundary* '}' # cube
- | expr '#{' expr '}' # trans
+ | 'tr' expr '#{' expr '}' # trans
+ | 'Partial' expr '#{' expr '}' # partTy
  | iPat # iLit
  | '~' expr # inv
  | expr (AND | OR) expr # iConn

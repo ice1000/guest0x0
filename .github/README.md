@@ -7,7 +7,7 @@
 
 [maven]: https://img.shields.io/maven-central/v/org.aya-prover/guest0x0-base
 
-Experimenting with some basic programming in Java 17 and see the following:
+Experimenting with some basic programming in Java 18 and see the following:
 
 + If Java competes with existing established independently typed languages for writing compilers, like Haskell
 + If capture-avoiding substitution is not too bad (because with nestable pattern matching, de-bruijn indices are too bad)
@@ -50,12 +50,12 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ![image](https://user-images.githubusercontent.com/16398479/166834889-07041e0e-db7b-41b4-9081-282ab40b8e70.png)
 
-Added some tests for cofibration substitution, fixed some pretty-printing bugs. Below is a snippet that already works in old versions:
+Changed the syntax of transport from `A #{cof}` to `tr A #{cof}` for future convenience, implemented many tools for systems. Added some tests for cofibration substitution, fixed some pretty-printing bugs. Below is a snippet that already works in old versions:
 
 ```
-def transId (A : U) (a : A) : Eq A a ((\i. A) #{1=1} a) => refl A a
+def transId (A : U) (a : A) : Eq A a (tr (\i. A) #{1=1} a) => refl A a
 def forward (A : I -> Type) (r : I) : A r -> A 1 =>
-  (\i. A (r \/ i)) #{r = 1}
+  tr (\i. A (r \/ i)) #{r = 1}
 ```
 
 ### v0.11
