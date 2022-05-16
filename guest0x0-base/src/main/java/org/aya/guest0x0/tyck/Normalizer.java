@@ -92,6 +92,10 @@ public record Normalizer(
     };
   }
 
+  private @NotNull Term.SysClause clause(@NotNull Term.SysClause clause) {
+    return new Term.SysClause(new Term.Cof(restr(clause.cof().restr())), term(clause.u()));
+  }
+
   public Restr<Term> restr(@NotNull Restr<Term> restr) {
     return switch (restr.fmap(this::term)) {
       case Restr.Vary<Term> vary -> CofThy.normalizeRestr(vary);

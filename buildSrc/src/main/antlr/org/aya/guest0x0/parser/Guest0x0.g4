@@ -38,7 +38,8 @@ expr
  ;
 
 cond : ID '=' (LEFT | RIGHT);
-subSystem : '[|' expr '|->' expr '|]';
+subSystem : expr '|->' expr;
+system : '[|' ('|'? subSystem ('|' subSystem))? '|]';
 cof : cond (AND cond)*;
 iPat : LEFT | RIGHT | '_';
 AND : '/\\' | '\u2227';

@@ -94,4 +94,5 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
       return new Cof(restr.fmap(f));
     }
   }
+  record SysClause(@NotNull Cof cof, @NotNull Term u) {}
 }
