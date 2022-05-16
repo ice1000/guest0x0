@@ -210,7 +210,7 @@ public record Normalizer(
         }
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
         case Term.Mula f -> new Term.Mula(f.asFormula().fmap(this::term));
-        case Term.Transp transp -> new Term.Transp(term(transp.cover()), transp.restr().fmap(this::term));
+        case Term.Transp tr -> new Term.Transp(term(tr.cover()), tr.restr().fmap(this::term));
         case Term.Cof cof -> cof.fmap(this::term);
         case Term.PartTy par -> new Term.PartTy(term(par.ty()), par.restr().fmap(this::term));
         case Term.PartEl par -> new Term.PartEl(par.clauses().map(clause -> clause.rename(this::term)));

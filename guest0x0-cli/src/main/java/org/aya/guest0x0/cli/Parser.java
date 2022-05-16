@@ -58,6 +58,8 @@ public record Parser(@NotNull SourceFile source) {
       //   yield new Expr.Sub(sourcePosOf(sub), expr(sub.expr()), expr(sys.expr(0)), expr(sys.expr(1)));
       // }
       case Guest0x0Parser.PartTyContext par -> new Expr.PartTy(sourcePosOf(par), expr(par.expr(0)), expr(par.expr(1)));
+      case Guest0x0Parser.PartElContext par -> new Expr.PartEl(sourcePosOf(par),
+        Seq.wrapJava(par.subSystem()).map(this::clause));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
   }

@@ -143,7 +143,6 @@ public record Elaborator(
 
   public Synth synth(Expr expr) {
     var synth = switch (expr) {
-      // TODO implement face type in core
       case Expr.PrimTy u -> new Synth(new Term.UI(u.keyword()), Term.U);
       case Expr.Resolved resolved -> {
         var type = gamma.getOrNull(resolved.ref());
