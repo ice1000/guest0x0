@@ -21,6 +21,7 @@ public record AltF7(@NotNull LocalVar var) {
       case Term.Path path -> boundaries(path.data());
       case Term.Mula mula -> formula(mula.asFormula());
       case Term.Cof cof -> cof.restr().instView().anyMatch(this::press);
+      case Term.PartTy par -> press(par.ty()) || press(par.restr());
     };
   }
 

@@ -205,10 +205,7 @@ public record Elaborator(
           new Formula.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);
         case Formula.Lit lit -> new Synth(Term.end(lit.isLeft()), Term.I);
       };
-      case Expr.Cof cof -> new Synth(
-        new Term.Cof(cof.data().mapCond(c ->
-          new Restr.Cond<>(inherit(c.inst(), Term.I), c.isLeft()))
-        ), Term.F);
+      case Expr.Cof cof -> new Synth(new Term.Cof(cof.data().mapCond(this::condition)), Term.F);
       case Expr.Transp transp -> {
         var cover = inherit(transp.cover(), Term.mkPi(Term.I, Term.U));
         var detective = new AltF7(new LocalVar("?"));
@@ -239,6 +236,10 @@ public record Elaborator(
     } else return new Synth(synth.wellTyped, type);
   }
 
+  private @NotNull Restr.Cond<Term> condition(Restr.Cond<Expr> c) {
+    return new Restr.Cond<>(inherit(c.inst(), Term.I), c.isLeft());
+  }
+
   private @NotNull Term.Cof cof(@NotNull Expr restr) {
     var restrRaw = inherit(restr, Term.F);
     if (!(restrRaw instanceof Term.Cof cof))
@@ -246,10 +247,10 @@ public record Elaborator(
     return cof;
   }
 
-  // private @NotNull Term.SysClause clause(@NotNull Expr.SysClause clause, @NotNull Term term) {
-  //   var cof = inherit(clause.phi(), Term.F);
-  //   return new Term.SysClause(cof, );
-  // }
+  private @NotNull Term.SysClause clause(@NotNull Expr.SysClause clause, @NotNull Term ty) {
+    return new Term.SysClause(new Restr.Cofib<>(clause.phi().ands()
+      .map(this::condition)), inherit(clause.u(), ty));
+  }
 
   private @NotNull Normalizer jonSterling(SeqView<LocalVar> dims, Boundary.Face face) {
     return new Normalizer(sigma, MutableMap.from(dims

@@ -93,6 +93,8 @@ public record Normalizer(
         if (CofThy.satisfied(parkerLiu)) yield Term.id("x");
         yield transp(new LocalVar("i"), term(transp.cover()), new Term.Cof(parkerLiu));
       }
+      case Term.PartTy par -> new Term.PartTy(term(par.ty()),
+        new Term.Cof(restr(par.restr().restr())));
     };
   }
 
@@ -201,6 +203,7 @@ public record Normalizer(
         case Term.Mula f -> new Term.Mula(f.asFormula().fmap(this::term));
         case Term.Transp transp -> new Term.Transp(term(transp.cover()), transp.restr().fmap(this::term));
         case Term.Cof cof -> cof.fmap(this::term);
+        case Term.PartTy par -> new Term.PartTy(term(par.ty()), par.restr().fmap(this::term));
       };
     }
 

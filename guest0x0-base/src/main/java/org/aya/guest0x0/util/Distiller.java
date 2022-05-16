@@ -126,6 +126,7 @@ public interface Distiller {
         var doc = cof.restr().toDoc();
         yield envPrec.ordinal() > AppSpine.ordinal() ? Doc.parened(doc) : doc;
       }
+      case Term.PartTy par -> fibred("Partial", par.ty(), par.restr());
     };
   }
 }

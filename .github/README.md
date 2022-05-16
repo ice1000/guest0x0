@@ -16,9 +16,10 @@ Experimenting with some basic programming in Java 18 and see the following:
 
 "Basic programming" includes:
 
-+ A "de Morgan flavored" cubical type theory with redtt flavored cubes (the so-called "extension types")'
++ A "de Morgan flavored" cubical type theory with redtt flavored cubes (the so-called "extension types")
 + A ✨new syntax✨ for cofibration theory that is more convenient for confluence checking and hopefully is equivalent to existing ones
   + Update: it's not. The new syntax is implemented, tested, and removed for not working well with substitutions.
+  + Unlike Cubical Agda, Guest0x0 sticks to the paper syntax, and is not constraint-based.
 + Inductive types with pattern matching (hopefully) and "simpler indices" (see my TyDe paper)
 + An equalizer of the first projection of evaluation and just the first projection :trollface:
 

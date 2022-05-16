@@ -48,6 +48,8 @@ public class Unifier {
         yield CofThy.vdash(ll, initial, normalizer -> CofThy.satisfied(normalizer.restr(rr)))
           && CofThy.vdash(rr, initial, normalizer -> CofThy.satisfied(normalizer.restr(ll)));
       }
+      case Term.PartTy lpart && r instanceof Term.PartTy rpart ->
+        untyped(lpart.ty(), rpart.ty()) && untyped(lpart.restr(), rpart.restr());
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };
