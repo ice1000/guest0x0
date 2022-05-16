@@ -97,10 +97,10 @@ public record Normalizer(
       case Term.PartTy par -> new Term.PartTy(term(par.ty()),
         new Term.Cof(restr(par.restr().restr())));
       case Term.PartEl par -> {
-        var clauses = MutableArrayList.<Term.SysClause>create();
+        var clauses = MutableArrayList.<Restr.Side<Term>>create();
         for (var clause : par.clauses()) {
           var u = term(clause.u());
-          CofThy.normalizeCof(clause.cof(), clauses, cofib -> new Term.SysClause(cofib, u));
+          CofThy.normalizeCof(clause.cof(), clauses, cofib -> new Restr.Side<>(cofib, u));
         }
         yield new Term.PartEl(clauses.toImmutableArray());
       }
@@ -213,8 +213,7 @@ public record Normalizer(
         case Term.Transp transp -> new Term.Transp(term(transp.cover()), transp.restr().fmap(this::term));
         case Term.Cof cof -> cof.fmap(this::term);
         case Term.PartTy par -> new Term.PartTy(term(par.ty()), par.restr().fmap(this::term));
-        case Term.PartEl par -> new Term.PartEl(par.clauses().map(clause ->
-          new Term.SysClause(clause.cof().rename(this::term), clause.u())));
+        case Term.PartEl par -> new Term.PartEl(par.clauses().map(clause -> clause.rename(this::term)));
       };
     }
 

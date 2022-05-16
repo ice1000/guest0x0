@@ -3,6 +3,7 @@ package org.aya.guest0x0.util;
 import kala.collection.Seq;
 import kala.collection.mutable.MutableList;
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.pretty.doc.Doc;
@@ -57,8 +58,8 @@ public interface Distiller {
       case Expr.PartTy par -> fibred("Partial", par.ty(), par.restr());
     };
   }
-  static Doc clause(Expr.SysClause clause) {
-    return Doc.sep(clause.phi().toDoc(), Doc.symbol("|->"), clause.u().toDoc());
+  static Doc clause(Restr.Side<?> clause) {
+    return Doc.sep(clause.cof().toDoc(), Doc.symbol("|->"), clause.u().toDoc());
   }
   private static @NotNull Doc fibred(String kw, Docile cover, Docile restr) {
     return Doc.sep(Doc.plain(kw), cover.toDoc(),
@@ -127,7 +128,8 @@ public interface Distiller {
         yield envPrec.ordinal() > AppSpine.ordinal() ? Doc.parened(doc) : doc;
       }
       case Term.PartTy par -> fibred("Partial", par.ty(), par.restr());
-      case Term.PartEl par -> throw new UnsupportedOperationException("TODO");
+      case Term.PartEl par -> Doc.wrap("[|", "|]",
+        Doc.join(Doc.symbol("|"), par.clauses().map(Distiller::clause)));
     };
   }
 }

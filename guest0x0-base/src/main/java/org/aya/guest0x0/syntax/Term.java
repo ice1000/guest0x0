@@ -94,7 +94,6 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
       return new Cof(restr.fmap(f));
     }
   }
-  record SysClause(@NotNull Restr.Cofib<Term> cof, @NotNull Term u) {}
   record PartTy(@NotNull Term ty, @NotNull Cof restr) implements Term {}
-  record PartEl(@NotNull ImmutableSeq<SysClause> clauses) implements Term {}
+  record PartEl(@NotNull ImmutableSeq<Restr.Side<Term>> clauses) implements Term {}
 }

@@ -57,12 +57,13 @@ public record Parser(@NotNull SourceFile source) {
       //   var sys = sub.subSystem();
       //   yield new Expr.Sub(sourcePosOf(sub), expr(sub.expr()), expr(sys.expr(0)), expr(sys.expr(1)));
       // }
+      case Guest0x0Parser.PartTyContext par -> new Expr.PartTy(sourcePosOf(par), expr(par.expr(0)), expr(par.expr(1)));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
   }
 
-  private @NotNull Expr.SysClause clause(@NotNull Guest0x0Parser.SubSystemContext clause) {
-    return new Expr.SysClause(cofib(clause.cof()), expr(clause.expr()));
+  private @NotNull Restr.Side<Expr> clause(@NotNull Guest0x0Parser.SubSystemContext clause) {
+    return new Restr.Side<>(cofib(clause.cof()), expr(clause.expr()));
   }
 
   public @NotNull Restr<Expr> restr(Guest0x0Parser.RestrContext psi) {

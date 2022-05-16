@@ -248,8 +248,8 @@ public record Elaborator(
     return cof;
   }
 
-  private @NotNull Term.SysClause clause(@NotNull Expr.SysClause clause, @NotNull Term ty) {
-    return new Term.SysClause(new Restr.Cofib<>(clause.phi().ands()
+  private @NotNull Restr.Side<Term> clause(@NotNull Restr.Side<Expr> clause, @NotNull Term ty) {
+    return new Restr.Side<>(new Restr.Cofib<>(clause.cof().ands()
       .map(this::condition)), inherit(clause.u(), ty));
   }
 

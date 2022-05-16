@@ -61,7 +61,7 @@ public class Unifier {
   }
 
   /** Daniel Gratzer used <code>N</code> when explaining these to me */
-  private boolean clause(@NotNull Term.SysClause clause, @NotNull Term n) {
+  private boolean clause(@NotNull Restr.Side<Term> clause, @NotNull Term n) {
     return CofThy.vdash(new Restr.Vary<>(ImmutableSeq.of(clause.cof())),
       Normalizer.create(), subst -> untyped(clause.u(), subst.term(n)));
   }
