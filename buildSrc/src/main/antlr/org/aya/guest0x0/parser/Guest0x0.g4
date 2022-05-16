@@ -18,7 +18,7 @@ expr
  | <assoc=right> expr TIMES expr # simpTup
  | PI param ARROW expr # pi
  | SIG param TIMES expr # sig
- | 'Sub' expr '[|' expr '|->' expr ']' # sub
+ | 'Sub' expr subSystem # sub
 
  // Introduction lures
  | LAM ID+ '.' expr # lam
@@ -38,6 +38,7 @@ expr
  ;
 
 cond : ID '=' (LEFT | RIGHT);
+subSystem : '[|' expr '|->' expr '|]';
 cof : cond (AND cond)*;
 iPat : LEFT | RIGHT | '_';
 AND : '/\\' | '\u2227';
