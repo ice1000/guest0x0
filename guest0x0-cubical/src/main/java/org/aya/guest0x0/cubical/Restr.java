@@ -41,12 +41,9 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
     }
 
     @Override public @NotNull Doc toDoc() {
-      return Doc.join(Doc.spaced(Doc.symbol("\\/")), orz.view().map(or -> {
-        var orDoc = Doc.join(Doc.spaced(Doc.symbol("/\\")), or.ands.view().map(and ->
-          Doc.sep(and.inst.toDoc(), Doc.symbol("="), Doc.symbol(and.isLeft() ? "0" : "1"))));
-        return or.ands.sizeGreaterThan(1) && orz.sizeGreaterThan(1)
-          ? Doc.parened(orDoc) : orDoc;
-      }));
+      return Doc.join(Doc.spaced(Doc.symbol("\\/")), orz.view().map(or ->
+        or.ands.sizeGreaterThan(1) && orz.sizeGreaterThan(1)
+          ? Doc.parened(or.toDoc()) : or.toDoc()));
     }
   }
   record Const<E extends TermLike<E>>(boolean isTrue) implements Restr<E> {
@@ -75,7 +72,12 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
       return new Cond<>(g.apply(inst), isLeft);
     }
   }
-  record Cofib<E>(@NotNull ImmutableSeq<Cond<E>> ands) {
+  record Cofib<E extends TermLike<E>>(@NotNull ImmutableSeq<Cond<E>> ands) implements Docile {
+    @Override public @NotNull Doc toDoc() {
+      return Doc.join(Doc.spaced(Doc.symbol("/\\")), ands.view().map(and ->
+        Doc.sep(and.inst.toDoc(), Doc.symbol("="), Doc.symbol(and.isLeft() ? "0" : "1"))));
+    }
+
     public Cofib<E> rename(@NotNull Function<E, E> g) {
       return new Cofib<>(ands.map(c -> c.rename(g)));
     }

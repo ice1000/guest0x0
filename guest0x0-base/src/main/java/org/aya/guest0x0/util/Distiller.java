@@ -3,7 +3,6 @@ package org.aya.guest0x0.util;
 import kala.collection.Seq;
 import kala.collection.mutable.MutableList;
 import org.aya.guest0x0.cubical.Formula;
-import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.pretty.doc.Doc;
@@ -18,7 +17,7 @@ public interface Distiller {
   @FunctionalInterface
   interface PP<E> extends BiFunction<E, Prec, Doc> {}
   enum Prec {
-    Free, IOp, Transp, Cod, AppHead, AppSpine, ProjHead
+    Free, IOp, Cod, AppHead, AppSpine, ProjHead
   }
   static @NotNull Doc expr(@NotNull Expr expr, Prec envPrec) {
     return switch (expr) {
@@ -44,7 +43,7 @@ public interface Distiller {
       }
       case Expr.Hole ignored -> Doc.symbol("_");
       case Expr.Mula e -> formulae(Distiller::expr, e.asFormula(), envPrec);
-      case Expr.Transp transp -> transp(Distiller::expr, envPrec, transp.cover(), transp.restr());
+      case Expr.Transp transp -> fibred("tr", transp.cover(), transp.restr());
       case Expr.Cof cof -> {
         var doc = cof.data().toDoc();
         // Well, hopefully I guessed the precedence right.
@@ -53,11 +52,17 @@ public interface Distiller {
       // case Expr.Sub sub -> Doc.sep(Doc.plain("Sub"),
       //   expr(sub.ty(), Free), Doc.symbol("[|"), expr(sub.phi(), Free),
       //   Doc.symbol("|->"), expr(sub.u(), Free), Doc.symbol("|]"));
+      case Expr.PartEl par -> Doc.wrap("[|", "|]",
+        Doc.join(Doc.symbol("|"), par.clauses().map(Distiller::clause)));
+      case Expr.PartTy par -> fibred("Partial", par.ty(), par.restr());
     };
   }
-  private static <E extends Restr.TermLike<E>> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Docile restr) {
-    var doc = Doc.sep(f.apply(cover, Transp), Doc.symbol("#{"), restr.toDoc(), Doc.symbol("}"));
-    return envPrec.ordinal() >= Transp.ordinal() ? Doc.parened(doc) : doc;
+  static Doc clause(Expr.SysClause clause) {
+    return Doc.sep(clause.phi().toDoc(), Doc.symbol("|->"), clause.u().toDoc());
+  }
+  private static @NotNull Doc fibred(String kw, Docile cover, Docile restr) {
+    return Doc.sep(Doc.plain(kw), cover.toDoc(),
+      Doc.symbol("#{"), restr.toDoc(), Doc.symbol("}"));
   }
   private static @NotNull Doc dependentType(boolean isPi, Param<?> param, Docile cod) {
     return Doc.sep(Doc.plain(isPi ? "Pi" : "Sig"),
@@ -116,7 +121,7 @@ public interface Distiller {
         yield envPrec.ordinal() > Free.ordinal() ? Doc.parened(doc) : doc;
       }
       case Term.Mula f -> formulae(Distiller::term, f.asFormula(), envPrec);
-      case Term.Transp transp -> transp(Distiller::term, envPrec, transp.cover(), transp.restr());
+      case Term.Transp transp -> fibred("tr", transp.cover(), transp.restr());
       case Term.Cof cof -> {
         var doc = cof.restr().toDoc();
         yield envPrec.ordinal() > AppSpine.ordinal() ? Doc.parened(doc) : doc;

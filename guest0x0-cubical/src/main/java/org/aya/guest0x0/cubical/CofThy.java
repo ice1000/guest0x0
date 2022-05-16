@@ -19,7 +19,7 @@ public interface CofThy {
    * I'm sorry, I'm just too bad at writing while loops.
    * Add <code>localOrz</code> into <code>conds</code>, and push the results into <code>combined</code>.
    */
-  static <T> void combineRecursively(
+  static <T extends Restr.TermLike<T>> void combineRecursively(
     @NotNull SeqView<Formula.Conn<T>> localOrz,
     MutableStack<Restr.Cond<T>> conds,
     MutableList<Restr.Cofib<T>> combined

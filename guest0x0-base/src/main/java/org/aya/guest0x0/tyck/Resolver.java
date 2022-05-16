@@ -88,6 +88,8 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
       case Expr.Transp transp -> new Expr.Transp(transp.pos(), expr(transp.cover()), expr(transp.restr()));
       case Expr.Cof cof -> new Expr.Cof(cof.pos(), cof.data().fmap(this::expr));
       // case Expr.Sub sub -> new Expr.Sub(sub.pos(), expr(sub.ty()), expr(sub.phi()), expr(sub.u()));
+      case Expr.PartEl par -> new Expr.PartEl(par.pos(), par.clauses().map(this::clause));
+      case Expr.PartTy par -> new Expr.PartTy(par.pos(), expr(par.ty()), expr(par.restr()));
     };
   }
 
