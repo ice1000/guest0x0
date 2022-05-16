@@ -36,7 +36,7 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
   + [ ] Inductive type and pattern matching
 + CHM
   + [x] Extension type (generalized path type)
-  + [ ] Cofibration theory
+  + [x] Cofibration theory
   + [ ] Generalized transport
     + [x] Pi, Sigma, Universe
     + [ ] Higher inductive type
@@ -47,6 +47,10 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
     + [ ] Glue/V
 
 ### Untagged
+
+![image](https://user-images.githubusercontent.com/16398479/168640908-c1be4ea2-cc35-443d-ada9-84e754fef322.png)
+
+### v0.12
 
 ![image](https://user-images.githubusercontent.com/16398479/166834889-07041e0e-db7b-41b4-9081-282ab40b8e70.png)
 
