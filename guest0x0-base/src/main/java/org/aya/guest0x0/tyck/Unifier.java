@@ -6,6 +6,7 @@ import kala.tuple.Tuple;
 import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.LocalVar;
@@ -57,7 +58,8 @@ public class Unifier {
 
   /** Daniel Gratzer used <code>N</code> when explaining these to me */
   private boolean clause(@NotNull Term.SysClause clause, @NotNull Term n) {
-    return CofThy.vdash(clause.cof().restr(), Normalizer.create(), subst -> untyped(clause.u(), subst.term(n)));
+    return CofThy.vdash(new Restr.Vary<>(ImmutableSeq.of(clause.cof())),
+      Normalizer.create(), subst -> untyped(clause.u(), subst.term(n)));
   }
 
   private boolean unifySeq(@NotNull ImmutableSeq<Term> l, @NotNull ImmutableSeq<Term> r) {

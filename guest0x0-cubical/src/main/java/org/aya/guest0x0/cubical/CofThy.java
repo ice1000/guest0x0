@@ -7,6 +7,7 @@ import kala.collection.mutable.MutableStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -95,7 +96,9 @@ public interface CofThy {
   static <E extends Restr.TermLike<E>> @NotNull Restr<E> normalizeRestr(Restr.Vary<E> vary) {
     var orz = MutableArrayList.<Restr.Cofib<E>>create(vary.orz().size());
     // This is a sequence of "or"s, so if any cof is true, the whole thing is true
-    for (var cof : vary.orz()) if (normalizeCof(cof, orz)) return new Restr.Const<>(true);
+    for (var cof : vary.orz())
+      if (normalizeCof(cof, orz, Function.identity()))
+        return new Restr.Const<>(true);
     if (orz.isEmpty()) return new Restr.Const<>(false);
     return new Restr.Vary<>(orz.toImmutableArray());
   }
@@ -149,7 +152,10 @@ public interface CofThy {
    *
    * @return true if this is constantly true
    */
-  static <E extends Restr.TermLike<E>> boolean normalizeCof(Restr.Cofib<E> cof, MutableList<Restr.Cofib<E>> orz) {
+  static <E extends Restr.TermLike<E>, Clause> boolean normalizeCof(
+    Restr.Cofib<E> cof, MutableList<Clause> orz,
+    Function<Restr.Cofib<E>, Clause> clause
+  ) {
     var ands = MutableArrayList.<Restr.Cond<E>>create(cof.ands().size());
     var localOrz = MutableList.<Formula.Conn<E>>create();
     // If a false is found, do not modify orz
@@ -159,10 +165,10 @@ public interface CofThy {
       combineRecursively(localOrz.view(), ands.asMutableStack(), combined);
       // `cofib` has side effects, so you must first traverse them and then call `allMatch`
       // Can I do this without recursion?
-      return combined.map(cofib -> normalizeCof(cofib, orz)).allMatch(b -> b);
+      return combined.map(cofib -> normalizeCof(cofib, orz, clause)).allMatch(b -> b);
     }
     if (ands.isNotEmpty()) {
-      orz.append(new Restr.Cofib<>(ands.toImmutableArray()));
+      orz.append(clause.apply(new Restr.Cofib<>(ands.toImmutableArray())));
       return false;
     } else return true;
   }
