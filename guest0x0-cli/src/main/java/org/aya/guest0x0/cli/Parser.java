@@ -50,10 +50,10 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.CubeContext cube -> new Expr.Path(sourcePosOf(cube), new BdryData<>(
         localVars(cube.ID()), expr(cube.expr()),
         Seq.wrapJava(cube.boundary()).map(b -> new Boundary<>(face(b), expr(b.expr())))));
-      case Guest0x0Parser.SubContext sub -> {
-        var sys = sub.subSystem();
-        yield new Expr.Sub(sourcePosOf(sub), expr(sub.expr()), expr(sys.expr(0)), expr(sys.expr(1)));
-      }
+      // case Guest0x0Parser.SubContext sub -> {
+      //   var sys = sub.subSystem();
+      //   yield new Expr.Sub(sourcePosOf(sub), expr(sub.expr()), expr(sys.expr(0)), expr(sys.expr(1)));
+      // }
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
   }

@@ -50,9 +50,9 @@ public interface Distiller {
         // Well, hopefully I guessed the precedence right.
         yield envPrec.ordinal() > AppSpine.ordinal() ? Doc.parened(doc) : doc;
       }
-      case Expr.Sub sub -> Doc.sep(Doc.plain("Sub"),
-        expr(sub.ty(), Free), Doc.symbol("[|"), expr(sub.phi(), Free),
-        Doc.symbol("|->"), expr(sub.u(), Free), Doc.symbol("|]"));
+      // case Expr.Sub sub -> Doc.sep(Doc.plain("Sub"),
+      //   expr(sub.ty(), Free), Doc.symbol("[|"), expr(sub.phi(), Free),
+      //   Doc.symbol("|->"), expr(sub.u(), Free), Doc.symbol("|]"));
     };
   }
   private static <E extends Restr.TermLike<E>> @NotNull Doc transp(PP<E> f, Prec envPrec, E cover, Docile restr) {
