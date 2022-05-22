@@ -94,8 +94,7 @@ public record Normalizer(
         if (CofThy.satisfied(parkerLiu)) yield Term.id("x");
         yield transp(new LocalVar("i"), term(transp.cover()), new Term.Cof(parkerLiu));
       }
-      case Term.PartTy par -> new Term.PartTy(term(par.ty()),
-        new Term.Cof(restr(par.restr().restr())));
+      case Term.PartTy par -> new Term.PartTy(term(par.ty()), term(par.restr()));
       case Term.PartEl par -> {
         var clauses = MutableArrayList.<Restr.Side<Term>>create();
         for (var clause : par.clauses()) {
@@ -212,7 +211,7 @@ public record Normalizer(
         case Term.Mula f -> new Term.Mula(f.asFormula().fmap(this::term));
         case Term.Transp tr -> new Term.Transp(term(tr.cover()), tr.restr().fmap(this::term));
         case Term.Cof cof -> cof.fmap(this::term);
-        case Term.PartTy par -> new Term.PartTy(term(par.ty()), par.restr().fmap(this::term));
+        case Term.PartTy par -> new Term.PartTy(term(par.ty()), term(par.restr()));
         case Term.PartEl par -> new Term.PartEl(par.clauses().map(clause -> clause.rename(this::term)));
       };
     }
