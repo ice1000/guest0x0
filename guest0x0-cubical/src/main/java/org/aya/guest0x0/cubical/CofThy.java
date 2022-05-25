@@ -4,6 +4,7 @@ import kala.collection.SeqView;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableStack;
+import kala.control.Option;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,7 +55,7 @@ public interface CofThy {
   static <E extends Restr.TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
   vdash(@NotNull Restr<E> r, @NotNull Subst initial, @NotNull Predicate<Subst> sat) {
     return switch (r) {
-      case Restr.Const c -> !c.isTrue() || sat.test(initial);
+      case Restr.Const<E> c -> !c.isTrue() || sat.test(initial);
       case Restr.Vary<E> restr -> {
         for (var or : restr.orz()) {
           var derived = initial.derive();
@@ -75,6 +76,35 @@ public interface CofThy {
         yield true;
       }
     };
+  }
+
+  /**
+   * Type-checking (any procedure) under an and-only cofibration.
+   *
+   * @return Ideally it would apply <code>tyck</code> to the body of <code>r</code>, but: <ul>
+   * <li><code>Option.none()</code> if the cofib is not satisfiable</li>
+   * <li><code>Option.some(null)</code> if the cofib is invalid (cannot be made a substitution)</li>
+   * <li><code>Option.some(tyck(subst, u))</code> if everything's fine</li>
+   * </ul>
+   * @see SubstObj
+   */
+  static <V, T extends Restr.TermLike<T>, Subst extends SubstObj<T, V, Subst>> Option<T>
+  vdash(@NotNull Restr.Cofib<T> or, @NotNull Subst initial, @NotNull Function<Subst, T> tyck) {
+    var derived = initial.derive();
+    var unsat = false;
+    for (var eq : or.ands()) {
+      var inst = eq.inst();
+      if (inst.asFormula() instanceof Formula.Lit<?> lit && lit.isLeft() != eq.isLeft())
+        unsat = true;
+      else {
+        var castVar = initial.asRef(inst);
+        if (castVar != null) {
+          derived.put(castVar, eq.isLeft());
+        } else return Option.some(null);
+      }
+    }
+    if (unsat) return Option.none(); // Skip unsatisfiable cases
+    return Option.some(tyck.apply(derived));
   }
 
   /**
@@ -175,7 +205,7 @@ public interface CofThy {
 
   static boolean satisfied(@NotNull Restr<?> restriction) {
     return switch (restriction) {
-      case Restr.Const c -> c.isTrue();
+      case Restr.Const<?> c -> c.isTrue();
       case Restr.Vary<?> restr -> {
         for (var or : restr.orz()) {
           var satisfied = true;

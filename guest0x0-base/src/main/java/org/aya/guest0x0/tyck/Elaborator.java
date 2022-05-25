@@ -5,6 +5,7 @@ import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
+import kala.control.Option;
 import kala.tuple.Tuple;
 import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.cubical.CofThy;
@@ -59,6 +60,13 @@ public record Elaborator(
         default -> throw new SPE(lam.pos(),
           Doc.english("Expects a right adjoint for"), expr, Doc.plain("got"), type);
       };
+      case Expr.PartEl el -> {
+        if (!(normalize(type) instanceof Term.PartTy par)) throw new SPE(el.pos(),
+          Doc.english("Expects partial type for partial elements"), expr, Doc.plain("got"), type);
+        var clauses = el.clauses().flatMap(cl -> clause(el.pos(), cl, par.ty()));
+        // TODO: confluence
+        yield new Term.PartEl(clauses);
+      }
       case Expr.Two two && !two.isApp() -> {
         if (!(normalize(type) instanceof Term.DT dt) || dt.isPi()) throw new SPE(two.pos(),
           Doc.english("Expects a left adjoint for"), expr, Doc.plain("got"), type);
@@ -202,7 +210,7 @@ public record Elaborator(
         case Formula.Inv<Expr> inv -> new Synth(Term.neg(inherit(inv.i(), Term.I)), Term.I);
         case Formula.Conn<Expr> conn -> new Synth(new Term.Mula(
           new Formula.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);
-        case Formula.Lit lit -> new Synth(Term.end(lit.isLeft()), Term.I);
+        case Formula.Lit<Expr> lit -> new Synth(Term.end(lit.isLeft()), Term.I);
       };
       case Expr.Cof cof -> new Synth(new Term.Cof(cof.data().mapCond(this::condition)), Term.F);
       case Expr.PartTy par -> new Synth(new Term.PartTy(inherit(par.ty(), Term.U), cof(par.restr())), Term.U);
@@ -247,9 +255,16 @@ public record Elaborator(
     return cof;
   }
 
-  private @NotNull Restr.Side<Term> clause(@NotNull Restr.Side<Expr> clause, @NotNull Term ty) {
-    return new Restr.Side<>(new Restr.Cofib<>(clause.cof().ands()
-      .map(this::condition)), inherit(clause.u(), ty));
+  private @NotNull Option<Restr.Side<Term>> clause(
+    @NotNull SourcePos pos,
+    @NotNull Restr.Side<Expr> clause, @NotNull Term ty
+  ) {
+    var cofib = new Restr.Cofib<>(clause.cof().ands().map(this::condition));
+    var u = CofThy.vdash(cofib, Normalizer.create(), norm -> inherit(clause.u(), norm.term(ty)));
+    if (u.isDefined() && u.get() == null)
+      throw new SPE(pos, Doc.english("The cofibration in"), cofib,
+        Doc.english("is not well-defined"));
+    return u.map(uu -> new Restr.Side<>(cofib, uu));
   }
 
   private @NotNull Normalizer jonSterling(SeqView<LocalVar> dims, Boundary.Face face) {
