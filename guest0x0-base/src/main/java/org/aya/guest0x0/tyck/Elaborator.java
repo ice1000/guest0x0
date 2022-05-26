@@ -67,7 +67,7 @@ public record Elaborator(
         var cof = cof(par.restr(), el.pos());
         var clauses = el.clauses().flatMap(cl -> clause(el.pos(), cl, par.ty()));
         var face = new Restr.Vary<>(clauses.map(Restr.Side::cof));
-        if (!CofThy.vdash(face, Normalizer.create(), norm -> CofThy.satisfied(norm.restr(cof.restr()))))
+        if (!CofThy.vdash(cof.restr(), Normalizer.create(), norm -> CofThy.satisfied(norm.restr(face))))
           throw new SPE(el.pos(), Doc.english("The faces in the partial element"), face,
             Doc.english("must cover the type"), cof);
         for (int i = 1; i < clauses.size(); i++) {

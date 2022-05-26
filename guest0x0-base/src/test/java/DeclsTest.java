@@ -133,6 +133,15 @@ public class DeclsTest {
       """);
   }
 
+  @Test public void partial() {
+    tyck("""
+      def par1 (A : Type) (u : A) (i : I) : Partial A #{i = 0} =>
+        {| i = 0 |-> u |}
+      def par2 (A : Type) (u : A) (i : I) : Partial A #{i = 0} =>
+        {| i = 0 |-> u | i = 1 |-> u |}
+      """);
+  }
+
   private static @NotNull Elaborator tyck(@Language("TEXT") String s) {
     return CliMain.tyck(s, false);
   }
