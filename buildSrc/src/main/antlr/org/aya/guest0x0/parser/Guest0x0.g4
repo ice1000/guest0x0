@@ -33,7 +33,7 @@ expr
  | '[|' ID+ '|]' expr '{' boundary* '}' # cube
  | 'tr' expr '#{' expr '}' # trans
  | 'Partial' expr '#{' expr '}' # partTy
- | '{|' '|'? subSystem ('|' subSystem) '|}' # partEl
+ | '{|' '|'? subSystem ('|' subSystem)* '|}' # partEl
  | iPat # iLit
  | '~' expr # inv
  | expr (AND | OR) expr # iConn

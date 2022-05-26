@@ -9,4 +9,6 @@ module org.aya.guest.cli {
   requires transitive org.aya.pretty;
   requires transitive org.aya.repl;
   requires transitive org.aya.util;
+
+  exports org.aya.guest0x0.cli;
 }

@@ -64,7 +64,12 @@ public record Elaborator(
       case Expr.PartEl el -> {
         if (!(normalize(type) instanceof Term.PartTy par)) throw new SPE(el.pos(),
           Doc.english("Expects partial type for partial elements"), expr, Doc.plain("got"), type);
+        var cof = cof(par.restr(), el.pos());
         var clauses = el.clauses().flatMap(cl -> clause(el.pos(), cl, par.ty()));
+        var face = new Restr.Vary<>(clauses.map(Restr.Side::cof));
+        if (!CofThy.vdash(face, Normalizer.create(), norm -> CofThy.satisfied(norm.restr(cof.restr()))))
+          throw new SPE(el.pos(), Doc.english("The faces in the partial element"), face,
+            Doc.english("must cover the type"), cof);
         for (int i = 1; i < clauses.size(); i++) {
           var lhs = clauses.get(i);
           for (int j = 0; j < i; j++) {
@@ -135,7 +140,7 @@ public record Elaborator(
     if (!unifier.untyped(actual, ty)) throw new SPE(pos, message.apply(unifier));
   }
 
-  private @NotNull Doc unifyDoc(Term ty, Docile on, @NotNull Term actual, Unifier unifier) {
+  private static @NotNull Doc unifyDoc(Docile ty, Docile on, Docile actual, Unifier unifier) {
     var line1 = Doc.sep(Doc.plain("Umm,"), ty.toDoc(), Doc.plain("!="),
       actual.toDoc(), Doc.english("on"), on.toDoc());
     if (unifier.data != null) {
@@ -261,9 +266,12 @@ public record Elaborator(
   }
 
   private @NotNull Term.Cof cof(@NotNull Expr restr) {
-    var restrRaw = inherit(restr, Term.F);
-    if (!(restrRaw instanceof Term.Cof cof))
-      throw new SPE(restr.pos(), Doc.english("Expects a cofibration literal, got"), restrRaw);
+    return cof(inherit(restr, Term.F), restr.pos());
+  }
+
+  private static @NotNull Term.Cof cof(Term restr, @NotNull SourcePos pos) {
+    if (!(restr instanceof Term.Cof cof))
+      throw new SPE(pos, Doc.english("Expects a cofibration literal, got"), restr);
     return cof;
   }
 
