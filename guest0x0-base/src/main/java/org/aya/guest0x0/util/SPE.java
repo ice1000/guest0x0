@@ -18,6 +18,6 @@ public class SPE extends RuntimeException {
   }
 
   public SPE(@NotNull SourcePos pos, Docile @NotNull ... message) {
-    this(pos, Doc.sep(ImmutableSeq.from(message).map(Docile::toDoc)));
+    this(pos, Doc.sepNonEmpty(ImmutableSeq.from(message).map(Docile::toDoc)));
   }
 }

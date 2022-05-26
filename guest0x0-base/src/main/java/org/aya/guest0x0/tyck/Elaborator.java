@@ -24,6 +24,7 @@ import org.aya.pretty.doc.Docile;
 import org.aya.util.error.SourcePos;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public record Elaborator(
@@ -64,7 +65,13 @@ public record Elaborator(
         if (!(normalize(type) instanceof Term.PartTy par)) throw new SPE(el.pos(),
           Doc.english("Expects partial type for partial elements"), expr, Doc.plain("got"), type);
         var clauses = el.clauses().flatMap(cl -> clause(el.pos(), cl, par.ty()));
-        // TODO: confluence
+        for (int i = 1; i < clauses.size(); i++) {
+          var lhs = clauses.get(i);
+          for (int j = 0; j < i; j++) {
+            var rhs = clauses.get(j);
+            unify(lhs.u(), el, rhs.u(), el.pos(), Doc.english("Boundaries do not agree."));
+          }
+        }
         yield new Term.PartEl(clauses);
       }
       case Expr.Two two && !two.isApp() -> {
@@ -115,13 +122,21 @@ public record Elaborator(
     };
   }
 
+  private void unify(Term ty, Docile on, @NotNull Term actual, SourcePos pos, Doc prefix) {
+    unify(ty, actual, pos, u -> Doc.vcat(prefix, unifyDoc(ty, on, actual, u)));
+  }
+
   private void unify(Term ty, Docile on, @NotNull Term actual, SourcePos pos) {
+    unify(ty, actual, pos, u -> unifyDoc(ty, on, actual, u));
+  }
+
+  private static void unify(Term ty, Term actual, SourcePos pos, Function<Unifier, Doc> message) {
     var unifier = new Unifier();
-    if (!unifier.untyped(actual, ty)) throw new SPE(pos, unifyDoc(ty, on, actual, unifier));
+    if (!unifier.untyped(actual, ty)) throw new SPE(pos, message.apply(unifier));
   }
 
   private @NotNull Doc unifyDoc(Term ty, Docile on, @NotNull Term actual, Unifier unifier) {
-    var line1 = Doc.sep(Doc.plain("Expects"), ty.toDoc(), Doc.plain("got"),
+    var line1 = Doc.sep(Doc.plain("Umm,"), ty.toDoc(), Doc.plain("!="),
       actual.toDoc(), Doc.english("on"), on.toDoc());
     if (unifier.data != null) {
       var line2 = Doc.sep(Doc.english("In particular,"),
@@ -140,10 +155,7 @@ public record Elaborator(
     var core = coreSupplier.get();
     for (var boundary : data.boundaries()) {
       var jon = jonSterling(lamDims.view(), boundary.face()).term(core);
-      var unifier = new Unifier();
-      if (!unifier.untyped(boundary.body(), jon)) throw new SPE(pos,
-        Doc.vcat(Doc.english("Boundary mismatch, oh no."),
-          unifyDoc(boundary.body(), boundary.face(), jon, unifier)));
+      unify(boundary.body(), boundary.face(), jon, pos, Doc.english("Boundary mismatch, oh no."));
     }
     lamDims.forEach(gamma::remove);
     return new Term.PLam(lamDims.toImmutableArray(), core);
