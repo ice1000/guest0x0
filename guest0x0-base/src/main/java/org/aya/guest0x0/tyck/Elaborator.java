@@ -69,13 +69,13 @@ public record Elaborator(
         var face = new Restr.Vary<>(clauses.map(Restr.Side::cof));
         if (!CofThy.conv(cof.restr(), Normalizer.create(), norm -> CofThy.satisfied(norm.restr(face))))
           throw new SPE(el.pos(), Doc.english("The faces in the partial element"), face,
-            Doc.english("must cover the type"), cof);
+            Doc.english("must cover the face(s) specified in type:"), cof);
         for (int i = 1; i < clauses.size(); i++) {
           var lhs = clauses.get(i);
           for (int j = 0; j < i; j++) {
             var rhs = clauses.get(j);
             CofThy.conv(lhs.cof().and(rhs.cof()), normalizer(), norm -> {
-              unify(norm.term(lhs.u()), el, norm.term(rhs.u()), el.pos(), Doc.english("Boundaries disagree"));
+              unify(norm.term(lhs.u()), el, norm.term(rhs.u()), el.pos(), Doc.english("Boundaries disagree."));
               return true;
             });
           }

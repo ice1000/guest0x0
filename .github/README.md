@@ -38,6 +38,7 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 + CHM
   + [x] Extension type (generalized path type)
   + [x] Cofibration theory
+  + [x] Partial elements (with a dedicated type like in Cubical Agda)
   + [ ] Generalized transport
     + [x] Pi, Sigma, Universe
     + [ ] Higher inductive type
@@ -50,6 +51,52 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 ### Untagged
 
 ![image](https://user-images.githubusercontent.com/16398479/168640908-c1be4ea2-cc35-443d-ada9-84e754fef322.png)
+
+Added a dedicated type for cofibrations, added partial element syntax `{| i = 0 |-> u | i = 1 /\ j = 0 |-> v |}` (this is a demonstration) and the dedicated type `Partial #{i = 0 \/ i = 1 /\ j = 0}`, like in Cubical Agda. Elimination of contradiction in cofibration is also implemented. Here are some examples of partial elements typing:
+
+```
+def par1 (A : Type) (u : A) (i : I) : Partial A #{i = 0} =>
+  {| i = 0 |-> u |}
+def par2 (A : Type) (u : A) (i : I) : Partial A #{i = 0} =>
+  {| i = 0 |-> u | i = 1 |-> u |}
+def par3 (A : Type) (u : A) (v : A) (i : I) : Partial A #{i = 0 \/ i = 1} =>
+  {| i = 0 |-> u | i = 1 |-> v |}
+def par4 (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 \/ i = 1 /\ j = 0} =>
+  {| i = 0 |-> u | i = 1 /\ j = 0 |-> v |}
+def par5 (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 \/ i = 1 /\ j = 0} =>
+  {| i = 0 |-> u | i = 1 |-> v |}
+```
+
+Some counterexamples:
+
+```
+def par (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 /\ j = 0} =>
+  {| i = 0 |-> u | i = 0 /\ j = 0 |-> v |}
+```
+
+Raises:
+
+```
+Boundaries disagree.
+Umm, v != u on [| i = 0 |-> u | i = 0 /\ j = 0 |-> v |]
+In particular, u != v
+```
+
+And this one:
+
+```
+def par (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 \/ i = 1} =>
+  {| i = 0 |-> u | i = 1 /\ j = 0 |-> v |}
+```
+
+Raises:
+
+```
+The faces in the partial element i = 0 \/ (i = 1 /\ j = 0) must cover the face(s) specified
+in type: i = 0 \/ i = 1
+```
+
+Total lines of Java code in base (including spaces and comments): 1322, and in cubical infra: 377.
 
 ### v0.12
 

@@ -59,7 +59,7 @@ public interface Distiller {
     };
   }
   static Doc clause(Restr.Side<?> clause) {
-    return Doc.sep(clause.cof().toDoc(), Doc.symbol("|->"), clause.u().toDoc());
+    return Doc.spaced(Doc.sep(clause.cof().toDoc(), Doc.symbol("|->"), clause.u().toDoc()));
   }
   private static @NotNull Doc fibred(String kw, Docile cover, Docile restr) {
     return Doc.sep(Doc.plain(kw), cover.toDoc(),

@@ -139,7 +139,27 @@ public class DeclsTest {
         {| i = 0 |-> u |}
       def par2 (A : Type) (u : A) (i : I) : Partial A #{i = 0} =>
         {| i = 0 |-> u | i = 1 |-> u |}
+      def par3 (A : Type) (u : A) (v : A) (i : I) : Partial A #{i = 0 \\/ i = 1} =>
+        {| i = 0 |-> u | i = 1 |-> v |}
+      def par4 (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 \\/ i = 1 /\\ j = 0} =>
+        {| i = 0 |-> u | i = 1 /\\ j = 0 |-> v |}
+      def par5 (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 \\/ i = 1 /\\ j = 0} =>
+        {| i = 0 |-> u | i = 1 |-> v |}
       """);
+  }
+
+  @Test public void partialTooRestricted() {
+    assertThrowsExactly(SPE.class, () -> tyck("""
+      def par (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 \\/ i = 1} =>
+        {| i = 0 |-> u | i = 1 /\\ j = 0 |-> v |}
+      """));
+  }
+
+  @Test public void partialDisagree() {
+    assertThrowsExactly(SPE.class, () -> tyck("""
+      def par (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 /\\ j = 0} =>
+        {| i = 0 |-> u | i = 0 /\\ j = 0 |-> v |}
+      """));
   }
 
   private static @NotNull Elaborator tyck(@Language("TEXT") String s) {
