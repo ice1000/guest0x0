@@ -58,20 +58,11 @@ public interface CofThy {
       case Restr.Const<E> c -> !c.isTrue() || sat.test(initial);
       case Restr.Vary<E> restr -> {
         for (var or : restr.orz()) {
-          var derived = initial.derive();
-          var unsat = false;
-          for (var eq : or.ands()) {
-            if (eq.inst().asFormula() instanceof Formula.Lit<?> lit && lit.isLeft() != eq.isLeft())
-              unsat = true;
-            else {
-              var castVar = initial.asRef(eq.inst());
-              if (castVar != null) {
-                derived.put(castVar, eq.isLeft());
-              } else yield false;
-            }
-          }
-          if (unsat) continue; // Skip unsatisfiable cases
-          if (!sat.test(derived)) yield false;
+          var result = vdash(or, initial, sat::test);
+          if (result.isEmpty()) continue; // Skip unsatisfiable cases
+          var resBool = result.get();
+          if (resBool == null) yield false; // Cofib with nontrivial variables, like (i /\ j) = 0
+          if (!resBool) yield false;
         }
         yield true;
       }
@@ -88,8 +79,8 @@ public interface CofThy {
    * </ul>
    * @see SubstObj
    */
-  static <V, T extends Restr.TermLike<T>, Subst extends SubstObj<T, V, Subst>> Option<T>
-  vdash(@NotNull Restr.Cofib<T> or, @NotNull Subst initial, @NotNull Function<Subst, T> tyck) {
+  static <V, T extends Restr.TermLike<T>, Subst extends SubstObj<T, V, Subst>, E> Option<E>
+  vdash(@NotNull Restr.Cofib<T> or, @NotNull Subst initial, @NotNull Function<Subst, E> tyck) {
     var derived = initial.derive();
     var unsat = false;
     for (var eq : or.ands()) {
