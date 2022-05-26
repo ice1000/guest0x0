@@ -85,9 +85,13 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
     public @NotNull SeqView<E> view() {
       return ands.view().map(and -> and.inst);
     }
+
+    public Cofib<E> and(@NotNull Cofib<E> cof) {
+      return new Cofib<>(ands.appendedAll(cof.ands));
+    }
   }
 
-  record Side<E extends TermLike<E>>(@NotNull Restr.Cofib<E> cof, @NotNull E u) {
+  record Side<E extends TermLike<E>>(@NotNull Cofib<E> cof, @NotNull E u) {
     public Side<E> rename(@NotNull Function<E, E> g) {
       return new Side<>(cof.rename(g), g.apply(u));
     }

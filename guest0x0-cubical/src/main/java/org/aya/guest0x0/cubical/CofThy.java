@@ -1,6 +1,7 @@
 package org.aya.guest0x0.cubical;
 
 import kala.collection.SeqView;
+import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableStack;
@@ -46,6 +47,12 @@ public interface CofThy {
     conds.pop();
   }
 
+  /** @see CofThy#conv(Restr, SubstObj, Predicate) */
+  static <E extends Restr.TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
+  conv(@NotNull Restr.Cofib<E> r, @NotNull Subst initial, @NotNull Predicate<Subst> sat) {
+    return conv(new Restr.Vary<>(ImmutableSeq.of(r)), initial, sat);
+  }
+
   /**
    * Equality-checking (any procedure that returns a boolean) under a cofibration.
    *
@@ -53,7 +60,7 @@ public interface CofThy {
    * @see SubstObj
    */
   static <E extends Restr.TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
-  vdash(@NotNull Restr<E> r, @NotNull Subst initial, @NotNull Predicate<Subst> sat) {
+  conv(@NotNull Restr<E> r, @NotNull Subst initial, @NotNull Predicate<Subst> sat) {
     return switch (r) {
       case Restr.Const<E> c -> !c.isTrue() || sat.test(initial);
       case Restr.Vary<E> restr -> {
@@ -90,7 +97,9 @@ public interface CofThy {
       else {
         var castVar = initial.asRef(inst);
         if (castVar != null) {
-          derived.put(castVar, eq.isLeft());
+          if (derived.contradicts(castVar, eq.isLeft()))
+            return Option.none(); // Unsatisfiable
+          else derived.put(castVar, eq.isLeft());
         } else return Option.some(null);
       }
     }
@@ -98,17 +107,20 @@ public interface CofThy {
     return Option.some(tyck.apply(derived));
   }
 
-  /**
-   * Representation of a generic <strong>interval</strong> substitution object.
-   *
-   * @param <E> "terms"
-   * @param <V> "variables" -- assuming capture-avoiding substitution instead of indices
-   */
-  interface SubstObj<E, V, Subst extends SubstObj<E, V, Subst>> {
-    void put(V var, boolean isLeft);
-    @Nullable V asRef(@NotNull E term);
-    @NotNull Subst derive();
-  }
+/**
+ * Representation of a generic <strong>interval</strong> substitution object.
+ *
+ * @param <E> "terms"
+ * @param <V> "variables" -- assuming capture-avoiding substitution instead of indices
+ */
+interface SubstObj<E, V, Subst extends SubstObj<E, V, Subst>> {
+  /** Put <code>i := I(isLeft)</code> into the substitution */
+  void put(V i, boolean isLeft);
+  /** @return true if there is <code>i := I(oldIsLeft)</code> while <code>oldIsLeft != newIsLeft</code> */
+  boolean contradicts(V i, boolean newIsLeft);
+  @Nullable V asRef(@NotNull E term);
+  @NotNull Subst derive();
+}
 
   /**
    * Normalizes a "restriction" which looks like "f1 \/ f2 \/ ..." where

@@ -45,8 +45,8 @@ public class Unifier {
         var initial = Normalizer.create();
         var ll = lcof.restr();
         var rr = rcof.restr();
-        yield CofThy.vdash(ll, initial, normalizer -> CofThy.satisfied(normalizer.restr(rr)))
-          && CofThy.vdash(rr, initial, normalizer -> CofThy.satisfied(normalizer.restr(ll)));
+        yield CofThy.conv(ll, initial, normalizer -> CofThy.satisfied(normalizer.restr(rr)))
+          && CofThy.conv(rr, initial, normalizer -> CofThy.satisfied(normalizer.restr(ll)));
       }
       case Term.PartTy lpart && r instanceof Term.PartTy rpart ->
         untyped(lpart.ty(), rpart.ty()) && untyped(lpart.restr(), rpart.restr());
@@ -62,7 +62,7 @@ public class Unifier {
 
   /** Daniel Gratzer used <code>N</code> when explaining these to me */
   private boolean clause(@NotNull Restr.Side<Term> clause, @NotNull Term n) {
-    return CofThy.vdash(new Restr.Vary<>(ImmutableSeq.of(clause.cof())),
+    return CofThy.conv(new Restr.Vary<>(ImmutableSeq.of(clause.cof())),
       Normalizer.create(), subst -> untyped(clause.u(), subst.term(n)));
   }
 

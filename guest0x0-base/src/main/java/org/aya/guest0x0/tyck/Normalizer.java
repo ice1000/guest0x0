@@ -33,8 +33,14 @@ public record Normalizer(
     return new Param<>(param.x(), term(param.type()));
   }
 
-  @Override public void put(LocalVar var, boolean isLeft) {
-    rho.put(var, Term.end(isLeft));
+  @Override public void put(LocalVar i, boolean isLeft) {
+    rho.put(i, Term.end(isLeft));
+  }
+
+  @Override public boolean contradicts(LocalVar i, boolean newIsLeft) {
+    if (!rho.containsKey(i)) return false;
+    if (!(rho.get(i).asFormula() instanceof Formula.Lit<Term> lit)) return false;
+    return lit.isLeft() != newIsLeft;
   }
 
   @Override public @Nullable LocalVar asRef(@NotNull Term term) {

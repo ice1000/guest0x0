@@ -67,14 +67,17 @@ public record Elaborator(
         var cof = cof(par.restr(), el.pos());
         var clauses = el.clauses().flatMap(cl -> clause(el.pos(), cl, par.ty()));
         var face = new Restr.Vary<>(clauses.map(Restr.Side::cof));
-        if (!CofThy.vdash(cof.restr(), Normalizer.create(), norm -> CofThy.satisfied(norm.restr(face))))
+        if (!CofThy.conv(cof.restr(), Normalizer.create(), norm -> CofThy.satisfied(norm.restr(face))))
           throw new SPE(el.pos(), Doc.english("The faces in the partial element"), face,
             Doc.english("must cover the type"), cof);
         for (int i = 1; i < clauses.size(); i++) {
           var lhs = clauses.get(i);
           for (int j = 0; j < i; j++) {
             var rhs = clauses.get(j);
-            unify(lhs.u(), el, rhs.u(), el.pos(), Doc.english("Boundaries do not agree."));
+            CofThy.conv(lhs.cof().and(rhs.cof()), normalizer(), norm -> {
+              unify(norm.term(lhs.u()), el, norm.term(rhs.u()), el.pos(), Doc.english("Boundaries disagree"));
+              return true;
+            });
           }
         }
         yield new Term.PartEl(clauses);
@@ -243,7 +246,7 @@ public record Elaborator(
         };
         // I want it to have no references, so !detective.press(), and if it returns true, it means no problem
         // So if it returns false then we're in trouble
-        if (!CofThy.vdash(cof.restr(), normalizer(), n -> !detective.press(capture.under = n.term(sample))))
+        if (!CofThy.conv(cof.restr(), normalizer(), n -> !detective.press(capture.under = n.term(sample))))
           throw new SPE(transp.pos(), Doc.english("The cover"), cover,
             Doc.english("has to be constant under the cofibration"), cof,
             Doc.english("but applying a variable `?` to it results in"), capture.under,
@@ -280,7 +283,7 @@ public record Elaborator(
     @NotNull Restr.Side<Expr> clause, @NotNull Term ty
   ) {
     var cofib = new Restr.Cofib<>(clause.cof().ands().map(this::condition));
-    var u = CofThy.vdash(cofib, Normalizer.create(), norm -> inherit(clause.u(), norm.term(ty)));
+    var u = CofThy.vdash(cofib, normalizer(), norm -> inherit(clause.u(), norm.term(ty)));
     if (u.isDefined() && u.get() == null)
       throw new SPE(pos, Doc.english("The cofibration in"), cofib,
         Doc.english("is not well-defined"));
