@@ -50,9 +50,11 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+### v0.13
+
 ![image](https://user-images.githubusercontent.com/16398479/168640908-c1be4ea2-cc35-443d-ada9-84e754fef322.png)
 
-Added a dedicated type for cofibrations, added partial element syntax `{| i = 0 |-> u | i = 1 /\ j = 0 |-> v |}` (this is a demonstration) and the dedicated type `Partial #{i = 0 \/ i = 1 /\ j = 0}`, like in Cubical Agda. Elimination of contradiction in cofibration is also implemented. Here are some examples of partial elements typing:
+Added a dedicated type for cofibrations (`F`), added partial element syntax `{| i = 0 |-> u | i = 1 /\ j = 0 |-> v |}` (this is a demonstration) and the dedicated type `Partial #{i = 0 \/ i = 1 /\ j = 0}`, like in Cubical Agda. Elimination of contradiction in cofibration is also implemented. Here are some examples of partial elements typing:
 
 ```
 def par1 (A : Type) (u : A) (i : I) : Partial A #{i = 0} =>
