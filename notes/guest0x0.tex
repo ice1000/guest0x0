@@ -20,11 +20,18 @@ Translate the following typing rules into an algorithmic description:
 \end{mathpar}
 Which of them is an introduction rule, and which is an elimination rule?
 \end{exercise}
+\begin{notation}
+In this tutorial, instead of the more traditional $\lambda x.b$, the notation for $\lambda$-abstraction is $\lam x b$ 
+following the style of the Arend language. Furthermore, substitution is denoted by
+$u[v/x]$. One may think of this notation as ``fractional multiplication'' $u\times \frac v x$,
+where the denominator $x$ is cancelled out from $u$ and \textit{replaced} with the numerator $v$.
+Other authors may use $u[x\mapsto v]$, $u[x:=v]$, $[v/x]u$, etc.
+\end{notation}
 \begin{exercise}
 Define path concatenation in \CTT{} using \hcomp{}.
 \end{exercise}
 \subsection{Motivation}
-This document is intended to help readers get more familiar with how
+This tutorial is intended to help readers get more familiar with how
 \CTT{} works, what difficulties it is having in implementations,
 what it can already do, and what it cannot do yet.
 
@@ -32,12 +39,12 @@ what it can already do, and what it cannot do yet.
 which uses sophisticated mathematics, while computer scientists
 usually do not have relevant courses taught in their undergraduate program.
 But it is also the computer scientists who are suppose to implement \CTT{} as
-programming languages. This document tries to help those who did not study homotopy
+programming languages. This tutorial tries to help those who did not study homotopy
 theory, but wish to learn the internals of \CTT.
 
 \CTT{} extends Martin-L\"{o}f type theory with huge new constructions,
 especially the typing rules are written in a very compact way (like in~\cite{HCompPDF}).
-This document aims to discuss them from an algorithmic perspective,
+This tutorial aims to discuss them from an algorithmic perspective,
 and hopefully to inspire more people to implement cubical type theory,
 to fuse these ideas into other work, or just to worship these brilliant ideas.
 
