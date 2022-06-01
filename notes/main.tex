@@ -1,0 +1,33 @@
+\documentclass[reqno]{amsart}
+
+\usepackage[style=alphabetic,sorting=none,backend=biber]{biblatex}
+\setcounter{biburllcpenalty}{7000}
+\setcounter{biburlucpenalty}{8000}
+\bibliography{guest0x0}
+\usepackage{tiz-note}
+\usepackage[hyphenbreaks]{breakurl}
+
+\begin{document}
+
+\title{A tutorial on implementing De Morgan cubical type theory}
+
+\author{Tesla Zhang}
+\address{The Pennsylvania State University}
+\email{ice1000kotlin@foxmail.com}
+\urladdr{https://personal.psu.edu/yqz5714}
+\date\today
+
+\newcommand{\GuestName}{\textsc{Guest0x0}}
+
+\begin{abstract}
+This tutorial explains (one way) how to implement De Morgan cubical type theory
+to people who know how to implement a dependent type theory. It contains an introduction
+to basic concepts of cubes, type checking algorithms under a cofibration,
+the idea of ``transportation rules'' and cubical operations.
+\end{abstract}
+\maketitle
+\tableofcontents
+\input{guest0x0}
+
+\printbibliography
+\end{document}

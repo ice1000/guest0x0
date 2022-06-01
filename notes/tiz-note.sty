@@ -1,0 +1,53 @@
+\RequirePackage{tiz-paper}
+\RequirePackage{mathpazo}
+
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
+\numberwithin{figure}{section}
+
+\RequirePackage{etoolbox}
+\RequirePackage{catchfilebetweentags}
+\RequirePackage{hologo}
+\DeclareFontFamily{U}{skulls}{}
+\DeclareFontShape{U}{skulls}{m}{n}{ <-> skull }{}
+\NewDocumentCommand\skull{}{\text{\usefont{U}{skulls}{m}{n}\symbol{'101}}}
+
+\NewDocumentCommand\Hint{m}{{\color{gray}#1}}
+
+\makeatletter
+\patchcmd{\@maketitle}
+  {\ifx\@empty\@dedicatory}
+  {\ifx\@empty\@date \else {\vskip3ex \centering\footnotesize\@date\par\vskip1ex}\fi
+   \ifx\@empty\@dedicatory}
+  {}{}
+\patchcmd{\@adminfootnotes}
+  {\ifx\@empty\@date\else \@footnotetext{\@setdate}\fi}
+  {}{}{}
+\makeatother
+
+\NewDocumentCommand\SetupQED{m m}{%
+  \AtBeginEnvironment{#1}{%
+    \renewcommand\qedsymbol{#2}%
+    \pushQED{\qed}%
+  }%
+  \AtEndEnvironment{#1}{\popQED}%
+}
+\NewDocumentCommand\SetupMountain{m}{\SetupQED{#1}{\Mountain}}
+
+\SetupQED{glorious-defn}\manstar
+% \SetupVarMountain{example}
+\SetupMountain{example}
+\SetupQED{remark}\PencilLeftDown
+\SetupQED{warning}\skull
+\SetupQED{history}\Tent
+
+\SetupMountain{convention}
+\SetupMountain{notation}
+\SetupMountain{terminology}
+\SetupMountain{prop}
+\SetupMountain{defn}
+\SetupMountain{principle}
+\SetupMountain{open-question}
+\SetupMountain{observation}
+\SetupMountain{fact}
+\SetupMountain{construction}

@@ -70,16 +70,7 @@ public record Elaborator(
         if (!CofThy.conv(cof.restr(), Normalizer.create(), norm -> CofThy.satisfied(norm.restr(face))))
           throw new SPE(el.pos(), Doc.english("The faces in the partial element"), face,
             Doc.english("must cover the face(s) specified in type:"), cof);
-        for (int i = 1; i < clauses.size(); i++) {
-          var lhs = clauses.get(i);
-          for (int j = 0; j < i; j++) {
-            var rhs = clauses.get(j);
-            CofThy.conv(lhs.cof().and(rhs.cof()), normalizer(), norm -> {
-              unify(norm.term(lhs.u()), el, norm.term(rhs.u()), el.pos(), Doc.english("Boundaries disagree."));
-              return true;
-            });
-          }
-        }
+        confluence(el, clauses, el.pos());
         yield new Term.PartEl(clauses);
       }
       case Expr.Two two && !two.isApp() -> {
@@ -128,6 +119,19 @@ public record Elaborator(
         };
       }
     };
+  }
+
+  private void confluence(Docile on, ImmutableSeq<Restr.Side<Term>> clauses, @NotNull SourcePos pos) {
+    for (int i = 1; i < clauses.size(); i++) {
+      var lhs = clauses.get(i);
+      for (int j = 0; j < i; j++) {
+        var rhs = clauses.get(j);
+        CofThy.conv(lhs.cof().and(rhs.cof()), normalizer(), norm -> {
+          unify(norm.term(lhs.u()), on, norm.term(rhs.u()), pos, Doc.english("Boundaries disagree."));
+          return true;
+        });
+      }
+    }
   }
 
   private void unify(Term ty, Docile on, @NotNull Term actual, SourcePos pos, Doc prefix) {

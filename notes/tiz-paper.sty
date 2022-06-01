@@ -1,0 +1,158 @@
+\RequirePackage[T1]{fontenc}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{xcolor}
+\let\Bbbk\relax
+\RequirePackage{amssymb}
+\RequirePackage{amsmath}
+\RequirePackage[all]{xy}
+\RequirePackage{verbatim}
+\RequirePackage{ifthen}
+\RequirePackage{xargs}
+\RequirePackage{xparse}
+\RequirePackage{subfig}
+\RequirePackage{mathpartir}
+\RequirePackage{mathtools}
+\RequirePackage{etex}
+\RequirePackage{centernot}
+\RequirePackage{varioref}
+\RequirePackage[bookmarksnumbered,unicode]{hyperref}
+\RequirePackage{cleveref}
+\RequirePackage{stmaryrd}
+\RequirePackage{float}
+\RequirePackage{braket}
+
+\RequirePackage{ragged2e}
+\setlength{\RaggedRightParindent}{\parindent}
+
+\RequirePackage{quiver}
+\RequirePackage[alpine,misc]{ifsym}
+\RequirePackage{bbding}
+\RequirePackage{manfnt}
+
+\definecolor{comment}{rgb}{0.70,0.13,0.13}
+\definecolor{keyword}{rgb}{1.0,0.43,0}
+\definecolor{builtin}{rgb}{0.63,0.13,0.94}
+\definecolor{function}{rgb}{0.00,0.00,1.00}
+\definecolor{datatype}{rgb}{0.13,0.55,0.13}
+\definecolor{constant}{rgb}{0.00,0.55,0.55}
+
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=purple}
+
+\newcommand{\axlabel}[1]{(#1) \phantomsection \label{ax:#1}}
+\newcommand{\axtag}[1]{\label{ax:#1} \tag{#1}}
+\newcommand{\axref}[1]{(\hyperref[ax:#1]{#1})}
+% https://tex.stackexchange.com/a/79683/145304
+\makeatletter
+\newsavebox{\@brx}
+\newcommand{\llangle}[1][]{\savebox{\@brx}{\(\m@th{#1\langle}\)}%
+  \mathopen{\copy\@brx\mkern2mu\kern-0.9\wd\@brx\usebox{\@brx}}}
+\newcommand{\rrangle}[1][]{\savebox{\@brx}{\(\m@th{#1\rangle}\)}%
+  \mathclose{\copy\@brx\mkern2mu\kern-0.9\wd\@brx\usebox{\@brx}}}
+\makeatother
+
+\makeatletter % allow us to mention @-commands
+\def\arcr{\@arraycr}
+\makeatother
+
+% general
+\newcommand{\TODO}[0]{{\color{red} TODO}}
+\newcommand{\lessSpace}[1]{\mbox{}\par\nopagebreak\vspace{#1\baselineskip}\vspace{-\abovedisplayskip}}
+\newenvironment{margined}[1]
+  {\list{}{\leftmargin=#1\rightmargin=#1}\item[]}
+  {\endlist}
+
+% judgments
+\newcommand{\Gvdash}{\Gamma \vdash}
+\newcommand{\SGvdash}{\Sigma;\Gamma \vdash}
+\newcommand{\isType}[1]{#1~\text{type}}
+
+% tokens
+\newcommand{\fs}[1]{\mathrm{#1}}
+\newcommand{\Dat}[1]{\fs{\color{datatype} #1}}
+\newcommand{\func}[1]{\fs{\color{function} #1}}
+\newcommand{\cons}[1]{\fs{\color{builtin} #1}}
+\newcommand{\kw}[1]{\textsf{\color{keyword} #1}}
+\newcommand{\elim}[1]{\fs{\color{constant} #1}}
+
+% symbols
+\newcommand{\UU}{\mathcal U}
+\newcommand{\CC}{\mathcal C}
+\newcommand{\Prop}{\fs{Prop}}
+\newcommand{\El}[1]{\fs{El}(#1)}
+\newcommand{\Ty}[2][]{\ifthenelse{\equal{#1}{}}{\text{Ty}(#2)}{\text{Ty}_{#1}(#2)}}
+\newcommand{\Tm}[2]{\fs{Tm}(#1, #2)}
+\newcommand{\id}{\fs{id}}
+\newcommand{\lrbracket}[1]{\llbracket #1 \rrbracket}
+\newcommand{\lam}[2]{\lambda #1\Rightarrow#2}
+\newcommand{\brakett}[1]{\llangle#1\rrangle}
+\newcommand{\fstProj}{\fs{fst}}
+\newcommand{\sndProj}{\fs{snd}}
+\newcommand{\plam}[2]{\braket{#1}~#2}
+
+% jon-note
+\NewDocumentCommand\OpCat{m}{#1^{\mathrm{op}}}
+\NewDocumentCommand\SET{}{\mathbf{Set}}
+\NewDocumentCommand\CAT{}{\mathbf{Cat}}
+\NewDocumentCommand\FAM{}{\mathbf{Fam}}
+
+% theorems
+% some \ifdefined are used to avoid llncs.cls conflicts
+\ifdefined\theorem\else
+\newtheorem{theorem}{Theorem}[section]
+\fi
+\newtheorem{lem}[theorem]{Lemma}
+\newtheorem{thm}[theorem]{Theorema}
+\ifdefined\conjecture\else
+\newtheorem{conjecture}[theorem]{Conjecture}
+\fi
+\newtheorem{cor}[theorem]{Corollary}
+\newtheorem{prop}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{principle}[theorem]{Principle}
+\newtheorem{open-question}[theorem]{Open Question}
+\newtheorem{construction}[theorem]{Construction}
+\newtheorem{convention}[theorem]{Convention}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{terminology}[theorem]{Terminology}
+\newtheorem{defn}[theorem]{Definition}
+\newtheorem{glorious-defn}[theorem]{Definition}
+\ifdefined\remark\else
+\newtheorem{remark}[theorem]{Remark}
+\fi
+\newtheorem{history}[theorem]{History}
+\ifdefined\example\else
+\newtheorem{example}[theorem]{Demonstration}
+\fi
+\ifdefined\exercise\else
+\newtheorem{exercise}[theorem]{Exercise}
+\fi
+\newtheorem{observation}[theorem]{Observation}
+\newtheorem{warning}[theorem]{Warning}
+
+\Crefname{prop}{Proposition}{Propositions}
+\Crefname{rule}{Rule}{Rules}
+\Crefname{principle}{Principle}{Principles}
+\Crefname{notation}{Notation}{Notations}
+\Crefname{terminology}{Terminology}{Terminologies}
+\Crefname{open-question}{Open Question}{Open Questions}
+\Crefname{defn}{Definition}{Definitions}
+\Crefname{lem}{Lemma}{Lemmata}
+\Crefname{thm}{Theorema}{Theoremata}
+\Crefname{remark}{Remark}{Remarks}
+\Crefname{history}{History}{Histories}
+\Crefname{example}{Demonstration}{Demonstrations}
+\Crefname{exercise}{Exercise}{Exercises}
+\Crefname{reduction}{Reduction}{Reductions}
+\Crefname{convention}{Convention}{Conventions}
+
+\definecolor{crefformatColor}{rgb}{0.42, 0.06, 0.45}
+\crefformat{section}{\S#2{\color{crefformatColor} #1}#3} % see manual of cleveref, section 8.2.1
+\crefformat{subsection}{\S#2{\color{crefformatColor} #1}#3}
+\crefformat{subsubsection}{\S#2{\color{crefformatColor} #1}#3}
+\crefformat{figure}{Fig.~#2{\color{crefformatColor} #1}#3}
+\crefformat{equation}{(#2{\color{crefformatColor} #1}#3)}
+
+\crefmultiformat{defn}{definitions~#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
+\crefmultiformat{thm}{theoremata~#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
+\crefmultiformat{lem}{lemmata~#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
+\crefmultiformat{glorious-defn}{definitions~#2#1#3}{ and~#2#1#3}{, #2#1#3}{ and~#2#1#3}
