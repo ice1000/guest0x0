@@ -31,12 +31,17 @@ Which of them is an introduction rule, and which is an elimination rule?
 \begin{notation}
 In this tutorial, instead of the more traditional \fbox{$\lambda x.b$},
 the notation for $\lambda$-abstraction is \fbox{$\lam x b$} 
-following the style of the Arend language. Furthermore, substitution is denoted by
-$u[v/x]$. One may think of this notation as ``fractional multiplication'' $u\times \frac v x$,
+following the style of the Arend language.
+
+Substitution is denoted by $u[v/x]$.
+One may think of this notation as ``fractional multiplication'' $u\times \frac v x$,
 where the denominator $x$ is cancelled out from $u$ and \textit{replaced} with the numerator $v$.
 Other authors may use $u[x\mapsto v]$, $u[x:=v]$, $[v/x]u$, etc.
+
+Propositional equality and path equivalence are both denoted $u=v$,
+while definitional equality (a.k.a. judgmental equality) is denoted $u\equiv v$.
 \end{notation}
-\begin{exercise}
+\begin{exercise}\label{ex:concat-sym}
 Consider path concatenation and symmetry in \CTT{}:
 \begin{align*}
 \concat&:(p:a=b)\to(q:b=c)\to{a=c}\\
@@ -114,5 +119,22 @@ it goes to $\Phi$, otherwise it goes to $\Gamma$.
 Note that~\cref{not:ctx} does not imply anything implementation-wise.
 
 \subsection{Partial elements}\label{sub:partial}
-In \CTT, we may not be able to describe every cube using a term.
-This motivates the idea of partial elements
+In \CTT, we may not be able to describe every cube using a term,
+like the squares in~\cref{ex:concat-sym}.
+This motivates the idea of partial elements.
+\begin{terminology}
+We follow the terminology in~\cite{CubicalAgda}.
+In~\cite{CCHM}, partial elements are called \textit{systems}.
+\end{terminology}
+Suppose we want to describe a square $i:\II,j:\II\vdash u:A$,
+where $i$ goes from left to right and $j$ goes from bottom to top.
+For simplicity we assume $\vdash \isType{A}$, say, $A$ does not depend on $i$ or $j$.
+% https://q.uiver.app/?q=WzAsMyxbMCwxXSxbMSwxXSxbMCwwXSxbMCwxLCJpIl0sWzAsMiwiaiIsMl1d
+\[\begin{tikzcd}
+	{} \\
+	{} & {}
+	\arrow["i", from=2-1, to=2-2]
+	\arrow["j"', from=2-1, to=1-1]
+\end{tikzcd}\]
+The goal is to make $u[\lcon/i, \rcon/j]\equiv a$ and $u[\rcon/i]\equiv v$.
+From the goal we may deduce $\vdash a:A$ and $j:II\vdash v:A$.
