@@ -1,4 +1,12 @@
 \section{Introduction}
+Throughout this tutorial, \fbox{boxes} will be used in the following two cases:
+\begin{itemize}
+\item to clarify the precedences of symbols when formulae become too large. \\
+e.g. \fbox{$\Gvdash \fbox{$\lam x M$}~:~\fbox{$(y:A)\to B$}
+\Leftarrow \fbox{$\lam x u$}$}.
+\item to distinguish type theory terms from natural language text. \\
+e.g. ``we combine a term \fbox{$a$} with a term \fbox{$b$} to get a term \fbox{$a~b$}''.
+\end{itemize}
 \subsection{Target Audience}
 This tutorial assumes familiarity with the following:
 \begin{itemize}
@@ -15,20 +23,40 @@ Some quick warm-ups:
 \begin{exercise}
 Translate the following typing rules into an algorithmic description:
 \begin{mathpar}
-\inferrule{\Gamma,x:A\vdash b:B[x/y]}{\Gvdash \lam x b : (y:A)\to B} \and
+\inferrule{\Gamma,x:A\vdash b:B[x/y]}{\Gvdash \fbox{$\lam x b$} : (y:A)\to B} \and
 \inferrule{\Gvdash u : (x:A)\to B \\ \Gvdash v:A}{\Gvdash u~v:B[v/x]}
 \end{mathpar}
 Which of them is an introduction rule, and which is an elimination rule?
 \end{exercise}
 \begin{notation}
-In this tutorial, instead of the more traditional $\lambda x.b$, the notation for $\lambda$-abstraction is $\lam x b$ 
+In this tutorial, instead of the more traditional \fbox{$\lambda x.b$},
+the notation for $\lambda$-abstraction is \fbox{$\lam x b$} 
 following the style of the Arend language. Furthermore, substitution is denoted by
 $u[v/x]$. One may think of this notation as ``fractional multiplication'' $u\times \frac v x$,
 where the denominator $x$ is cancelled out from $u$ and \textit{replaced} with the numerator $v$.
 Other authors may use $u[x\mapsto v]$, $u[x:=v]$, $[v/x]u$, etc.
 \end{notation}
 \begin{exercise}
-Define path concatenation in \CTT{} using \hcomp{}.
+Consider path concatenation and symmetry in \CTT{}:
+\begin{align*}
+\concat&:(p:a=b)\to(q:b=c)\to{a=c}\\
+\sym&:(p:a=b)\to{b=a}
+\end{align*}
+Define both using \hcomp{} on the following squares,
+preferably in a cubical programming language:
+% https://q.uiver.app?q=WzAsOCxbMCwwLCJhIl0sWzEsMCwiYyJdLFswLDEsImEiXSxbMSwxLCJiIl0sWzIsMSwiYSJdLFsyLDAsImIiXSxbMywxLCJhIl0sWzMsMCwiYSJdLFswLDEsIlxcY29uY2F0KHAsIHEpIl0sWzIsMCwiIiwwLHsibGV2ZWwiOjIsInN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMiwzLCJwIiwyXSxbMywxLCJxIiwyXSxbNCw1LCJwIl0sWzQsNiwiIiwyLHsibGV2ZWwiOjIsInN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNiw3LCIiLDIseyJsZXZlbCI6Miwic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs1LDcsIlxcc3ltKHApIl1d
+\[\begin{tikzcd}
+	a & c & b & a \\
+	a & b & a & a
+	\arrow["{\concat(p, q)}", from=1-1, to=1-2]
+	\arrow[Rightarrow, no head, from=2-1, to=1-1]
+	\arrow["p"', from=2-1, to=2-2]
+	\arrow["q"', from=2-2, to=1-2]
+	\arrow["p", from=2-3, to=1-3]
+	\arrow[Rightarrow, no head, from=2-3, to=2-4]
+	\arrow[Rightarrow, no head, from=2-4, to=1-4]
+	\arrow["{\sym(p)}", from=1-3, to=1-4]
+\end{tikzcd}\]
 \end{exercise}
 \subsection{Motivation}
 This tutorial is intended to help readers get more familiar with how
@@ -52,7 +80,21 @@ to fuse these ideas into other work, or just to worship these brilliant ideas.
 This section motivates and explains typing judgments with cofibrations in the context.
 
 \subsection{Syntax and notations}\label{sub:syntax}
-We assume an informal understanding of type theory syntax, including
-dependently-typed $\lambda$-calculus
-
-In \CTT, 
+In \CTT, we have the interval type:
+\[\vdash \isType\II\quad \vdash \lcon:\II \quad \vdash \rcon:\II\]
+The interval type is used in the following way.
+\begin{example}
+Suppose \fbox{$i:\II\vdash\isType{A}$} and \fbox{$i:\II\vdash u:A$},
+then semantically $u$ is a line between $u[\lcon/0]$ and $u[\rcon/0]$, like this:
+% https://q.uiver.app/?q=WzAsMixbMCwwLCJ1W1xcbGNvbi9pXSJdLFsxLDAsInVbXFxyY29uL2ldIl0sWzAsMSwidSJdXQ==
+\[\begin{tikzcd}
+	{u[\lcon/i]} & {u[\rcon/i]}
+	\arrow["u", from=1-1, to=1-2]
+\end{tikzcd}\]
+\end{example}
+\begin{notation}
+Typing judgments are written as \fbox{$\PGvdash \isType{A}$} and \fbox{$\PGvdash u:A$},
+where \fbox{$\Phi;\Gamma$} is the usual \textit{context} in type theories,
+with variables classified into two groups: if a variable has type $\II$,
+it goes to $\Phi$, otherwise it goes to $\Gamma$.
+\end{notation}
