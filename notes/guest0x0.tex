@@ -120,8 +120,10 @@ Typing judgments are written as \fbox{$\PGvdash \isType{A}$} and \fbox{$\PGvdash
 where \fbox{$\Phi;\Gamma$} is the usual \textit{context} in type theories,
 with variables classified into two groups: if a variable has type $\II$,
 it goes to $\Phi$, otherwise it goes to $\Gamma$.
+This convention is borrowed from~\cite{ABCFHL}.
 \end{notation}
-Note that~\cref{not:ctx} does not imply anything implementation-wise.
+Note that~\cref{not:ctx} does not imply anything implementation-wise:
+the \GuestName{} type checker mix intervals and other bindings in a unified context.
 
 \subsection{Partial elements}\label{sub:partial}
 In \CTT, we may not be able to describe every cube using a term,
@@ -151,8 +153,9 @@ From the goal we may deduce $\vdash a:A$ and $j:\II\vdash v:A$.
 	\arrow["v"', from=2-2, to=1-2]
 \end{tikzcd}\]
 The above ``describing a cube by describing parts of its boundaries''
-process is a just-need of \CTT, and such descriptions are called \textit{partial elements}.
-In \CTT, we simply invent a syntax for them.
+process is a just-need of \CTT, and such descriptions are called \textit{partial elements}
+(also informally called a \textit{configuration} of a cube).
+In \CTT, we need a syntax for partial elements.
 Intuitively we may write something like this:
 \[\lrbbar{\begin{array}{rc}
   i\equiv\lcon \land j\equiv\rcon&\mapsto a\\
@@ -160,3 +163,7 @@ Intuitively we may write something like this:
 \end{array}}\]
 To define this formally, we need to define the syntax of the left-hand-side of $\mapsto$.
 They are called \textit{cofibrations} in \CTT.
+\begin{terminology}
+In~\cite{CCHM}, cofibrations are called \textit{face restrictions},
+which is more intuitive but also longer.
+\end{terminology}
