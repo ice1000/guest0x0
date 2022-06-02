@@ -81,6 +81,11 @@ This tutorial aims to discuss them from an algorithmic perspective,
 and hopefully to inspire more people to implement cubical type theory,
 to fuse these ideas into other work, or just to worship these brilliant ideas.
 
+This tutorial is a by-product of an experiment in implementing \CTT, called \GuestName,
+a project created to encourage a particular person to learn \CTT.
+The story ends up in the worst way: the person did not learn \CTT, and instead created
+a new project to encourage the author of \GuestName{} to learn extensional type theory.
+
 \section{Type checking cubes}\label{sec:tyck-cube}
 This section motivates and explains typing judgments with cofibrations in the context.
 
@@ -126,9 +131,9 @@ This motivates the idea of partial elements.
 We follow the terminology in~\cite{CubicalAgda}.
 In~\cite{CCHM}, partial elements are called \textit{systems}.
 \end{terminology}
-Suppose we want to describe a square $i:\II,j:\II\vdash u:A$,
+Suppose we want to describe a square \fbox{$i:\II,j:\II\vdash u:A$},
 where $i$ goes from left to right and $j$ goes from bottom to top.
-For simplicity we assume $\vdash \isType{A}$, say, $A$ does not depend on $i$ or $j$.
+For simplicity we assume \fbox{$\vdash \isType{A}$}, say, $A$ does not depend on $i$ or $j$.
 % https://q.uiver.app/?q=WzAsMyxbMCwxXSxbMSwxXSxbMCwwXSxbMCwxLCJpIl0sWzAsMiwiaiIsMl1d
 \[\begin{tikzcd}
 	{} \\
