@@ -20,6 +20,7 @@
 \RequirePackage{stmaryrd}
 \RequirePackage{float}
 \RequirePackage{braket}
+\RequirePackage{scalerel}
 
 \RequirePackage{ragged2e}
 \setlength{\RaggedRightParindent}{\parindent}
@@ -48,9 +49,6 @@
   \mathopen{\copy\@brx\mkern2mu\kern-0.9\wd\@brx\usebox{\@brx}}}
 \newcommand{\rrangle}[1][]{\savebox{\@brx}{\(\m@th{#1\rangle}\)}%
   \mathclose{\copy\@brx\mkern2mu\kern-0.9\wd\@brx\usebox{\@brx}}}
-\makeatother
-
-\makeatletter % allow us to mention @-commands
 \def\arcr{\@arraycr}
 \makeatother
 
@@ -82,12 +80,17 @@
 \newcommand{\Ty}[2][]{\ifthenelse{\equal{#1}{}}{\text{Ty}(#2)}{\text{Ty}_{#1}(#2)}}
 \newcommand{\Tm}[2]{\fs{Tm}(#1, #2)}
 \newcommand{\id}{\fs{id}}
-\newcommand{\lrbracket}[1]{\llbracket #1 \rrbracket}
 \newcommand{\lam}[2]{\lambda #1\Rightarrow#2}
-\newcommand{\brakett}[1]{\llangle#1\rrangle}
 \newcommand{\fstProj}{\fs{fst}}
 \newcommand{\sndProj}{\fs{snd}}
 \newcommand{\plam}[2]{\braket{#1}~#2}
+
+\newcommand{\lrbracket}[1]{\llbracket #1 \rrbracket}
+\newcommand{\brakett}[1]{\llangle#1\rrangle}
+\newcommand{\lbbar}{\{\kern-0.5ex|}
+\newcommand{\rbbar}{|\kern-0.5ex\}}
+% https://tex.stackexchange.com/a/256652/145304
+\newcommand{\lrbbar}[1]{\stretchleftright{\lbbar}{#1}{\rbbar}}
 
 % jon-note
 \NewDocumentCommand\OpCat{m}{#1^{\mathrm{op}}}
