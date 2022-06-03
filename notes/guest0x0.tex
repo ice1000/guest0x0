@@ -122,8 +122,9 @@ with variables classified into two groups: if a variable has type $\II$,
 it goes to $\Phi$, otherwise it goes to $\Gamma$.
 This convention is borrowed from~\cite{ABCFHL}.
 \end{notation}
-Note that~\cref{not:ctx} does not imply anything implementation-wise:
-the \GuestName{} type checker mix intervals and other bindings in a unified context.
+Note that~\cref{not:ctx} does not imply that contexts has to be classified
+in the implementations. The \GuestName{} type checker mix intervals
+and other bindings in a unified context, just like usual dependent type checkers.
 
 \subsection{Partial elements}\label{sub:partial}
 In \CTT, we may not be able to describe every cube using a term,
@@ -165,5 +166,19 @@ To define this formally, we need to define the syntax of the left-hand-side of $
 They are called \textit{cofibrations} in \CTT.
 \begin{terminology}
 In~\cite{CCHM}, cofibrations are called \textit{face restrictions},
-which is more intuitive but also longer.
+which is more (geometrically) intuitive but also longer.
 \end{terminology}
+The syntax of a cofibration is defined to be a disjunction normal form of
+face ``conditions'' like $i\equiv\lcon$ or $i\equiv\rcon$.
+Variable names are assumed to respect capture-avoiding substitution,
+and can be implemented using any nameless representations.
+\begin{figure}[h!]
+\[\begin{array}{rcl}
+  i,j,k,l ::= & \cdots & \text{variable names} \\
+  \cond ::= & i\equiv\lcon \mid i\equiv\rcon & \text{condition} \\
+  \conj ::= & \cond \mid \cond \land \conj & \text{conjunction} \\
+  \disj ::= & \conj \mid \conj \lor \disj & \text{disjunction}
+\end{array}\]
+\caption{Syntax of cofibrations}
+\label{fig:cofib}
+\end{figure}
