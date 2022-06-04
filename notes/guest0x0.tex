@@ -158,7 +158,7 @@ process is a just-need of \CTT, and such descriptions are called \textit{partial
 (also informally called a \textit{configuration} of a cube).
 In \CTT, we need a syntax for partial elements.
 Intuitively we may write something like this:
-\[\lrbbar{\begin{array}{rc}
+\[\LRbbar{\begin{array}{rc}
   i\equiv\lcon \land j\equiv\rcon&\mapsto a\\
   i\equiv\rcon &\mapsto v
 \end{array}}\]
@@ -183,6 +183,7 @@ and can be implemented using any nameless representations.
 \caption{Syntax of cofibrations}
 \label{fig:cofib}
 \end{figure}
+
 The meaning of cofibrations is simple. Suppose we are talking about a $3$-dimensional cube,
 so we are in a context with $3$ intervals, say, $\Phi=i:\II,j:\II,k:\II$.
 Then:
@@ -193,17 +194,26 @@ and $i=\lcon\land j=\rcon\land k=\lcon$ specifies a point (note that this point 
 \item $\disj$ talks about several $n$-cubes (for $n\leq 2$) in $\Phi$ at the same time.
 \end{itemize}
 Using cofibrations, we define the syntax of partial elements
-by extending the syntax for terms:
+by extending the syntax for terms in~\cref{fig:partial}
+(assuming we use $u,A$ for term syntax).
 \begin{figure}[h!]
 \[\begin{array}{rl}
 	\face::=&\conj\mapsto u \mid \conj\mapsto u,\face\\
-	u::=&\lrbbar{\face} \mid \cdots~\text{(other term formers)}
+	u,A::=&\lrbbar{\face} \mid \Partial{\disj}{A} \mid \cdots~\text{(other term formers)}
 \end{array}\]
 \caption{Syntax of partial elements}
-\label{fig:parEl}
+\label{fig:partial}
 \end{figure}
+
+Note that we also need to define the type of partial elements,
+and the type needs to contain the following two pieces of information:
+\begin{itemize}
+\item The faces being specified, $\disj$.
+\item The type of the faces, $A$.
+\end{itemize}
 There are several advantages to use a disjunction normal form:
 \begin{itemize}
 \item We can put $\conj$ to the left-hand-side of $\mapsto$,
 so every clause in a partial element is a single face.
+\item It is easy to get the type of a partial element.
 \end{itemize}
