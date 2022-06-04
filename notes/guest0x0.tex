@@ -75,7 +75,7 @@ But it is also the computer scientists who are suppose to implement \CTT{} as
 programming languages. This tutorial tries to help those who did not study homotopy
 theory, but wish to learn the internals of \CTT.
 
-\CTT{} extends Martin-L\"{o}f type theory with huge new constructions,
+\CTT{} extends Martin-L\"{o}f type theory with a huge amount of new constructions,
 especially the typing rules are written in a very compact way (like in~\cite{HCompPDF}).
 This tutorial aims to discuss them from an algorithmic perspective,
 and hopefully to inspire more people to implement cubical type theory,
@@ -168,12 +168,13 @@ They are called \textit{cofibrations} in \CTT.
 In~\cite{CCHM}, cofibrations are called \textit{face restrictions},
 which is more (geometrically) intuitive but also longer.
 \end{terminology}
-The syntax of a cofibration is defined to be a disjunction normal form of
-face ``conditions'' like $i\equiv\lcon$ or $i\equiv\rcon$.
+The syntax of a cofibration is defined to be a disjunction normal form
+(a disjunction list of conjunctions) of
+face ``conditions'' like $i\equiv\lcon$ or $i\equiv\rcon$, as in~\cref{fig:cofib}.
 Variable names are assumed to respect capture-avoiding substitution,
 and can be implemented using any nameless representations.
 \begin{figure}[h!]
-\[\begin{array}{rcl}
+\[\begin{array}{rll}
   i,j,k,l ::= & \cdots & \text{variable names} \\
   \cond ::= & i\equiv\lcon \mid i\equiv\rcon & \text{condition} \\
   \conj ::= & \cond \mid \cond \land \conj & \text{conjunction} \\
@@ -182,3 +183,27 @@ and can be implemented using any nameless representations.
 \caption{Syntax of cofibrations}
 \label{fig:cofib}
 \end{figure}
+The meaning of cofibrations is simple. Suppose we are talking about a $3$-dimensional cube,
+so we are in a context with $3$ intervals, say, $\Phi=i:\II,j:\II,k:\II$.
+Then:
+\begin{itemize}
+\item $\cond$ specifies a $2$-cube (a square) in $\Phi$.
+\item $\conj$ specifies any $n$-cube (for $n\leq 2$) in $\Phi$. For example, $i=\lcon\land j=\rcon$ specifies a line,
+and $i=\lcon\land j=\rcon\land k=\lcon$ specifies a point (note that this point is on the line).
+\item $\disj$ talks about several $n$-cubes (for $n\leq 2$) in $\Phi$ at the same time.
+\end{itemize}
+Using cofibrations, we define the syntax of partial elements
+by extending the syntax for terms:
+\begin{figure}[h!]
+\[\begin{array}{rl}
+	\face::=&\conj\mapsto u \mid \conj\mapsto u,\face\\
+	u::=&\lrbbar{\face} \mid \cdots~\text{(other term formers)}
+\end{array}\]
+\caption{Syntax of partial elements}
+\label{fig:parEl}
+\end{figure}
+There are several advantages to use a disjunction normal form:
+\begin{itemize}
+\item We can put $\conj$ to the left-hand-side of $\mapsto$,
+so every clause in a partial element is a single face.
+\end{itemize}

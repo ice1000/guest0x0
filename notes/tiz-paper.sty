@@ -87,10 +87,19 @@
 
 \newcommand{\lrbracket}[1]{\llbracket #1 \rrbracket}
 \newcommand{\brakett}[1]{\llangle#1\rrangle}
+\newcommand{\LRbracket}[1]{\stretchleftright{\llbracket}{#1}{\rrbracket}}
+\newcommand{\Brakett}[1]{\stretchleftright{\llangle}{#1}{\rrangle}}
+\newcommand{\Paren}[1]{\stretchleftright{(}{#1}{)}}
 \newcommand{\lbbar}{\{\kern-0.5ex|}
 \newcommand{\rbbar}{|\kern-0.5ex\}}
 % https://tex.stackexchange.com/a/256652/145304
-\newcommand{\lrbbar}[1]{\stretchleftright{\lbbar}{#1}{\rbbar}}
+\newcommand{\LRbbar}[1]{\stretchleftright{\lbbar}{#1}{\rbbar}}
+\newcommand{\lrbbar}[1]{{\lbbar}{#1}{\rbbar}}
+
+% Add a single hiragana "Yo".
+\DeclareFontFamily{U}{min}{}
+\DeclareFontShape{U}{min}{m}{n}{<-> udmj30}{}
+\newcommand{\yo}{\text{\usefont{U}{min}{m}{n}\symbol{'210}}}
 
 % jon-note
 \NewDocumentCommand\OpCat{m}{#1^{\mathrm{op}}}
