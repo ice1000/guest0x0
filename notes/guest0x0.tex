@@ -19,6 +19,10 @@ and combine them into an algorithm.
 (hereafter as \CTT{}), including the interval type $\II$, the path type,
 and the idea of representing cubes using terms with interval variables in it.
 \end{itemize}
+This tutorial will not treat substitution formally.
+Variable names are assumed to respect capture-avoiding substitution,
+and can be implemented using any nameless representations.
+
 Some quick warm-ups:
 \begin{exercise}
 Translate the following typing rules into an algorithmic description:
@@ -28,8 +32,15 @@ Translate the following typing rules into an algorithmic description:
 \end{mathpar}
 Which of them is an introduction rule, and which is an elimination rule?
 \end{exercise}
-\begin{notation}
-In this tutorial, instead of the more traditional \fbox{$\lambda x.b$},
+\begin{notation}\label{not:pre}
+In this tutorial, we will use $x, y, i, j, k$ for variables
+(preferably $i, j, k$ for those of type $\II$ and $x, y$ otherwise)
+and other Latin letters like $u,v,a,b,c,A,B,C$ for terms
+(preferably uppercase for types and lowercase for terms).
+
+We will write $u, A::=$ for syntax definition of terms.
+
+Instead of the more traditional \fbox{$\lambda x.b$},
 the notation for $\lambda$-abstraction is \fbox{$\lam x b$} 
 following the style of the Arend language.
 
@@ -171,11 +182,8 @@ which is more (geometrically) intuitive but also longer.
 The syntax of a cofibration is defined to be a disjunction normal form
 (a disjunction list of conjunctions) of
 face ``conditions'' like $i\equiv\lcon$ or $i\equiv\rcon$, as in~\cref{fig:cofib}.
-Variable names are assumed to respect capture-avoiding substitution,
-and can be implemented using any nameless representations.
 \begin{figure}[h!]
 \[\begin{array}{rll}
-  i,j,k,l ::= & \cdots & \text{variable names} \\
   \cond ::= & i\equiv\lcon \mid i\equiv\rcon & \text{condition} \\
   \conj ::= & \cond \mid \cond \land \conj & \text{conjunction} \\
   \disj ::= & \conj \mid \conj \lor \disj & \text{disjunction}
@@ -195,7 +203,7 @@ and $i=\lcon\land j=\rcon\land k=\lcon$ specifies a point (note that this point 
 \end{itemize}
 Using cofibrations, we define the syntax of partial elements
 by extending the syntax for terms in~\cref{fig:partial}
-(assuming we use $u,A$ for term syntax).
+(recall~\cref{not:pre}).
 \begin{figure}[h!]
 \[\begin{array}{rl}
 	\face::=&\conj\mapsto u \mid \conj\mapsto u,\face\\
