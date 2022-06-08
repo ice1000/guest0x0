@@ -1,9 +1,7 @@
-module aya.guest.cubical {
+module aya.cube.visualizer {
   requires static org.jetbrains.annotations;
-
-  requires transitive org.aya.pretty;
+  requires static ice1000.jimgui;
   requires transitive kala.base;
   requires transitive kala.collection;
-
-  exports org.aya.guest0x0.cubical;
+  exports org.aya.cube.visualizer;
 }

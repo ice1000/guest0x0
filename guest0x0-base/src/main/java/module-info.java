@@ -1,7 +1,7 @@
-module org.aya.guest.base {
+module aya.guest.base {
   requires static org.jetbrains.annotations;
 
-  requires org.aya.guest.cubical;
+  requires aya.guest.cubical;
 
   requires transitive org.aya.pretty;
   requires transitive org.aya.util;

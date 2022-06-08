@@ -1,8 +1,8 @@
-module org.aya.guest.cli {
+module aya.guest.cli {
   requires static org.jetbrains.annotations;
   requires org.antlr.antlr4.runtime;
-  requires org.aya.guest.base;
-  requires org.aya.guest.cubical;
+  requires aya.guest.base;
+  requires aya.guest.cubical;
   requires info.picocli;
   requires transitive kala.base;
   requires transitive kala.collection;
