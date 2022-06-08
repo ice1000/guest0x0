@@ -67,16 +67,23 @@ public final class GuiMain implements AutoCloseable {
   private void previewWindow() {
     var x = window.getWindowPosX();
     var y = window.getWindowPosY();
-    var userSize = cubeLen.accessValue();
-    offsetX = x + 30;
-    offsetY = y + 50;
-    hParallelogram(userSize / 2, userSize);
-    vParallelogram(userSize / 2, userSize);
-    offsetY += userSize;
-    hParallelogram(userSize / 2, userSize);
-    offsetY -= userSize;
-    offsetX += userSize;
-    vParallelogram(userSize / 2, userSize);
+    var userLen = cubeLen.accessValue();
+    var originalX = x + 30;
+    var originalY = y + 50;
+    offsetX = originalX;
+    offsetY = originalY;
+    var projectedLen = userLen * 0.6F;
+    hParallelogram(projectedLen, userLen); // Top
+    vParallelogram(projectedLen, userLen); // Left
+    offsetY += projectedLen;
+    square(userLen); // Front
+    offsetY = originalY + userLen;
+    hParallelogram(projectedLen, userLen); // Bottom
+    offsetY = originalY;
+    offsetX += projectedLen;
+    square(userLen); // Back
+    offsetX = originalX + userLen;
+    vParallelogram(projectedLen, userLen); // Right
   }
 
   private void hParallelogram(float height, float width) {
@@ -87,6 +94,14 @@ public final class GuiMain implements AutoCloseable {
       offsetX + width, offsetY + height,
       offsetX, offsetY + height,
       0x88AAFF00);
+  }
+
+  private void square(float width) {
+    var ui = window.getForegroundDrawList();
+    ui.addRectFilled(
+      offsetX, offsetY,
+      offsetX + width, offsetY + width,
+      0x88BBEE11);
   }
 
   private void vParallelogram(float height, float width) {
