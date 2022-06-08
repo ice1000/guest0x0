@@ -60,18 +60,18 @@ Consider path concatenation and symmetry in \CTT{}:
 \end{align*}
 Define both using \hcomp{} on the following squares,
 preferably in a cubical programming language:
-% https://q.uiver.app?q=WzAsOCxbMCwwLCJhIl0sWzEsMCwiYyJdLFswLDEsImEiXSxbMSwxLCJiIl0sWzIsMSwiYSJdLFsyLDAsImIiXSxbMywxLCJhIl0sWzMsMCwiYSJdLFswLDEsIlxcY29uY2F0KHAsIHEpIl0sWzIsMCwiIiwwLHsibGV2ZWwiOjIsInN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMiwzLCJwIiwyXSxbMywxLCJxIiwyXSxbNCw1LCJwIl0sWzQsNiwiIiwyLHsibGV2ZWwiOjIsInN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNiw3LCIiLDIseyJsZXZlbCI6Miwic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs1LDcsIlxcc3ltKHApIl1d
+% https://q.uiver.app/?q=WzAsOCxbMCwwLCJhIl0sWzEsMCwiYyJdLFswLDEsImEiXSxbMSwxLCJiIl0sWzIsMSwiYSJdLFsyLDAsImIiXSxbMywxLCJhIl0sWzMsMCwiYSJdLFswLDEsIlxcY29uY2F0KHAsIHEpIiwwLHsic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZGFzaGVkIn19fV0sWzIsMCwiIiwwLHsibGV2ZWwiOjIsInN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMiwzLCJwIiwyXSxbMywxLCJxIiwyXSxbNCw1LCJwIl0sWzQsNiwiIiwyLHsibGV2ZWwiOjIsInN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNiw3LCIiLDIseyJsZXZlbCI6Miwic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs1LDcsIlxcc3ltKHApIiwwLHsic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZGFzaGVkIn19fV1d
 \[\begin{tikzcd}
 	a & c & b & a \\
 	a & b & a & a
-	\arrow["{\concat(p, q)}", from=1-1, to=1-2]
+	\arrow["{\concat(p, q)}", dashed, from=1-1, to=1-2]
 	\arrow[Rightarrow, no head, from=2-1, to=1-1]
 	\arrow["p"', from=2-1, to=2-2]
 	\arrow["q"', from=2-2, to=1-2]
 	\arrow["p", from=2-3, to=1-3]
 	\arrow[Rightarrow, no head, from=2-3, to=2-4]
 	\arrow[Rightarrow, no head, from=2-4, to=1-4]
-	\arrow["{\sym(p)}", from=1-3, to=1-4]
+	\arrow["{\sym(p)}", dashed, from=1-3, to=1-4]
 \end{tikzcd}\]
 \end{exercise}
 \subsection{Motivation}
@@ -225,3 +225,45 @@ There are several advantages to use a disjunction normal form:
 so every clause in a partial element is a single face.
 \item It is easy to get the type of a partial element.
 \end{itemize}
+
+\[
+	\carloTikZ{
+		\foreach \x in {0,1}
+			\foreach \y in {0,1}
+				\node (\x\y) at (\x , \y) {\textbullet} ;
+		\draw (00) to node [above] {$p$} (10) ;
+		\draw (10) to node [right] {$q$} (11) ;
+		\draw (00) to node (r) [left] {$r$} (01) ;
+		\draw [dashed] (01) to (11) ;
+		\fill [pattern color=gray,pattern=north west lines] (0,0) rectangle (1,1) ;
+	}
+	:=
+	\carloTikZ{\carloCubeBullets
+		% left
+		\draw [draw=white,line width=3pt,fill=black!50,fill opacity=0.5]
+			(0,0,0) -- (0,1,0) -- (0,1,1) -- (0,0,1) -- cycle ;
+		\node (r) at (0,0.5,0.5) {$r'$} ;
+		\draw (001) -- (011) ;
+		% back
+		\draw [draw=white,line width=3pt,fill=black!50,fill opacity=0.5]
+			(0,0,0) -- (1,0,0) -- (1,1,0) -- (0,1,0) -- cycle ;
+		\draw [equals arrow] (000) -- (010) ;
+		\draw (010) -- (110) ;
+		% top
+		\draw [draw=white,line width=3pt,fill=black!50,fill opacity=0.5]
+			(0,0,0) -- (1,0,0) -- (1,0,1) -- (0,0,1) -- cycle ;
+		\node at (0.5,0,0.5) {$p$} ;
+		\foreach \i in {0,1} \draw (00\i) -- (10\i) ;
+		\fill [pattern color=gray,pattern=north west lines]
+			(0,1,0) -- (1,1,0) -- (1,1,1) -- (0,1,1) -- cycle ;
+		% right
+		\draw [draw=white,line width=3pt,fill=black!50,fill opacity=0.5]
+			(1,0,0) -- (1,1,0) -- (1,1,1) -- (1,0,1) -- cycle ;
+		\node at (1,0.5,0.5) {$q'$} ;
+		\draw [equals arrow] (100) -- (110) ;
+		\draw (101) -- (111) ;
+		\foreach \i in {0,1} \draw [shorten <>= -3pt, equals arrow] (\i 00) to (\i 01) ;
+		\foreach \i in {0,1} \draw [shorten <>= -3pt] (\i 10) to (\i 11) ;
+		\draw [dashed] (011) -- (111) ;
+	}
+\]

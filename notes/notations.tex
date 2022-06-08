@@ -12,3 +12,36 @@
 \newcommand{\Partial}[2]{\textsf{Partial}~{#1}~{#2}}
 \newcommand{\conj}{\phi_\land}
 \newcommand{\disj}{\phi_\lor}
+
+% carlo: https://gist.github.com/cangiuli/b21c9f8cb49dde06eef6480c29f7cf21
+\pgfdeclarelayer{frontmost}
+\pgfsetlayers{main,frontmost}
+\usetikzlibrary{patterns}
+
+\tikzset{
+  carlo-axes/.style =
+  {
+    y = {(0,-1)},
+    z = {(-0.6,0.6)}
+  } ,
+  shorten <>/.style =
+  {
+    shorten >=#1 , shorten <=#1
+  } ,
+  equals arrow/.style =
+  {
+    arrows = - ,
+    double equal sign distance ,
+  } ,
+}
+
+\newcommand{\carloCubeBullets}{\begin{pgfonlayer}{frontmost}
+  \foreach \x in {0,1}
+    \foreach \y in {0,1}
+      \foreach \z in {0,1}
+        \node (\x\y\z) at (\x , \y , \z) {\textbullet} ;
+\end{pgfonlayer}}
+\newcommand{\carloTikZ}[1]{
+  \begin{tikzpicture}[carlo-axes, scale = 2, arrows = ->, baseline={(r.base)}]
+		#1
+	\end{tikzpicture}}
