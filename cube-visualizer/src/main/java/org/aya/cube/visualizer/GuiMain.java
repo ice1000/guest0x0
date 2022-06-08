@@ -71,8 +71,12 @@ public final class GuiMain implements AutoCloseable {
     offsetX = x + 30;
     offsetY = y + 50;
     hParallelogram(userSize / 2, userSize);
+    vParallelogram(userSize / 2, userSize);
     offsetY += userSize;
     hParallelogram(userSize / 2, userSize);
+    offsetY -= userSize;
+    offsetX += userSize;
+    vParallelogram(userSize / 2, userSize);
   }
 
   private void hParallelogram(float height, float width) {
@@ -82,16 +86,16 @@ public final class GuiMain implements AutoCloseable {
       offsetX + height + width, offsetY,
       offsetX + width, offsetY + height,
       offsetX, offsetY + height,
-      0x88FFFF00);
+      0x88AAFF00);
   }
 
-  private void vParallelogram(int height, int width) {
+  private void vParallelogram(float height, float width) {
     var ui = window.getForegroundDrawList();
     ui.addQuadFilled(
       offsetX + height, offsetY,
-      offsetX + height + width, offsetY,
-      offsetX + width, offsetY + height,
+      offsetX + height, offsetY + width,
+      offsetX, offsetY + width + height,
       offsetX, offsetY + height,
-      0x88FFFF00);
+      0x88CCEE00);
   }
 }
