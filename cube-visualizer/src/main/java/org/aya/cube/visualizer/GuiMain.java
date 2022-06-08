@@ -10,10 +10,10 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings("AccessStaticViaInstance")
 public final class GuiMain implements AutoCloseable {
   private final JImGui window;
-  private float offsetX;
-  private float offsetY;
   private final @NotNull NativeFloat cubeLen = new NativeFloat();
-  private NativeBool[] faces = new NativeBool[Face3D.values().length];
+  private float userLen;
+  private float projectedLen;
+  private final NativeBool[] faces = new NativeBool[Face3D.values().length];
 
   public enum Face3D {
     Top, Bottom, Front, Back, Left, Right;
@@ -67,50 +67,40 @@ public final class GuiMain implements AutoCloseable {
   private void previewWindow() {
     var x = window.getWindowPosX();
     var y = window.getWindowPosY();
-    var userLen = cubeLen.accessValue();
-    var originalX = x + 30;
-    var originalY = y + 50;
-    offsetX = originalX;
-    offsetY = originalY;
-    var projectedLen = userLen * 0.6F;
-    hParallelogram(projectedLen, userLen); // Top
-    vParallelogram(projectedLen, userLen); // Left
-    offsetY += projectedLen;
-    square(userLen); // Front
-    offsetY = originalY + userLen;
-    hParallelogram(projectedLen, userLen); // Bottom
-    offsetY = originalY;
-    offsetX += projectedLen;
-    square(userLen); // Back
-    offsetX = originalX + userLen;
-    vParallelogram(projectedLen, userLen); // Right
+    userLen = cubeLen.accessValue();
+    projectedLen = userLen * 0.6F;
+    var baseX = x + 30;
+    var baseY = y + 50;
+    if (faces[Face3D.Top.ordinal()].accessValue()) hParallelogram(baseX, baseY); // Top
+    if (faces[Face3D.Left.ordinal()].accessValue()) vParallelogram(baseX, baseY); // Left
+    if (faces[Face3D.Front.ordinal()].accessValue()) square(baseX, baseY + projectedLen); // Front
+    if (faces[Face3D.Bottom.ordinal()].accessValue()) hParallelogram(baseX, baseY + userLen); // Bottom
+    if (faces[Face3D.Back.ordinal()].accessValue()) square(baseX + projectedLen, baseY); // Back
+    if (faces[Face3D.Right.ordinal()].accessValue()) vParallelogram(baseX + userLen, baseY); // Right
   }
 
-  private void hParallelogram(float height, float width) {
+  private void hParallelogram(float x, float y) {
     var ui = window.getForegroundDrawList();
     ui.addQuadFilled(
-      offsetX + height, offsetY,
-      offsetX + height + width, offsetY,
-      offsetX + width, offsetY + height,
-      offsetX, offsetY + height,
+      x + projectedLen, y,
+      x + projectedLen + userLen, y,
+      x + userLen, y + projectedLen,
+      x, y + projectedLen,
       0x88AAFF00);
   }
 
-  private void square(float width) {
+  private void square(float x, float y) {
     var ui = window.getForegroundDrawList();
-    ui.addRectFilled(
-      offsetX, offsetY,
-      offsetX + width, offsetY + width,
-      0x88BBEE11);
+    ui.addRectFilled(x, y, x + userLen, y + userLen, 0x8811EEBB);
   }
 
-  private void vParallelogram(float height, float width) {
+  private void vParallelogram(float x, float y) {
     var ui = window.getForegroundDrawList();
     ui.addQuadFilled(
-      offsetX + height, offsetY,
-      offsetX + height, offsetY + width,
-      offsetX, offsetY + width + height,
-      offsetX, offsetY + height,
+      x + projectedLen, y,
+      x + projectedLen, y + userLen,
+      x, y + userLen + projectedLen,
+      x, y + projectedLen,
       0x88CCEE00);
   }
 }
