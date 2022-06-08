@@ -1,7 +1,6 @@
 package org.aya.cube.visualizer;
 
 import org.ice1000.jimgui.JImGui;
-import org.ice1000.jimgui.NativeBool;
 import org.ice1000.jimgui.NativeFloat;
 import org.ice1000.jimgui.util.JImGuiUtil;
 import org.ice1000.jimgui.util.JniLoader;
@@ -87,12 +86,20 @@ public final class GuiMain implements AutoCloseable {
     projectedLen = userLen * 0.6F;
     var baseX = x + 30;
     var baseY = y + 50;
-    if (faces[Face3D.Top.ordinal()].enabled()) hParallelogram(baseX, baseY); // Top
-    if (faces[Face3D.Left.ordinal()].enabled()) vParallelogram(baseX, baseY); // Left
-    if (faces[Face3D.Front.ordinal()].enabled()) square(baseX, baseY + projectedLen); // Front
-    if (faces[Face3D.Bottom.ordinal()].enabled()) hParallelogram(baseX, baseY + userLen); // Bottom
-    if (faces[Face3D.Back.ordinal()].enabled()) square(baseX + projectedLen, baseY); // Back
-    if (faces[Face3D.Right.ordinal()].enabled()) vParallelogram(baseX + userLen, baseY); // Right
+    if (wantDraw(Face3D.Top)) hParallelogram(baseX, baseY); // Top
+    if (wantDraw(Face3D.Left)) vParallelogram(baseX, baseY); // Left
+    if (wantDraw(Face3D.Front)) square(baseX, baseY + projectedLen); // Front
+    if (wantDraw(Face3D.Bottom)) hParallelogram(baseX, baseY + userLen); // Bottom
+    if (wantDraw(Face3D.Back)) square(baseX + projectedLen, baseY); // Back
+    if (wantDraw(Face3D.Right)) vParallelogram(baseX + userLen, baseY); // Right
+  }
+
+  private boolean wantDraw(Face3D face) {
+    if (focusedFace == face) {
+      alphaDiff = 0x33000000;
+      return true;
+    }
+    return faces[face.ordinal()].enabled();
   }
 
   private void hParallelogram(float x, float y) {
