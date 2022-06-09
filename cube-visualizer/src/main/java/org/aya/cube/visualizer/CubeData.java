@@ -116,9 +116,7 @@ public record CubeData(
     });
     builder.appendln("\\end{pgfonlayer}", false);
     for (var orient : Orient.values()) {
-      var isHighlight = highlight == orient;
-      var ptr = faces[orient.ordinal()];
-      ptr.buildText(builder, orient, isHighlight);
+      faces[orient.ordinal()].buildText(builder, orient, highlight == orient);
     }
     for (var side : Side.values()) {
       var isHighlight = highlight == side;

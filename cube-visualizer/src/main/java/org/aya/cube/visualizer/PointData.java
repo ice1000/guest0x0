@@ -12,7 +12,6 @@ public record PointData(@NotNull NativeString latex) implements AutoCloseable {
   public PointData() {
     this(new NativeString());
     for (var b : BULLET) latex.append(b);
-    latex.append('\0');
   }
 
   @Override public void close() {
