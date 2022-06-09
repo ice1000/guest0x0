@@ -35,7 +35,9 @@ public interface TextBuilder {
     public Strings() {this(new StringBuilder());}
 
     @Override public void append(@NotNull NativeString text, boolean highlight) {
-      append(text.toString(), highlight);
+      for (byte c : text.toBytes()) {
+        if (c != '\0') sb.append((char) c);
+      }
     }
 
     @Override public void append(@NotNull String text, boolean highlight) {

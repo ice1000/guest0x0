@@ -83,15 +83,15 @@ public record CubeData(
   }
 
   public void buildText(@NotNull TextBuilder builder, Object highlight) {
-    builder.appendln("\\[\\carloTikZ{", false);
+    builder.appendln("\\carloTikZ{", false);
     Util.forEach3D((i, x, y, z) -> {
       var isHighlight = highlight == Integer.valueOf(i);
       builder.append("\\node (" + Util.binPad3(i) +
-          ") at (" + x + " , " + y + " , " + z + ") {",
+          ") at (" + x + " , " + y + " , " + z + ") {\\(",
         isHighlight);
       builder.append(vertices[i].latex(), isHighlight);
-      builder.appendln("};", isHighlight);
+      builder.appendln("\\)};", isHighlight);
     });
-    builder.appendln("}\\]", false);
+    builder.appendln("}", false);
   }
 }
