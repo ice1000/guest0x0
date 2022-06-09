@@ -78,6 +78,9 @@ public final class GuiMain implements AutoCloseable {
       }
       if (!beginTabItem) continue;
       var ptr = cube.lines()[side.ordinal()];
+      window.toggleButton(side.hidden, ptr.isHidden());
+      window.sameLine();
+      window.text("Hidden");
       window.toggleButton(side.dashed, ptr.isDashed());
       window.sameLine();
       window.text("Dashed");
@@ -165,7 +168,7 @@ public final class GuiMain implements AutoCloseable {
       alphaDiff = 0x40000000;
       return true;
     } else alphaDiff = 0;
-    return true;
+    return cube.enabled(side);
   }
 
   private void hline(float x, float y) {

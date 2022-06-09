@@ -21,6 +21,10 @@ public record CubeData(
     return faces[orientation.ordinal()].enabled();
   }
 
+  public boolean enabled(Side orientation) {
+    return !lines[orientation.ordinal()].isHidden().accessValue();
+  }
+
   public boolean doubled(Side orientation) {
     return lines[orientation.ordinal()].isDoubled().accessValue();
   }
@@ -45,6 +49,7 @@ public record CubeData(
     public final JImStr tabItem;
     public final JImStr dashed;
     public final JImStr doubled;
+    public final JImStr hidden;
 
     Side(Orient adjacent0, Orient adjacent1) {
       this.adjacent0 = adjacent0;
@@ -52,6 +57,7 @@ public record CubeData(
       tabItem = new JImStr(ordinal() + "##TabItem" + name());
       dashed = new JImStr("##Dash" + name());
       doubled = new JImStr("##DL" + name());
+      hidden = new JImStr("##Hidden" + name());
     }
   }
 
