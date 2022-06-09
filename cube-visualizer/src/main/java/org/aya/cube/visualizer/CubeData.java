@@ -125,7 +125,7 @@ public record CubeData(
     });
     builder.appendln("\\end{pgfonlayer}", false);
     for (var orient : Orient.values()) {
-      faces[orient.ordinal()].buildText(builder, orient, highlight == orient);
+      faces[orient.ordinal()].serialize().buildText(builder, orient, highlight == orient);
     }
     for (var side : Side.values()) {
       lines[side.ordinal()].serialize().buildText(builder, side, highlight == side);

@@ -54,6 +54,14 @@ subprojects {
       release.set(javaVersion)
       compilerArgs.addAll(listOf("-Xlint:unchecked", "--enable-preview"))
     }
+
+    doLast {
+      val tree = fileTree(destinationDirectory)
+      tree.include("**/*.class")
+      tree.exclude("module-info.class")
+      val root = project.buildDir.toPath().resolve("classes/java/main")
+      tree.forEach { StripPreview.stripPreview(root, it.toPath(), true) }
+    }
   }
 
   tasks.withType<Javadoc>().configureEach {
