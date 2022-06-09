@@ -67,13 +67,20 @@ public record CubeData(
   }
 
   public enum Orient {
-    Top, Bottom, Front, Back, Left, Right;
+    Top("(0,0,0) -- (1,0,0) -- (1,0,1) -- (0,0,1)"),
+    Bottom("(0,1,0) -- (1,1,0) -- (1,1,1) -- (0,1,1)"),
+    Front("(0,0,1) -- (1,0,1) -- (1,1,1) -- (0,1,1)"),
+    Back("(0,0,0) -- (1,0,0) -- (1,1,0) -- (0,1,0)"),
+    Left("(0,0,0) -- (0,1,0) -- (0,1,1) -- (0,0,1)"),
+    Right("(1,0,0) -- (1,1,0) -- (1,1,1) -- (1,0,1)");
 
     public final @NotNull JImStr[] toggle;
     public final @NotNull JImStr input;
     public final @NotNull JImStr tabItem;
+    public final @NotNull String tikz;
 
-    Orient() {
+    Orient(@NotNull String tikz) {
+      this.tikz = tikz;
       input = new JImStr("##Input" + name());
       toggle = new JImStr[FaceData.Status.values().length];
       for (var status : FaceData.Status.values())
@@ -83,7 +90,7 @@ public record CubeData(
   }
 
   public void buildText(@NotNull TextBuilder builder, Object highlight) {
-    builder.appendln("\\carloTikZ{", false);
+    builder.appendln("\\carloTikZ{\\begin{pgfonlayer}{frontmost}", false);
     Util.forEach3D((i, x, y, z) -> {
       var isHighlight = highlight == Integer.valueOf(i);
       builder.append("\\node (" + Util.binPad3(i) +
@@ -92,6 +99,18 @@ public record CubeData(
       builder.append(vertices[i].latex(), isHighlight);
       builder.appendln("\\)};", isHighlight);
     });
+    builder.appendln("\\end{pgfonlayer}", false);
+    for (var orient : Orient.values()) {
+      var isHighlight = highlight == orient;
+      var ptr = faces[orient.ordinal()];
+      var status = ptr.status().accessValue();
+      if (status == FaceData.Status.Shaded.ordinal()) {
+        builder.appendln("\\draw [draw=white,line width=3pt,fill=black!50,fill opacity=0.5]", isHighlight);
+      } else if (status == FaceData.Status.Lines.ordinal()) {
+        builder.appendln("\\fill [pattern color=gray,pattern=north west lines]", isHighlight);
+      } else continue;
+      builder.appendln(orient.tikz + " -- cycle ;", isHighlight);
+    }
     builder.appendln("}", false);
   }
 }

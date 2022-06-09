@@ -19,7 +19,7 @@ public interface Util {
     }
 
     \\newcommand{\\carloTikZ}[1]{
-      \\begin{tikzpicture}[carlo-axes, scale = 2, arrows = ->, baseline={(r.base)}]
+      \\begin{tikzpicture}[carlo-axes, scale = 2, arrows = ->]
       #1
       \\end{tikzpicture}}
     """;
