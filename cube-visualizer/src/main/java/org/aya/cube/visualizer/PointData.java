@@ -3,15 +3,20 @@ package org.aya.cube.visualizer;
 import org.ice1000.jimgui.NativeString;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 
 public record PointData(
   @NotNull NativeString latex
 ) implements AutoCloseable {
-  @Override public void close() {
-    latex.close();
+  public static final byte[] BULLET = "\\bullet".getBytes(StandardCharsets.US_ASCII);
+
+  public PointData() {
+    this(new NativeString());
+    for (var b : BULLET) latex.append(b);
+    latex.append('\0');
   }
 
-  public record Axia(boolean x, boolean y, boolean z) implements Serializable {
+  @Override public void close() {
+    latex.close();
   }
 }

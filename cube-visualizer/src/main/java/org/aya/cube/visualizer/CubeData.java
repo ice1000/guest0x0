@@ -4,17 +4,21 @@ import org.ice1000.jimgui.JImStr;
 import org.jetbrains.annotations.NotNull;
 
 public record CubeData(
+  @NotNull PointData @NotNull [] vertices,
   @NotNull LineData @NotNull [] lines,
   @NotNull FaceData @NotNull [] faces
 ) implements AutoCloseable {
   public CubeData() {
-    this(new LineData[Side.values().length],
+    this(
+      new PointData[0b1000],
+      new LineData[Side.values().length],
       new FaceData[Orient.values().length]);
   }
 
   @SuppressWarnings("resource") public CubeData {
     for (var face : Orient.values()) faces[face.ordinal()] = new FaceData();
     for (var side : Side.values()) lines[side.ordinal()] = new LineData();
+    for (int i = 0; i < vertices.length; i++) vertices[i] = new PointData();
   }
 
   public boolean enabled(Orient orientation) {
@@ -32,6 +36,7 @@ public record CubeData(
   @Override public void close() {
     for (var v : faces) v.close();
     for (var v : lines) v.close();
+    for (var v : vertices) v.close();
   }
 
   public enum Side {

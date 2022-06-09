@@ -19,11 +19,11 @@ public final class GuiMain implements AutoCloseable {
   /** {@link CubeData.Orient} or {@link CubeData.Side} */
   private @Nullable Object highlight;
   private static final JImStr latexCodeStr = new JImStr("LaTeX code");
-  private float thickness = 1F;
+  private float thickness = 3F;
 
   public GuiMain(JImGui window) {
     this.window = window;
-    cubeLen.modifyValue(50);
+    cubeLen.modifyValue(100);
   }
 
   @Override public void close() {
@@ -63,7 +63,30 @@ public final class GuiMain implements AutoCloseable {
     var hasHover = cubeFaces(cube);
     window.separator();
     hasHover = cubeEdges(cube) || hasHover;
+    window.separator();
+    hasHover = cubePoints(cube) || hasHover;
     if (!hasHover) highlight = null;
+  }
+
+  private boolean cubePoints(CubeData cube) {
+    window.text("Points");
+    if (!window.beginTabBar("Points")) return false;
+    var hasHover = false;
+    for (var i = 0; i <= 0b111; ++i) {
+      // https://stackoverflow.com/a/4421438/7083401
+      var name = String.format("%3s", Integer.toString(i, 2)).replace(' ', '0');
+      var beginTabItem = window.beginTabItem(name + "##Pt");
+      if (window.isItemHovered()) {
+        hasHover = true;
+        highlight = i;
+      }
+      if (!beginTabItem) continue;
+      var ptr = cube.vertices()[i];
+      window.inputText("##Input" + name, ptr.latex());
+      window.endTabItem();
+    }
+    window.endTabBar();
+    return hasHover;
   }
 
   private boolean cubeEdges(CubeData cube) {
@@ -152,6 +175,26 @@ public final class GuiMain implements AutoCloseable {
     if (wantDraw(CubeData.Side.LF)) vline(baseX, baseY + projectedLen);
     if (wantDraw(CubeData.Side.RB)) vline(baseX + projectedLen + userLen, baseY);
     if (wantDraw(CubeData.Side.RF)) vline(baseX + userLen, baseY + projectedLen);
+
+    //     _______ x
+    //    /|
+    //   / |
+    //  /  |
+    // z   y
+    var ui = window.getWindowDrawList();
+    for (var i = 0; i <= 0b111; ++i) {
+      var zz = (i & 0b001) > 0;
+      var yy = (i & 0b010) > 0;
+      var xx = (i & 0b100) > 0;
+      var z = zz ? 1 : 0;
+      var y = yy ? 1 : 0;
+      var x = xx ? 1 : 0;
+      var centreX = baseX + projectedLen + x * userLen - z * projectedLen;
+      var centreY = baseY + y * userLen + z * projectedLen;
+      if (highlight == Integer.valueOf(i)) {
+        ui.addCircleFilled(centreX, centreY, 4F, 0xFF0000FF);
+      } else ui.addCircle(centreX, centreY, 4F, 0xFF0000FF);
+    }
   }
 
   private boolean wantDraw(CubeData.Orient face) {
