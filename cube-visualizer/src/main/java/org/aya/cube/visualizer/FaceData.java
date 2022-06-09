@@ -1,23 +1,28 @@
 package org.aya.cube.visualizer;
 
 import org.ice1000.jimgui.NativeBool;
+import org.ice1000.jimgui.NativeInt;
 import org.ice1000.jimgui.NativeString;
 import org.jetbrains.annotations.NotNull;
 
 public record FaceData(
-  @NotNull NativeBool isEnabled,
+  @NotNull NativeInt status,
   @NotNull NativeString latex
 ) implements AutoCloseable {
   public FaceData() {
-    this(new NativeBool(), new NativeString());
+    this(new NativeInt(), new NativeString());
+  }
+
+  public enum Status {
+    Invisible, Shaded, Lines
   }
 
   public boolean enabled() {
-    return isEnabled.accessValue();
+    return status.accessValue() != Status.Invisible.ordinal();
   }
 
   @Override public void close() {
-    isEnabled.close();
+    status.close();
     latex.close();
   }
 }

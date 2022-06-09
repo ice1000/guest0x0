@@ -16,8 +16,10 @@ public final class GuiMain implements AutoCloseable {
   private float projectedLen;
   private int alphaDiff = 0;
   private final CubeData cube = new CubeData();
-  private @Nullable CubeData.Orient focusedFace;
+  /** {@link CubeData.Orient} or {@link CubeData.Side} */
+  private @Nullable Object highlight;
   private static final JImStr latexCodeStr = new JImStr("LaTeX code");
+  private float thickness = 1F;
 
   public GuiMain(JImGui window) {
     this.window = window;
@@ -54,39 +56,64 @@ public final class GuiMain implements AutoCloseable {
   }
 
   private void mainControlWindow() {
-    window.sliderFloat("Width", cubeLen, 5, 200);
-    if (window.beginTabBar("Control")) {
-      cubeFaces(cube);
-      cubeEdges(cube);
-      window.endTabBar();
+    if (window.button("Copy preamble")) {
+      window.setClipboardText(Constants.carloPreamble);
     }
+    window.sliderFloat("Width", cubeLen, 5, 200);
+    var hasHover = cubeFaces(cube);
+    window.separator();
+    hasHover = cubeEdges(cube) || hasHover;
+    if (!hasHover) highlight = null;
   }
 
-  private void cubeEdges(CubeData cube) {
-    if (!window.beginTabItem("Edges")) return;
-    window.endTabItem();
-  }
-
-  private void cubeFaces(CubeData cube) {
-    if (!window.beginTabItem("Faces")) return;
+  private boolean cubeEdges(CubeData cube) {
+    window.text("Lines");
+    if (!window.beginTabBar("Edges")) return false;
     var hasHover = false;
-    for (var face : CubeData.Orient.values()) {
-      var ptr = cube.faces()[face.ordinal()];
-      window.toggleButton(face.toggle, ptr.isEnabled());
+    for (var side : CubeData.Side.values()) {
+      var beginTabItem = window.beginTabItem(side.tabItem);
       if (window.isItemHovered()) {
         hasHover = true;
-        focusedFace = face;
+        highlight = side;
       }
-      if (ptr.enabled()) {
-        window.sameLine();
-        window.inputTextWithHint(face.input,
-          latexCodeStr, ptr.latex());
-      }
+      if (!beginTabItem) continue;
+      var ptr = cube.lines()[side.ordinal()];
+      window.toggleButton(side.dashed, ptr.isDashed());
       window.sameLine();
-      window.text(face.name());
+      window.text("Dashed");
+      window.toggleButton(side.doubled, ptr.isDoubled());
+      window.sameLine();
+      window.text("Double line");
+      window.endTabItem();
     }
-    if (!hasHover) focusedFace = null;
-    window.endTabItem();
+    window.endTabBar();
+    return hasHover;
+  }
+
+  private boolean cubeFaces(CubeData cube) {
+    if (!window.beginTabBar("Faces")) return false;
+    var hasHover = false;
+    for (var face : CubeData.Orient.values()) {
+      var beginTabItem = window.beginTabItem(face.tabItem);
+      if (window.isItemHovered()) {
+        hasHover = true;
+        highlight = face;
+      }
+      if (!beginTabItem) continue;
+      var ptr = cube.faces()[face.ordinal()];
+      for (var status : FaceData.Status.values()) {
+        window.radioButton(face.toggle[status.ordinal()], ptr.status(), status.ordinal());
+        if (status == FaceData.Status.Lines && window.isItemHovered()) {
+          window.beginTooltip();
+          window.text("Displayed as shaded");
+          window.endTooltip();
+        }
+      }
+      window.inputTextWithHint(face.input, latexCodeStr, ptr.latex());
+      window.endTabItem();
+    }
+    window.endTabBar();
+    return hasHover;
   }
 
   private void previewWindow() {
@@ -94,7 +121,7 @@ public final class GuiMain implements AutoCloseable {
     var y = window.getWindowPosY();
     userLen = cubeLen.accessValue();
     projectedLen = userLen * 0.6F;
-    drawCubeAt(x + 30, y + 50);
+    drawCubeAt(x + 30, y + 30);
   }
 
   private void drawCubeAt(float baseX, float baseY) {
@@ -104,18 +131,60 @@ public final class GuiMain implements AutoCloseable {
     if (wantDraw(CubeData.Orient.Bottom)) hParallelogram(baseX, baseY + userLen); // Bottom
     if (wantDraw(CubeData.Orient.Back)) square(baseX + projectedLen, baseY); // Back
     if (wantDraw(CubeData.Orient.Right)) vParallelogram(baseX + userLen, baseY); // Right
+
+    // Top
+    if (wantDraw(CubeData.Side.TF)) hline(baseX, baseY + projectedLen);
+    if (wantDraw(CubeData.Side.TB)) hline(baseX + projectedLen, baseY);
+    if (wantDraw(CubeData.Side.TL)) aline(baseX, baseY);
+    if (wantDraw(CubeData.Side.TR)) aline(baseX + userLen, baseY);
+
+    // Bottom
+    if (wantDraw(CubeData.Side.BF)) hline(baseX, baseY + projectedLen + userLen);
+    if (wantDraw(CubeData.Side.BB)) hline(baseX + projectedLen, baseY + userLen);
+    if (wantDraw(CubeData.Side.BL)) aline(baseX, baseY + userLen);
+    if (wantDraw(CubeData.Side.BR)) aline(baseX + userLen, baseY + userLen);
+
+    // Side edges
+    if (wantDraw(CubeData.Side.LB)) vline(baseX + projectedLen, baseY);
+    if (wantDraw(CubeData.Side.LF)) vline(baseX, baseY + projectedLen);
+    if (wantDraw(CubeData.Side.RB)) vline(baseX + projectedLen + userLen, baseY);
+    if (wantDraw(CubeData.Side.RF)) vline(baseX + userLen, baseY + projectedLen);
   }
 
   private boolean wantDraw(CubeData.Orient face) {
-    if (focusedFace == face) {
+    if (highlight == face) {
       alphaDiff = 0x40000000;
       return true;
     } else alphaDiff = 0;
     return cube.enabled(face);
   }
 
+  private boolean wantDraw(CubeData.Side side) {
+    thickness = cube.doubled(side) ? 3F : 1F;
+    if (highlight == side) {
+      alphaDiff = 0x40000000;
+      return true;
+    } else alphaDiff = 0;
+    return true;
+  }
+
+  private void hline(float x, float y) {
+    var ui = window.getWindowDrawList();
+    ui.addLine(x, y, x + userLen, y, 0x99DDA0DD + alphaDiff, thickness);
+  }
+
+  private void vline(float x, float y) {
+    var ui = window.getWindowDrawList();
+    ui.addLine(x, y, x, y + userLen, 0x99DDA0DD + alphaDiff, thickness);
+  }
+
+  private void aline(float x, float y) {
+    var ui = window.getWindowDrawList();
+    ui.addLine(x + projectedLen, y, x, y + projectedLen, 0x99DDA0DD + alphaDiff, thickness);
+  }
+
   private void hParallelogram(float x, float y) {
-    var ui = window.getForegroundDrawList();
+    var ui = window.getWindowDrawList();
     ui.addQuadFilled(
       x + projectedLen, y,
       x + projectedLen + userLen, y,
@@ -125,13 +194,13 @@ public final class GuiMain implements AutoCloseable {
   }
 
   private void square(float x, float y) {
-    var ui = window.getForegroundDrawList();
+    var ui = window.getWindowDrawList();
     ui.addRectFilled(x, y, x + userLen, y + userLen,
       0x8811EEBB - alphaDiff);
   }
 
   private void vParallelogram(float x, float y) {
-    var ui = window.getForegroundDrawList();
+    var ui = window.getWindowDrawList();
     ui.addQuadFilled(
       x + projectedLen, y,
       x + projectedLen, y + userLen,
