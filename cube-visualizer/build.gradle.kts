@@ -4,3 +4,5 @@ dependencies {
   api(project(":cube-compiler"))
   implementation("org.ice1000.jimgui", "core", version = deps.getProperty("version.jimgui"))
 }
+
+CommonTasks.fatJar(project, "org.aya.cube.visualizer.GuiMain")
