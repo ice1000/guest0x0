@@ -3,6 +3,7 @@ package org.aya.cube.visualizer;
 import org.ice1000.jimgui.JImStr;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,7 @@ public record CubeData(
   }
 
   public boolean doubled(Side orientation) {
-    return lines[orientation.ordinal()].isDoubled().accessValue();
+    return lines[orientation.ordinal()].isEqual().accessValue();
   }
 
   @Override public void close() {
@@ -56,15 +57,20 @@ public record CubeData(
     public final Orient adjacent1;
     public final JImStr tabItem;
     public final JImStr dashed;
-    public final JImStr doubled;
+    public final JImStr equal;
     public final JImStr hidden;
+    public final String from, to;
 
     Side(Orient adjacent0, Orient adjacent1) {
       this.adjacent0 = adjacent0;
       this.adjacent1 = adjacent1;
+      var common = Arrays.stream(adjacent0.vertices).filter(adjacent1::contains).sorted().toArray();
+      assert common.length == 2;
+      from = Util.binPad3(common[0]);
+      to = Util.binPad3(common[1]);
       tabItem = new JImStr(ordinal() + "##TabItem" + name());
       dashed = new JImStr("##Dash" + name());
-      doubled = new JImStr("##DL" + name());
+      equal = new JImStr("##Equal" + name());
       hidden = new JImStr("##Hidden" + name());
     }
   }
@@ -83,6 +89,10 @@ public record CubeData(
     public final int @NotNull [] vertices;
     public final @NotNull String tikz;
     public final @NotNull String center;
+
+    public boolean contains(int i) {
+      return Arrays.stream(vertices).anyMatch(v -> v == i);
+    }
 
     Orient(int @NotNull [] vertices) {
       this.vertices = vertices;
@@ -120,6 +130,14 @@ public record CubeData(
     }
     for (var side : Side.values()) {
       var isHighlight = highlight == side;
+      var ptr = lines[side.ordinal()].serialize();
+      if (ptr.isHidden()) continue;
+      var attrs = new ArrayList<String>();
+      if (ptr.isEqual()) attrs.add("equals arrow");
+      if (ptr.isDashed()) attrs.add("dashed");
+      builder.appendln("\\draw " + attrs +
+        " (" + side.from +
+        ") -- (" + side.to + ") ;", isHighlight);
     }
     builder.appendln("}", false);
   }

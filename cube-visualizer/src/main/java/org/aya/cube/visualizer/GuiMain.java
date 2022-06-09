@@ -121,9 +121,9 @@ public final class GuiMain implements AutoCloseable {
       window.toggleButton(side.dashed, ptr.isDashed());
       window.sameLine();
       window.text("Dashed");
-      window.toggleButton(side.doubled, ptr.isDoubled());
+      window.toggleButton(side.equal, ptr.isEqual());
       window.sameLine();
-      window.text("Double line");
+      window.text("Equal");
       window.endTabItem();
     }
     window.endTabBar();
