@@ -109,7 +109,7 @@ public final class GuiMain implements AutoCloseable {
     if (!window.beginTabBar("Edges")) return false;
     var hasHover = false;
     for (var side : CubeData.Side.values()) {
-      var beginTabItem = window.beginTabItem(ImStrings.tabItem[side.ordinal()]);
+      var beginTabItem = window.beginTabItem(ImStrings.sideTabItem[side.ordinal()]);
       if (window.isItemHovered()) {
         hasHover = true;
         highlight = side;
@@ -117,14 +117,14 @@ public final class GuiMain implements AutoCloseable {
       if (!beginTabItem) continue;
       var ptr = cube.lines()[side.ordinal()];
       var hidden = ptr.isHidden();
-      window.toggleButton(ImStrings.hidden[side.ordinal()], hidden);
+      window.toggleButton(ImStrings.sideHidden[side.ordinal()], hidden);
       window.sameLine();
       window.text("Hidden");
       if (!hidden.accessValue()) {
-        window.toggleButton(ImStrings.dashed[side.ordinal()], ptr.isDashed());
+        window.toggleButton(ImStrings.sideDashed[side.ordinal()], ptr.isDashed());
         window.sameLine();
         window.text("Dashed");
-        window.toggleButton(ImStrings.equal[side.ordinal()], ptr.isEqual());
+        window.toggleButton(ImStrings.sideEqual[side.ordinal()], ptr.isEqual());
         window.sameLine();
         window.text("Equal");
       }
@@ -138,7 +138,7 @@ public final class GuiMain implements AutoCloseable {
     if (!window.beginTabBar("Faces")) return false;
     var hasHover = false;
     for (var face : CubeData.Orient.values()) {
-      var beginTabItem = window.beginTabItem(face.tabItem);
+      var beginTabItem = window.beginTabItem(ImStrings.orientTabItem[face.ordinal()]);
       if (window.isItemHovered()) {
         hasHover = true;
         highlight = face;
@@ -146,14 +146,14 @@ public final class GuiMain implements AutoCloseable {
       if (!beginTabItem) continue;
       var ptr = cube.faces()[face.ordinal()];
       for (var status : FaceData.Status.values()) {
-        window.radioButton(face.toggle[status.ordinal()], ptr.status(), status.ordinal());
+        window.radioButton(ImStrings.orientToggle[face.ordinal()][status.ordinal()], ptr.status(), status.ordinal());
         if (status == FaceData.Status.Lines && window.isItemHovered()) {
           window.beginTooltip();
           window.text("Displayed as shaded");
           window.endTooltip();
         }
       }
-      window.inputTextWithHint(face.input, latexCodeStr, ptr.latex());
+      window.inputTextWithHint(ImStrings.orientInput[face.ordinal()], latexCodeStr, ptr.latex());
       window.endTabItem();
     }
     window.endTabBar();

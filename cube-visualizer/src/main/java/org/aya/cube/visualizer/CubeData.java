@@ -75,9 +75,6 @@ public record CubeData(
     Left(new int[]{0b000, 0b010, 0b011, 0b001}),
     Right(new int[]{0b100, 0b110, 0b111, 0b101});
 
-    public final @NotNull JImStr[] toggle;
-    public final @NotNull JImStr input;
-    public final @NotNull JImStr tabItem;
     public final int @NotNull [] vertices;
     public final @NotNull String tikz;
     public final @NotNull String center;
@@ -97,11 +94,6 @@ public record CubeData(
         return sums[2] += z;
       }));
       center = sums[0] / 4F + "," + sums[1] / 4F + "," + sums[2] / 4F;
-      input = new JImStr("##Input" + name());
-      toggle = Arrays.stream(FaceData.Status.values())
-        .map(s -> new JImStr(s.name() + "##Toggle" + name() + s.name()))
-        .toArray(JImStr[]::new);
-      tabItem = new JImStr(name() + "##TabItem" + name());
     }
   }
 
