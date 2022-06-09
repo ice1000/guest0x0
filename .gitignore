@@ -20,10 +20,9 @@ lombok.config
 /test.html
 /highlight-hover.js
 
-/cli-*-all.jar
-/tgbot-*-all.jar
 imgui.ini
 /diagram.uml
 
 cube.tex
 cube.bin
+cube-*.jar

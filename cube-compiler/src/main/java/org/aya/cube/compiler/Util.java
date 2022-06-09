@@ -49,7 +49,7 @@ public interface Util {
   static void main(Path in, Path out) throws IOException, ClassNotFoundException {
     var builder = new TextBuilder.Strings();
     tryLoad(in).buildText(builder);
-    Files.writeString(out, builder.sb(), StandardCharsets.US_ASCII, StandardOpenOption.WRITE);
+    Files.writeString(out, builder.sb(), StandardCharsets.US_ASCII, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
   }
 
   @FunctionalInterface

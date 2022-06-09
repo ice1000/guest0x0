@@ -30,7 +30,7 @@ public final class GuiMain implements AutoCloseable {
   private final CubeData cube = new CubeData();
   /** {@link CompiledFace.Orient} or {@link CompiledLine.Side} */
   private @Nullable Object highlight;
-  public static @NotNull Path CUBE_BIN = Paths.get("cube.bin");
+  public static @NotNull Path CUBE_BIN = Paths.get("cubes.bin");
   private float thickness = 3F;
 
   public GuiMain(JImGui window) {
@@ -78,11 +78,11 @@ public final class GuiMain implements AutoCloseable {
   }
 
   private void cubeDatabaseWindow() {
-    if (window.button("Save cube.bin")) {
+    if (window.button("Save cubes.bin")) {
       Util.save(CUBE_BIN, new CubeDatabase(customPreamble.toBytes(), database));
     }
     window.sameLine();
-    if (window.button("Load cube.bin")) try {
+    if (window.button("Load cubes.bin")) try {
       var cubeDatabase = Util.tryLoad(CUBE_BIN);
       customPreamble.clear();
       for (byte b : cubeDatabase.customPreamble()) {
