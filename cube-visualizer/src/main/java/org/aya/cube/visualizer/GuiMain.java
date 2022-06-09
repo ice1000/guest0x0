@@ -1,19 +1,21 @@
 package org.aya.cube.visualizer;
 
-import org.aya.cube.compiler.CompiledFace;
-import org.aya.cube.compiler.CompiledLine;
-import org.aya.cube.compiler.TextBuilder;
-import org.aya.cube.compiler.Util;
+import org.aya.cube.compiler.*;
 import org.ice1000.jimgui.JImGui;
 import org.ice1000.jimgui.NativeFloat;
+import org.ice1000.jimgui.NativeInt;
+import org.ice1000.jimgui.NativeString;
+import org.ice1000.jimgui.flag.JImInputTextFlags;
 import org.ice1000.jimgui.util.JImGuiUtil;
 import org.ice1000.jimgui.util.JniLoader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 @SuppressWarnings("AccessStaticViaInstance")
 public final class GuiMain implements AutoCloseable {
@@ -22,6 +24,9 @@ public final class GuiMain implements AutoCloseable {
   private float userLen;
   private float projectedLen;
   private int alphaDiff = 0;
+  private ArrayList<CompiledCube> database = new ArrayList<>();
+  private final NativeString customPreamble = new NativeString();
+  private final NativeInt cubeSelection = new NativeInt();
   private final CubeData cube = new CubeData();
   /** {@link CompiledFace.Orient} or {@link CompiledLine.Side} */
   private @Nullable Object highlight;
@@ -37,6 +42,8 @@ public final class GuiMain implements AutoCloseable {
     window.close();
     cubeLen.close();
     cube.close();
+    customPreamble.close();
+    cubeSelection.close();
   }
 
   public static void main(String... args) {
@@ -62,8 +69,39 @@ public final class GuiMain implements AutoCloseable {
         tikzWindow();
         window.end();
       }
+      if (window.begin("Cube Database")) {
+        cubeDatabaseWindow();
+        window.end();
+      }
       window.render();
     }
+  }
+
+  private void cubeDatabaseWindow() {
+    if (window.button("Save cube.bin")) {
+      Util.save(CUBE_BIN, new CubeDatabase(customPreamble.toBytes(), database));
+    }
+    window.sameLine();
+    if (window.button("Load cube.bin")) try {
+      var cubeDatabase = Util.tryLoad(CUBE_BIN);
+      customPreamble.clear();
+      for (byte b : cubeDatabase.customPreamble()) {
+        customPreamble.append(b);
+      }
+      database = cubeDatabase.cubes();
+    } catch (IOException | ClassNotFoundException e) {
+      e.printStackTrace();
+    }
+    window.pushID(ImData.ID.CubeRadio.id);
+    for (int i = 0; i < database.size(); i++) {
+      var deserialize = database.get(i);
+      var text = new String(deserialize.name(), StandardCharsets.US_ASCII);
+      if (window.radioButton(text, cubeSelection, i)) {
+        var ix = cubeSelection.accessValue();
+        if (ix >= 0 && ix < database.size()) cube.deserialize(deserialize);
+      }
+    }
+    window.popID();
   }
 
   private void tikzWindow() {
@@ -77,22 +115,13 @@ public final class GuiMain implements AutoCloseable {
     if (window.button("Copy preamble")) {
       window.setClipboardText(Util.carloPreamble);
     }
-    window.sameLine();
-    if (window.button("Save cube.bin")) {
-      Util.save(CUBE_BIN, serialize);
-    }
-    window.sameLine();
-    if (window.button("Load cube.bin")) try {
-      cube.deserialize(Util.tryLoad(CUBE_BIN));
-    } catch (IOException | ClassNotFoundException e) {
-      e.printStackTrace();
-    }
     serialize.buildText(new ImGuiTextBuilder(window), highlight);
   }
 
   private void mainControlWindow() {
     window.text("FPS: " + window.getIO().getFramerate());
     window.sliderFloat("Width", cubeLen, 5, 200);
+    window.inputText("Name", cube.name(), JImInputTextFlags.AutoSelectAll);
     var hasHover = cubeFaces(cube);
     window.separator();
     hasHover = cubeEdges(cube) || hasHover;
@@ -126,7 +155,7 @@ public final class GuiMain implements AutoCloseable {
     if (!window.beginTabBar("Edges")) return false;
     var hasHover = false;
     for (var side : CompiledLine.Side.values()) {
-      var beginTabItem = window.beginTabItem(ImStrings.sideTabItem[side.ordinal()]);
+      var beginTabItem = window.beginTabItem(ImData.sideTabItem[side.ordinal()]);
       if (window.isItemHovered()) {
         hasHover = true;
         highlight = side;
@@ -134,14 +163,14 @@ public final class GuiMain implements AutoCloseable {
       if (!beginTabItem) continue;
       var ptr = cube.lines()[side.ordinal()];
       var hidden = ptr.isHidden();
-      window.toggleButton(ImStrings.sideHidden[side.ordinal()], hidden);
+      window.toggleButton(ImData.sideHidden[side.ordinal()], hidden);
       window.sameLine();
       window.text("Hidden");
       if (!hidden.accessValue()) {
-        window.toggleButton(ImStrings.sideDashed[side.ordinal()], ptr.isDashed());
+        window.toggleButton(ImData.sideDashed[side.ordinal()], ptr.isDashed());
         window.sameLine();
         window.text("Dashed");
-        window.toggleButton(ImStrings.sideEqual[side.ordinal()], ptr.isEqual());
+        window.toggleButton(ImData.sideEqual[side.ordinal()], ptr.isEqual());
         window.sameLine();
         window.text("Equal");
       }
@@ -155,22 +184,24 @@ public final class GuiMain implements AutoCloseable {
     if (!window.beginTabBar("Faces")) return false;
     var hasHover = false;
     for (var face : CompiledFace.Orient.values()) {
-      var beginTabItem = window.beginTabItem(ImStrings.orientTabItem[face.ordinal()]);
+      var beginTabItem = window.beginTabItem(ImData.orientTabItem[face.ordinal()]);
       if (window.isItemHovered()) {
         hasHover = true;
         highlight = face;
       }
       if (!beginTabItem) continue;
       var ptr = cube.faces()[face.ordinal()];
+      window.pushID(ImData.ID.StatusRadio.id);
       for (var status : CompiledFace.Status.values()) {
-        window.radioButton(ImStrings.orientToggle[face.ordinal()][status.ordinal()], ptr.status(), status.ordinal());
+        window.radioButton(ImData.orientToggle[face.ordinal()][status.ordinal()], ptr.status(), status.ordinal());
         if (status == CompiledFace.Status.Lines && window.isItemHovered()) {
           window.beginTooltip();
           window.text("Displayed as shaded");
           window.endTooltip();
         }
       }
-      window.inputTextWithHint(ImStrings.orientInput[face.ordinal()], ImStrings.latexCodeStr, ptr.latex());
+      window.popID();
+      window.inputTextWithHint(ImData.orientInput[face.ordinal()], ImData.latexCodeStr, ptr.latex());
       window.endTabItem();
     }
     window.endTabBar();

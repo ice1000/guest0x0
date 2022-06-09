@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
-public interface ImStrings {
+public interface ImData {
   JImStr[] sideTabItem = Arrays.stream(CompiledLine.Side.values())
     .map(s -> new JImStr(s.ordinal() + "##TabItem" + s.name()))
     .toArray(JImStr[]::new);
@@ -35,4 +35,12 @@ public interface ImStrings {
     .toArray(JImStr[]::new);
 
   JImStr latexCodeStr = new JImStr("LaTeX code");
+
+  enum ID {
+    CubeRadio(1),
+    StatusRadio(2);
+    public final int id;
+
+    ID(int id) {this.id = id;}
+  }
 }

@@ -5,11 +5,16 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Serializable;
 
 public record CompiledCube(
+  byte @NotNull [] name,
   @NotNull CompiledPoint @NotNull [] vertices,
   @NotNull CompiledLine @NotNull [] lines,
   @NotNull CompiledFace @NotNull [] faces
 ) implements Serializable {
   public void buildText(@NotNull TextBuilder builder, Object highlight) {
+    builder.append("%<*", false);
+    builder.append(name, false);
+    builder.appendln(">", false);
+
     builder.appendln("\\carloTikZ{\\begin{pgfonlayer}{frontmost}", false);
     Util.forEach3D((i, x, y, z) -> {
       var isHighlight = highlight == Integer.valueOf(i);
@@ -28,5 +33,8 @@ public record CompiledCube(
       lines[side.ordinal()].buildText(builder, side, highlight == side);
     }
     builder.appendln("}", false);
+    builder.append("%</", false);
+    builder.append(name, false);
+    builder.appendln(">", false);
   }
 }

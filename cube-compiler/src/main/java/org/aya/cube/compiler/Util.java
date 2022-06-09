@@ -6,10 +6,22 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 public interface Util {
+  @NotNull @NonNls String veryPrefix = """
+    \\documentclass{article}
+    \\usepackage[utf8]{inputenc}
+    \\usepackage{tikz}
+    \\usepackage{mathpazo}
+        
+    \\title{Cubes \\`a la Carlo Angiuli}
+    \\author{Tesla Zhang}
+    \\date{\\today}
+    """;
   @NotNull @NonNls String carloPreamble = """
     \\pgfdeclarelayer{frontmost}
     \\pgfsetlayers{main,frontmost}
@@ -32,6 +44,12 @@ public interface Util {
   static @NotNull String binPad3(int i) {
     // https://stackoverflow.com/a/4421438/7083401
     return String.format("%3s", Integer.toString(i, 2)).replace(' ', '0');
+  }
+
+  static void main(Path in, Path out) throws IOException, ClassNotFoundException {
+    var builder = new TextBuilder.Strings();
+    tryLoad(in).buildText(builder);
+    Files.writeString(out, builder.sb(), StandardCharsets.US_ASCII, StandardOpenOption.WRITE);
   }
 
   @FunctionalInterface
@@ -58,11 +76,11 @@ public interface Util {
     return action.apply(i, x, y, z);
   }
 
-  static @NotNull CompiledCube tryLoad(@NotNull Path path) throws IOException, ClassNotFoundException {
-    return (CompiledCube) new ObjectInputStream(Files.newInputStream(path)).readObject();
+  static @NotNull CubeDatabase tryLoad(@NotNull Path path) throws IOException, ClassNotFoundException {
+    return (CubeDatabase) new ObjectInputStream(Files.newInputStream(path)).readObject();
   }
 
-  static @NotNull CompiledCube load(@NotNull Path path) {
+  static @NotNull CubeDatabase load(@NotNull Path path) {
     try {
       return tryLoad(path);
     } catch (IOException | ClassNotFoundException e) {
@@ -70,11 +88,11 @@ public interface Util {
     }
   }
 
-  static void trySave(@NotNull Path path, @NotNull CompiledCube cube) throws IOException {
+  static void trySave(@NotNull Path path, @NotNull CubeDatabase cube) throws IOException {
     new ObjectOutputStream(Files.newOutputStream(path)).writeObject(cube);
   }
 
-  static void save(@NotNull Path path, @NotNull CompiledCube cube) {
+  static void save(@NotNull Path path, @NotNull CubeDatabase cube) {
     try {
       trySave(path, cube);
     } catch (IOException e) {
