@@ -3,6 +3,12 @@ package org.aya.cube.compiler;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public interface Util {
   @NotNull @NonNls String carloPreamble = """
     \\pgfdeclarelayer{frontmost}
@@ -50,5 +56,29 @@ public interface Util {
     var y = yy ? 1 : 0;
     var x = xx ? 1 : 0;
     return action.apply(i, x, y, z);
+  }
+
+  static @NotNull CompiledCube tryLoad(@NotNull Path path) throws IOException, ClassNotFoundException {
+    return (CompiledCube) new ObjectInputStream(Files.newInputStream(path)).readObject();
+  }
+
+  static @NotNull CompiledCube load(@NotNull Path path) {
+    try {
+      return tryLoad(path);
+    } catch (IOException | ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  static void trySave(@NotNull Path path, @NotNull CompiledCube cube) throws IOException {
+    new ObjectOutputStream(Files.newOutputStream(path)).writeObject(cube);
+  }
+
+  static void save(@NotNull Path path, @NotNull CompiledCube cube) {
+    try {
+      trySave(path, cube);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

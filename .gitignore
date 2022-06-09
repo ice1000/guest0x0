@@ -24,3 +24,6 @@ lombok.config
 /tgbot-*-all.jar
 imgui.ini
 /diagram.uml
+
+cube.tex
+cube.bin

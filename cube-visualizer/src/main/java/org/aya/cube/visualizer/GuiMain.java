@@ -5,12 +5,15 @@ import org.aya.cube.compiler.CompiledLine;
 import org.aya.cube.compiler.TextBuilder;
 import org.aya.cube.compiler.Util;
 import org.ice1000.jimgui.JImGui;
-import org.ice1000.jimgui.JImStr;
 import org.ice1000.jimgui.NativeFloat;
 import org.ice1000.jimgui.util.JImGuiUtil;
 import org.ice1000.jimgui.util.JniLoader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @SuppressWarnings("AccessStaticViaInstance")
 public final class GuiMain implements AutoCloseable {
@@ -22,7 +25,7 @@ public final class GuiMain implements AutoCloseable {
   private final CubeData cube = new CubeData();
   /** {@link CompiledFace.Orient} or {@link CompiledLine.Side} */
   private @Nullable Object highlight;
-  private static final JImStr latexCodeStr = new JImStr("LaTeX code");
+  public static @NotNull Path CUBE_BIN = Paths.get("cube.bin");
   private float thickness = 3F;
 
   public GuiMain(JImGui window) {
@@ -65,7 +68,7 @@ public final class GuiMain implements AutoCloseable {
 
   private void tikzWindow() {
     var serialize = cube.serialize();
-    if (window.button("Copy")) {
+    if (window.button("Copy TikZ")) {
       var sb = new TextBuilder.Strings();
       serialize.buildText(sb, highlight);
       window.setClipboardText(sb.sb().toString());
@@ -73,6 +76,16 @@ public final class GuiMain implements AutoCloseable {
     window.sameLine();
     if (window.button("Copy preamble")) {
       window.setClipboardText(Util.carloPreamble);
+    }
+    window.sameLine();
+    if (window.button("Save cube.bin")) {
+      Util.save(CUBE_BIN, serialize);
+    }
+    window.sameLine();
+    if (window.button("Load cube.bin")) try {
+      cube.deserialize(Util.tryLoad(CUBE_BIN));
+    } catch (IOException | ClassNotFoundException e) {
+      e.printStackTrace();
     }
     serialize.buildText(new ImGuiTextBuilder(window), highlight);
   }
@@ -157,7 +170,7 @@ public final class GuiMain implements AutoCloseable {
           window.endTooltip();
         }
       }
-      window.inputTextWithHint(ImStrings.orientInput[face.ordinal()], latexCodeStr, ptr.latex());
+      window.inputTextWithHint(ImStrings.orientInput[face.ordinal()], ImStrings.latexCodeStr, ptr.latex());
       window.endTabItem();
     }
     window.endTabBar();

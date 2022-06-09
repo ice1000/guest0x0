@@ -33,4 +33,6 @@ public interface ImStrings {
   @NotNull JImStr[] orientTabItem = Arrays.stream(CompiledFace.Orient.values())
     .map(o -> new JImStr(o.name() + "##TabItem" + o.name()))
     .toArray(JImStr[]::new);
+
+  JImStr latexCodeStr = new JImStr("LaTeX code");
 }
