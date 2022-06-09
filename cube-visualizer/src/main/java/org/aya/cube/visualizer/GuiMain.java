@@ -92,15 +92,24 @@ public final class GuiMain implements AutoCloseable {
     } catch (IOException | ClassNotFoundException e) {
       e.printStackTrace();
     }
+    if (window.button("Append")) database.add(cube.serialize());
     window.pushID(ImData.ID.CubeRadio.id);
+    var toRemove = -1;
     for (int i = 0; i < database.size(); i++) {
       var deserialize = database.get(i);
       var text = new String(deserialize.name(), StandardCharsets.US_ASCII);
-      if (window.radioButton(text, cubeSelection, i)) {
+      var hasAction = window.radioButton(text, cubeSelection, i);
+      window.sameLine();
+      if (window.button("Delete")) {
+        toRemove = i;
+        hasAction = true;
+      }
+      if (hasAction) {
         var ix = cubeSelection.accessValue();
         if (ix >= 0 && ix < database.size()) cube.deserialize(deserialize);
       }
     }
+    if (toRemove >= 0) database.remove(toRemove);
     window.popID();
   }
 

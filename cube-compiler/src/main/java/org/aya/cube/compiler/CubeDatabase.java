@@ -9,10 +9,6 @@ public record CubeDatabase(
   byte @NotNull [] customPreamble,
   @NotNull ArrayList<CompiledCube> cubes
 ) implements Serializable {
-  public CubeDatabase() {
-    this(new byte[]{}, new ArrayList<>());
-  }
-
   public void buildText(@NotNull TextBuilder builder) {
     builder.appendln(Util.veryPrefix, false);
     builder.append(customPreamble, false);
