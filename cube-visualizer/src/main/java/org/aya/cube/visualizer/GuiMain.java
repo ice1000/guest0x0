@@ -85,9 +85,7 @@ public final class GuiMain implements AutoCloseable {
     if (window.button("Load cubes.bin")) try {
       var cubeDatabase = Util.tryLoad(CUBE_BIN);
       customPreamble.clear();
-      for (byte b : cubeDatabase.customPreamble()) {
-        customPreamble.append(b);
-      }
+      for (var b : cubeDatabase.customPreamble()) customPreamble.append(b);
       database = cubeDatabase.cubes();
     } catch (IOException | ClassNotFoundException e) {
       e.printStackTrace();
@@ -100,13 +98,13 @@ public final class GuiMain implements AutoCloseable {
     for (int i = 0; i < database.size(); i++) {
       var deserialize = database.get(i);
       var text = new String(deserialize.name(), StandardCharsets.US_ASCII);
-      if (window.smallButton("Up")) toMoveUp = i;
+      if (window.smallButton("Up##" + i)) toMoveUp = i;
       window.sameLine();
-      if (window.smallButton("Down")) toMoveDown = i;
+      if (window.smallButton("Down##" + i)) toMoveDown = i;
       window.sameLine();
       var hasAction = window.radioButton(text, cubeSelection, i);
       window.sameLine();
-      if (window.button("Delete")) {
+      if (window.button("Delete##" + i)) {
         toRemove = i;
         hasAction = true;
       }
