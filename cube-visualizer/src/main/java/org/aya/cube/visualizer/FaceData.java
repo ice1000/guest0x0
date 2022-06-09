@@ -26,7 +26,6 @@ public record FaceData(
   }
 
   public void buildText(@NotNull TextBuilder builder, CubeData.Orient orient, boolean isHighlight) {
-    var st = status.accessValue();
     if (!latex.isEmpty()) {
       builder.append("\\node (" + orient.name() +
         ") at (" + orient.center +
@@ -34,11 +33,13 @@ public record FaceData(
       builder.append(latex, isHighlight);
       builder.appendln("} ;", isHighlight);
     }
-    if (st == FaceData.Status.Shaded.ordinal()) {
-      builder.appendln("\\draw [draw=white,line width=3pt,fill=black!50,fill opacity=0.5]", isHighlight);
-    } else if (st == FaceData.Status.Lines.ordinal()) {
-      builder.appendln("\\fill [pattern color=gray,pattern=north west lines]", isHighlight);
-    } else return;
+    switch (Status.values()[status.accessValue()]) {
+      case Shaded -> builder.appendln("\\draw [draw=white,line width=3pt,fill=black!50,fill opacity=0.5]", isHighlight);
+      case Lines -> builder.appendln("\\fill [pattern color=gray,pattern=north west lines]", isHighlight);
+      case Invisible -> {
+        return;
+      }
+    }
     builder.appendln(orient.tikz + " -- cycle ;", isHighlight);
   }
 }

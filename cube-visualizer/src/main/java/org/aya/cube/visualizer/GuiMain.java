@@ -115,15 +115,18 @@ public final class GuiMain implements AutoCloseable {
       }
       if (!beginTabItem) continue;
       var ptr = cube.lines()[side.ordinal()];
-      window.toggleButton(side.hidden, ptr.isHidden());
+      var hidden = ptr.isHidden();
+      window.toggleButton(side.hidden, hidden);
       window.sameLine();
       window.text("Hidden");
-      window.toggleButton(side.dashed, ptr.isDashed());
-      window.sameLine();
-      window.text("Dashed");
-      window.toggleButton(side.equal, ptr.isEqual());
-      window.sameLine();
-      window.text("Equal");
+      if (!hidden.accessValue()) {
+        window.toggleButton(side.dashed, ptr.isDashed());
+        window.sameLine();
+        window.text("Dashed");
+        window.toggleButton(side.equal, ptr.isEqual());
+        window.sameLine();
+        window.text("Equal");
+      }
       window.endTabItem();
     }
     window.endTabBar();

@@ -3,7 +3,6 @@ package org.aya.cube.visualizer;
 import org.ice1000.jimgui.JImStr;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -129,15 +128,7 @@ public record CubeData(
       faces[orient.ordinal()].buildText(builder, orient, highlight == orient);
     }
     for (var side : Side.values()) {
-      var isHighlight = highlight == side;
-      var ptr = lines[side.ordinal()].serialize();
-      if (ptr.isHidden()) continue;
-      var attrs = new ArrayList<String>();
-      if (ptr.isEqual()) attrs.add("equals arrow");
-      if (ptr.isDashed()) attrs.add("dashed");
-      builder.appendln("\\draw " + attrs +
-        " (" + side.from +
-        ") -- (" + side.to + ") ;", isHighlight);
+      lines[side.ordinal()].serialize().buildText(builder, side, highlight == side);
     }
     builder.appendln("}", false);
   }
