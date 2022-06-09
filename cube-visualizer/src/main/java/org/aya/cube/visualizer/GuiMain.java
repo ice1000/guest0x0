@@ -109,7 +109,7 @@ public final class GuiMain implements AutoCloseable {
     if (!window.beginTabBar("Edges")) return false;
     var hasHover = false;
     for (var side : CubeData.Side.values()) {
-      var beginTabItem = window.beginTabItem(side.tabItem);
+      var beginTabItem = window.beginTabItem(ImStrings.tabItem[side.ordinal()]);
       if (window.isItemHovered()) {
         hasHover = true;
         highlight = side;
@@ -117,14 +117,14 @@ public final class GuiMain implements AutoCloseable {
       if (!beginTabItem) continue;
       var ptr = cube.lines()[side.ordinal()];
       var hidden = ptr.isHidden();
-      window.toggleButton(side.hidden, hidden);
+      window.toggleButton(ImStrings.hidden[side.ordinal()], hidden);
       window.sameLine();
       window.text("Hidden");
       if (!hidden.accessValue()) {
-        window.toggleButton(side.dashed, ptr.isDashed());
+        window.toggleButton(ImStrings.dashed[side.ordinal()], ptr.isDashed());
         window.sameLine();
         window.text("Dashed");
-        window.toggleButton(side.equal, ptr.isEqual());
+        window.toggleButton(ImStrings.equal[side.ordinal()], ptr.isEqual());
         window.sameLine();
         window.text("Equal");
       }

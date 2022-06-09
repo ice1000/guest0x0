@@ -55,10 +55,6 @@ public record CubeData(
 
     public final Orient adjacent0;
     public final Orient adjacent1;
-    public final JImStr tabItem;
-    public final JImStr dashed;
-    public final JImStr equal;
-    public final JImStr hidden;
     public final String from, to;
 
     Side(Orient adjacent0, Orient adjacent1) {
@@ -68,10 +64,6 @@ public record CubeData(
       assert common.length == 2;
       from = Util.binPad3(common[0]);
       to = Util.binPad3(common[1]);
-      tabItem = new JImStr(ordinal() + "##TabItem" + name());
-      dashed = new JImStr("##Dash" + name());
-      equal = new JImStr("##Equal" + name());
-      hidden = new JImStr("##Hidden" + name());
     }
   }
 
@@ -106,9 +98,9 @@ public record CubeData(
       }));
       center = sums[0] / 4F + "," + sums[1] / 4F + "," + sums[2] / 4F;
       input = new JImStr("##Input" + name());
-      toggle = new JImStr[FaceData.Status.values().length];
-      for (var status : FaceData.Status.values())
-        toggle[status.ordinal()] = new JImStr(status.name() + "##Toggle" + name() + status.name());
+      toggle = Arrays.stream(FaceData.Status.values())
+        .map(s -> new JImStr(s.name() + "##Toggle" + name() + s.name()))
+        .toArray(JImStr[]::new);
       tabItem = new JImStr(name() + "##TabItem" + name());
     }
   }
