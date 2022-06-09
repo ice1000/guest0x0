@@ -51,13 +51,17 @@ public final class GuiMain implements AutoCloseable {
         mainControlWindow();
         window.end();
       }
+      if (window.begin("Early Song")) {
+        cube.buildText(new TextBuilder.ImGui(window), highlight);
+        window.end();
+      }
       window.render();
     }
   }
 
   private void mainControlWindow() {
     if (window.button("Copy preamble")) {
-      window.setClipboardText(Constants.carloPreamble);
+      window.setClipboardText(Util.carloPreamble);
     }
     window.sliderFloat("Width", cubeLen, 5, 200);
     var hasHover = cubeFaces(cube);
@@ -73,8 +77,7 @@ public final class GuiMain implements AutoCloseable {
     if (!window.beginTabBar("Points")) return false;
     var hasHover = false;
     for (var i = 0; i <= 0b111; ++i) {
-      // https://stackoverflow.com/a/4421438/7083401
-      var name = String.format("%3s", Integer.toString(i, 2)).replace(' ', '0');
+      var name = Util.binPad3(i);
       var beginTabItem = window.beginTabItem(name + "##Pt");
       if (window.isItemHovered()) {
         hasHover = true;
@@ -176,25 +179,14 @@ public final class GuiMain implements AutoCloseable {
     if (wantDraw(CubeData.Side.RB)) vline(baseX + projectedLen + userLen, baseY);
     if (wantDraw(CubeData.Side.RF)) vline(baseX + userLen, baseY + projectedLen);
 
-    //     _______ x
-    //    /|
-    //   / |
-    //  /  |
-    // z   y
     var ui = window.getWindowDrawList();
-    for (var i = 0; i <= 0b111; ++i) {
-      var zz = (i & 0b001) > 0;
-      var yy = (i & 0b010) > 0;
-      var xx = (i & 0b100) > 0;
-      var z = zz ? 1 : 0;
-      var y = yy ? 1 : 0;
-      var x = xx ? 1 : 0;
+    Util.forEach3D((i, x, y, z) -> {
       var centreX = baseX + projectedLen + x * userLen - z * projectedLen;
       var centreY = baseY + y * userLen + z * projectedLen;
       if (highlight == Integer.valueOf(i)) {
         ui.addCircleFilled(centreX, centreY, 4F, 0xFF0000FF);
       } else ui.addCircle(centreX, centreY, 4F, 0xFF0000FF);
-    }
+    });
   }
 
   private boolean wantDraw(CubeData.Orient face) {
