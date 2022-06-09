@@ -1,4 +1,4 @@
-package org.aya.cube.visualizer;
+package org.aya.cube.compiler;
 
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;

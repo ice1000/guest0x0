@@ -12,4 +12,5 @@ include(
   "guest0x0-base",
   "guest0x0-cli",
   "cube-visualizer",
+  "cube-compiler",
 )

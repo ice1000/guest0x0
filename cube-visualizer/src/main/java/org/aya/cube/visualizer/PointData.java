@@ -1,9 +1,9 @@
 package org.aya.cube.visualizer;
 
+import org.aya.cube.compiler.CompiledPoint;
 import org.ice1000.jimgui.NativeString;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
 public record PointData(@NotNull NativeString latex) implements AutoCloseable {
@@ -18,15 +18,12 @@ public record PointData(@NotNull NativeString latex) implements AutoCloseable {
     latex.close();
   }
 
-  public @NotNull Serialized serialize() {
-    return new Serialized(latex.toBytes());
+  public @NotNull CompiledPoint serialize() {
+    return new CompiledPoint(latex.toBytes());
   }
 
-  public void deserialize(@NotNull Serialized serialized) {
+  public void deserialize(@NotNull CompiledPoint serialized) {
     latex.clear();
-    for (byte b : serialized.latex) latex.append(b);
-  }
-
-  record Serialized(byte @NotNull [] latex) implements Serializable {
+    for (byte b : serialized.latex()) latex.append(b);
   }
 }
