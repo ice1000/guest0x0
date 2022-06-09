@@ -3,6 +3,7 @@ package org.aya.cube.visualizer;
 import org.ice1000.jimgui.JImStr;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -112,24 +113,43 @@ public record CubeData(
     }
   }
 
-  public void buildText(@NotNull TextBuilder builder, Object highlight) {
-    builder.appendln("\\carloTikZ{\\begin{pgfonlayer}{frontmost}", false);
-    Util.forEach3D((i, x, y, z) -> {
-      var isHighlight = highlight == Integer.valueOf(i);
-      builder.append("\\node (" + Util.binPad3(i) +
-          ") at (" + x + "," + y + "," + z + ") {\\(",
-        isHighlight);
-      builder.append(vertices[i].latex(), isHighlight);
-      builder.appendln("\\)};", isHighlight);
-      return null;
-    });
-    builder.appendln("\\end{pgfonlayer}", false);
-    for (var orient : Orient.values()) {
-      faces[orient.ordinal()].serialize().buildText(builder, orient, highlight == orient);
+  public @NotNull Serialized serialize() {
+    return new Serialized(
+      Arrays.stream(vertices).map(PointData::serialize).toArray(PointData.Serialized[]::new),
+      Arrays.stream(lines).map(LineData::serialize).toArray(LineData.Serialized[]::new),
+      Arrays.stream(faces).map(FaceData::serialize).toArray(FaceData.Serialized[]::new));
+  }
+
+  public void deserialize(@NotNull Serialized serialized) {
+    for (var i = 0; i < vertices.length; i++) vertices[i].deserialize(serialized.vertices[i]);
+    for (var i = 0; i < lines.length; i++) lines[i].deserialize(serialized.lines[i]);
+    for (var i = 0; i < faces.length; i++) faces[i].deserialize(serialized.faces[i]);
+  }
+
+  public record Serialized(
+    @NotNull PointData.Serialized @NotNull [] vertices,
+    @NotNull LineData.Serialized @NotNull [] lines,
+    @NotNull FaceData.Serialized @NotNull [] faces
+  ) implements Serializable {
+    public void buildText(@NotNull TextBuilder builder, Object highlight) {
+      builder.appendln("\\carloTikZ{\\begin{pgfonlayer}{frontmost}", false);
+      Util.forEach3D((i, x, y, z) -> {
+        var isHighlight = highlight == Integer.valueOf(i);
+        builder.append("\\node (" + Util.binPad3(i) +
+            ") at (" + x + "," + y + "," + z + ") {\\(",
+          isHighlight);
+        builder.append(vertices[i].latex(), isHighlight);
+        builder.appendln("\\)};", isHighlight);
+        return null;
+      });
+      builder.appendln("\\end{pgfonlayer}", false);
+      for (var orient : Orient.values()) {
+        faces[orient.ordinal()].buildText(builder, orient, highlight == orient);
+      }
+      for (var side : Side.values()) {
+        lines[side.ordinal()].buildText(builder, side, highlight == side);
+      }
+      builder.appendln("}", false);
     }
-    for (var side : Side.values()) {
-      lines[side.ordinal()].serialize().buildText(builder, side, highlight == side);
-    }
-    builder.appendln("}", false);
   }
 }

@@ -1,3 +1,5 @@
+import org.gradle.api.GradleException
+
 import java.nio.channels.FileChannel
 import java.nio.file.Path
 
@@ -26,7 +28,7 @@ public class StripPreview {
         mm.putShort(6, (short) 61);
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new GradleException(e);
     }
   }
 }

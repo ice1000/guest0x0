@@ -52,24 +52,25 @@ public final class GuiMain implements AutoCloseable {
         window.end();
       }
       if (window.begin("Early Song")) {
-        toStringWindow();
+        tikzWindow();
         window.end();
       }
       window.render();
     }
   }
 
-  private void toStringWindow() {
+  private void tikzWindow() {
+    var serialize = cube.serialize();
     if (window.button("Copy")) {
       var sb = new TextBuilder.Strings();
-      cube.buildText(sb, highlight);
+      serialize.buildText(sb, highlight);
       window.setClipboardText(sb.sb().toString());
     }
     window.sameLine();
     if (window.button("Copy preamble")) {
       window.setClipboardText(Util.carloPreamble);
     }
-    cube.buildText(new TextBuilder.ImGui(window), highlight);
+    serialize.buildText(new TextBuilder.ImGui(window), highlight);
   }
 
   private void mainControlWindow() {
