@@ -29,8 +29,8 @@ public interface Util {
   }
 
   @FunctionalInterface
-  interface Action3D {
-    void apply(int i, int x, int y, int z);
+  interface Action3D<T> {
+    T apply(int i, int x, int y, int z);
   }
 
   //     _______ x
@@ -38,15 +38,17 @@ public interface Util {
   //   / |
   //  /  |
   // z   y
-  static void forEach3D(@NotNull Action3D action) {
-    for (var i = 0; i <= 0b111; ++i) {
-      var zz = (i & 0b001) > 0;
-      var yy = (i & 0b010) > 0;
-      var xx = (i & 0b100) > 0;
-      var z = zz ? 1 : 0;
-      var y = yy ? 1 : 0;
-      var x = xx ? 1 : 0;
-      action.apply(i, x, y, z);
-    }
+  static void forEach3D(@NotNull Action3D<?> action) {
+    for (var i = 0; i <= 0b111; ++i) apply3D(i, action);
+  }
+
+  static <T> T apply3D(int i, @NotNull Action3D<T> action) {
+    var zz = (i & 0b001) > 0;
+    var yy = (i & 0b010) > 0;
+    var xx = (i & 0b100) > 0;
+    var z = zz ? 1 : 0;
+    var y = yy ? 1 : 0;
+    var x = xx ? 1 : 0;
+    return action.apply(i, x, y, z);
   }
 }

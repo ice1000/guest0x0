@@ -197,6 +197,7 @@ public final class GuiMain implements AutoCloseable {
       if (highlight == Integer.valueOf(i)) {
         ui.addCircleFilled(centreX, centreY, 4F, 0xFF0000FF);
       } else ui.addCircle(centreX, centreY, 4F, 0xFF0000FF);
+      return null;
     });
   }
 
