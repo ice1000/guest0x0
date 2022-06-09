@@ -95,9 +95,15 @@ public final class GuiMain implements AutoCloseable {
     if (window.button("Append")) database.add(cube.serialize());
     window.pushID(ImData.ID.CubeRadio.id);
     var toRemove = -1;
+    var toMoveUp = -1;
+    var toMoveDown = -1;
     for (int i = 0; i < database.size(); i++) {
       var deserialize = database.get(i);
       var text = new String(deserialize.name(), StandardCharsets.US_ASCII);
+      if (window.smallButton("Up")) toMoveUp = i;
+      window.sameLine();
+      if (window.smallButton("Down")) toMoveDown = i;
+      window.sameLine();
       var hasAction = window.radioButton(text, cubeSelection, i);
       window.sameLine();
       if (window.button("Delete")) {
@@ -110,6 +116,18 @@ public final class GuiMain implements AutoCloseable {
       }
     }
     if (toRemove >= 0) database.remove(toRemove);
+    if (toMoveUp > 0) {
+      var a = database.get(toMoveUp);
+      var b = database.get(toMoveUp - 1);
+      database.set(toMoveUp, b);
+      database.set(toMoveUp - 1, a);
+    }
+    if (toMoveDown >= 0 && toMoveDown < database.size() - 1) {
+      var a = database.get(toMoveDown);
+      var b = database.get(toMoveDown + 1);
+      database.set(toMoveDown, b);
+      database.set(toMoveDown + 1, a);
+    }
     window.popID();
   }
 
