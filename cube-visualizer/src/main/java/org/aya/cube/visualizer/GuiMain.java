@@ -1,6 +1,7 @@
 package org.aya.cube.visualizer;
 
 import org.ice1000.jimgui.JImGui;
+import org.ice1000.jimgui.JImStr;
 import org.ice1000.jimgui.NativeFloat;
 import org.ice1000.jimgui.util.JImGuiUtil;
 import org.ice1000.jimgui.util.JniLoader;
@@ -14,26 +15,19 @@ public final class GuiMain implements AutoCloseable {
   private float userLen;
   private float projectedLen;
   private int alphaDiff = 0;
-  private final FaceData[] faces = new FaceData[Face3D.values().length];
-  private @Nullable Face3D focusedFace;
-
-  public enum Face3D {
-    Top, Bottom, Front, Back, Left, Right;
-  }
+  private final CubeData cube = new CubeData();
+  private @Nullable CubeData.Orient focusedFace;
+  private static final JImStr latexCodeStr = new JImStr("LaTeX code");
 
   public GuiMain(JImGui window) {
     this.window = window;
     cubeLen.modifyValue(50);
-    for (var face : Face3D.values()) {
-      //noinspection resource
-      faces[face.ordinal()] = new FaceData();
-    }
   }
 
   @Override public void close() {
     window.close();
     cubeLen.close();
-    for (var face : faces) face.close();
+    cube.close();
   }
 
   public static void main(String... args) {
@@ -47,11 +41,11 @@ public final class GuiMain implements AutoCloseable {
   public void mainLoop() {
     while (!window.windowShouldClose()) {
       window.initNewFrame();
-      if (window.begin("Preview")) {
+      if (window.begin("Rumor")) {
         previewWindow();
         window.end();
       }
-      if (window.begin("Main Control")) {
+      if (window.begin("Ground Control")) {
         mainControlWindow();
         window.end();
       }
@@ -61,22 +55,38 @@ public final class GuiMain implements AutoCloseable {
 
   private void mainControlWindow() {
     window.sliderFloat("Width", cubeLen, 5, 200);
+    if (window.beginTabBar("Control")) {
+      cubeFaces(cube);
+      cubeEdges(cube);
+      window.endTabBar();
+    }
+  }
+
+  private void cubeEdges(CubeData cube) {
+    if (!window.beginTabItem("Edges")) return;
+    window.endTabItem();
+  }
+
+  private void cubeFaces(CubeData cube) {
+    if (!window.beginTabItem("Faces")) return;
     var hasHover = false;
-    for (var face : Face3D.values()) {
-      var ptr = faces[face.ordinal()];
-      window.toggleButton("##Toggle" + face.name(), ptr.isEnabled());
+    for (var face : CubeData.Orient.values()) {
+      var ptr = cube.faces()[face.ordinal()];
+      window.toggleButton(face.toggle, ptr.isEnabled());
       if (window.isItemHovered()) {
         hasHover = true;
         focusedFace = face;
       }
       if (ptr.enabled()) {
         window.sameLine();
-        window.inputText("##Input" + face.name(), ptr.latex());
+        window.inputTextWithHint(face.input,
+          latexCodeStr, ptr.latex());
       }
       window.sameLine();
       window.text(face.name());
     }
     if (!hasHover) focusedFace = null;
+    window.endTabItem();
   }
 
   private void previewWindow() {
@@ -84,22 +94,24 @@ public final class GuiMain implements AutoCloseable {
     var y = window.getWindowPosY();
     userLen = cubeLen.accessValue();
     projectedLen = userLen * 0.6F;
-    var baseX = x + 30;
-    var baseY = y + 50;
-    if (wantDraw(Face3D.Top)) hParallelogram(baseX, baseY); // Top
-    if (wantDraw(Face3D.Left)) vParallelogram(baseX, baseY); // Left
-    if (wantDraw(Face3D.Front)) square(baseX, baseY + projectedLen); // Front
-    if (wantDraw(Face3D.Bottom)) hParallelogram(baseX, baseY + userLen); // Bottom
-    if (wantDraw(Face3D.Back)) square(baseX + projectedLen, baseY); // Back
-    if (wantDraw(Face3D.Right)) vParallelogram(baseX + userLen, baseY); // Right
+    drawCubeAt(x + 30, y + 50);
   }
 
-  private boolean wantDraw(Face3D face) {
+  private void drawCubeAt(float baseX, float baseY) {
+    if (wantDraw(CubeData.Orient.Top)) hParallelogram(baseX, baseY); // Top
+    if (wantDraw(CubeData.Orient.Left)) vParallelogram(baseX, baseY); // Left
+    if (wantDraw(CubeData.Orient.Front)) square(baseX, baseY + projectedLen); // Front
+    if (wantDraw(CubeData.Orient.Bottom)) hParallelogram(baseX, baseY + userLen); // Bottom
+    if (wantDraw(CubeData.Orient.Back)) square(baseX + projectedLen, baseY); // Back
+    if (wantDraw(CubeData.Orient.Right)) vParallelogram(baseX + userLen, baseY); // Right
+  }
+
+  private boolean wantDraw(CubeData.Orient face) {
     if (focusedFace == face) {
-      alphaDiff = 0x33000000;
+      alphaDiff = 0x40000000;
       return true;
-    }
-    return faces[face.ordinal()].enabled();
+    } else alphaDiff = 0;
+    return cube.enabled(face);
   }
 
   private void hParallelogram(float x, float y) {
@@ -125,6 +137,6 @@ public final class GuiMain implements AutoCloseable {
       x + projectedLen, y + userLen,
       x, y + userLen + projectedLen,
       x, y + projectedLen,
-      0x88CCEE00 - alphaDiff);
+      0x88CCAA33 - alphaDiff);
   }
 }
