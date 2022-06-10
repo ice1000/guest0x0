@@ -42,6 +42,12 @@
         \node (\x\y\z) at (\x , \y , \z) {\textbullet} ;
 \end{pgfonlayer}}
 \newcommand{\carloTikZ}[1]{
-  \begin{tikzpicture}[carlo-axes, scale = 2, arrows = ->, baseline={(r.base)}]
+  \begin{tikzpicture}[carlo-axes, scale = 2, arrows = ->]
 		#1
 	\end{tikzpicture}}
+\newcommand{\carloCoord}[3]{\begin{scope}[shift={(-1.5,0)},scale=0.4]
+    \draw [->] (0,0,0) to node [above,pos=1] {#1} (1,0,0) ;
+    \draw [->] (0,0,0) to node [right,pos=1] {#2} (0,1,0) ;
+    \draw [->] (0,0,0) to node [above,pos=1.3] {#3} (0,0,1) ;
+  \end{scope}}
+\newcommand{\carloXyz}{\carloCoord{$x$}{$y$}{$z$}}

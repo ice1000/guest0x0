@@ -17,7 +17,7 @@ public interface Util {
     \\usepackage[utf8]{inputenc}
     \\usepackage{tikz}
     \\usepackage{mathpazo}
-        
+
     \\title{Cubes \\`a la Carlo Angiuli}
     \\author{Tesla Zhang}
     \\date{\\today}

@@ -20,9 +20,5 @@ public interface TextBuilder {
     @Override public void append(@NotNull String text, boolean highlight) {
       sb.append(text);
     }
-
-    @Override public String toString() {
-      return sb.toString();
-    }
   }
 }

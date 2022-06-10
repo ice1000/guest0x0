@@ -23,6 +23,7 @@ public record CompiledFace(int status, byte @NotNull [] latex) implements Serial
       }
     }
     builder.appendln(orient.tikz + " -- cycle ;", isHighlight);
+    builder.appendln("% ^ " + orient.name(), isHighlight);
   }
 
   public enum Orient {
