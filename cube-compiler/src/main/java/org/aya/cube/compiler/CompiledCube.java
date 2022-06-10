@@ -30,7 +30,12 @@ public record CompiledCube(
       faces[orient.ordinal()].buildText(builder, orient, highlight == orient);
     }
     for (var side : CompiledLine.Side.values()) {
-      lines[side.ordinal()].buildText(builder, side, highlight == side);
+      if (side.adjacent1 == CompiledFace.Orient.Back)
+        lines[side.ordinal()].buildText(builder, side, highlight == side);
+    }
+    for (var side : CompiledLine.Side.values()) {
+      if (side.adjacent1 != CompiledFace.Orient.Back)
+        lines[side.ordinal()].buildText(builder, side, highlight == side);
     }
     builder.appendln("}", false);
     builder.append("%</", false);

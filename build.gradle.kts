@@ -143,3 +143,12 @@ subprojects {
     sign(publishing.publications["maven"])
   }
 }
+
+tasks.register("generateNotesBuildScript") {
+  doFirst {
+    val notes = rootProject.file("notes")
+    fun path(name: String) = "@echo off\njava -jar ..\\cube-$name\\build\\libs\\cube-$name-$version-fat.jar"
+    notes.resolve("visualize.cmd").writeText("${path("visualizer")} %*")
+    notes.resolve("compile.cmd").writeText("${path("compiler")} %*")
+  }
+}
