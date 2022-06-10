@@ -10,7 +10,7 @@ public record CompiledLine(boolean isHidden, boolean isDashed, boolean isEqual) 
   public void buildText(@NotNull TextBuilder builder, Side side, boolean isHighlight) {
     if (isHidden) return;
     var fromTo = " (" + side.from + ") -- (" + side.to + ") ;";
-    // builder.appendln("\\draw " + Arrays.asList("draw=white", "double", "very thick") + fromTo, isHighlight);
+    // builder.appendln("\\draw " + Arrays.asList("line width=1.5pt", "draw opacity=0") + fromTo, isHighlight);
     var attrs = new ArrayList<String>();
     if (isEqual) attrs.add("equals arrow");
     if (isDashed) attrs.add("dashed");
