@@ -1,0 +1,17 @@
+[
+  {
+    "name" : "org.aya.cube.compiler.CompiledCube"
+  },
+  {
+    "name" : "org.aya.cube.compiler.CompiledFace"
+  },
+  {
+    "name" : "org.aya.cube.compiler.CompiledPoint"
+  },
+  {
+    "name" : "org.aya.cube.compiler.CubeDatabase"
+  },
+  {
+    "name" : "org.aya.cube.compiler.CompiledLine"
+  }
+]

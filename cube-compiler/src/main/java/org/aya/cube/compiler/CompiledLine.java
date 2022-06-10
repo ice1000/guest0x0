@@ -9,7 +9,9 @@ import java.util.Arrays;
 public record CompiledLine(boolean isHidden, boolean isDashed, boolean isEqual) implements Serializable {
   public void buildText(@NotNull TextBuilder builder, Side side, boolean isHighlight) {
     if (isHidden) return;
-    var attrs = new ArrayList<String>();
+    var attrs = new ArrayList<String>() {{
+      add("double");
+    }};
     if (isEqual) attrs.add("equals arrow");
     if (isDashed) attrs.add("dashed");
     builder.appendln("\\draw " + attrs +

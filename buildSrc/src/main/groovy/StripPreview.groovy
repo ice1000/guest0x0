@@ -16,7 +16,7 @@ public class StripPreview {
       int magic = mm.getInt(0);
       int minor = mm.getShort(4) & 0xFFFF;
       int major = mm.getShort(6) & 0xFFFF;
-      if (magic != 0xCAFEBABE) return;
+      if (magic != (int) 0xCAFEBABE) return;
       var relative = root.relativize(classFile.toAbsolutePath());
       if (minor == 0xFFFF) {
         mm.putShort(4, (short) 0);
