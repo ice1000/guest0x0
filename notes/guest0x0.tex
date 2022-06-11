@@ -33,8 +33,7 @@ Translate the following typing rules into an algorithmic description:
 Which of them is an introduction rule, and which is an elimination rule?
 \end{exercise}
 \begin{notation}\label{not:pre}
-In this tutorial, we will use $x, y, i, j, k$ for variables
-(preferably $i, j, k$ for those of type $\II$ and $x, y$ otherwise)
+In this tutorial, we will use $x, y, z$ for variables
 and other Latin letters like $u,v,a,b,c,A,B,C$ for terms
 (preferably uppercase for types and lowercase for terms).
 
@@ -109,16 +108,16 @@ The interval type and its products are used to represent dimensions
 Suppose \fbox{$i:\II\vdash\isType{A}$} and \fbox{$i:\II\vdash u:A$}.
 From a semantical or a topological perspective, we can say:
 \begin{itemize}
-\item $A$ is a (type) line between $A[\lcon/i]$ and $A[\rcon/i]$.
-\item $u$ is a (term) line between $u[\lcon/i]$ and $u[\rcon/i]$.
+\item $A$ is a (type) line between $A[\lcon/x]$ and $A[\rcon/x]$.
+\item $u$ is a (term) line between $u[\lcon/x]$ and $u[\rcon/x]$.
 \item The type of a line is a line, so the type of $u$ is $A$.
 \end{itemize}
 Then, because \emph{typing relations are preserved by substitution},
-we have $u[\rcon/i]:A[\rcon/i]$ and $u[\lcon/i]:A[\lcon/i]$.
+we have $u[\rcon/x]:A[\rcon/x]$ and $u[\lcon/x]:A[\lcon/x]$.
 % https://q.uiver.app/?q=WzAsNixbMCwwLCJ1W1xcbGNvbi9pXSJdLFswLDEsInVbXFxyY29uL2ldIl0sWzIsMCwiQVtcXGxjb24vaV0iXSxbMiwxLCJBW1xcbGNvbi9pXSJdLFsxLDBdLFsxLDFdLFswLDEsInUiXSxbMiwzLCJBIl0sWzQsNSwiOiIsMSx7InN0eWxlIjp7ImJvZHkiOnsibmFtZSI6Im5vbmUifSwiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dXQ==
 \[\begin{tikzcd}
-	{u[\lcon/i]} & {} & {A[\lcon/i]} \\
-	{u[\rcon/i]} & {} & {A[\lcon/i]}
+	{u[\lcon/x]} & {} & {A[\lcon/x]} \\
+	{u[\rcon/x]} & {} & {A[\lcon/x]}
 	\arrow["u", from=1-1, to=2-1]
 	\arrow["A", from=1-3, to=2-3]
 	\arrow["{:}"{description}, draw=none, from=1-2, to=2-2]
@@ -138,25 +137,37 @@ in the implementations. The \GuestName{} type checker mix intervals
 and other bindings in a unified context, just like usual dependent type checkers.
 
 \subsection{Partial elements}\label{sub:partial}
-In \CTT, we may not be able to describe every cube using a term,
-like the squares in~\cref{ex:concat-sym}.
-This motivates the idea of partial elements.
+In \CTT{}, the idea that \textit{open shapes can be filled}
+is the core concept that makes terms in type theory space-like,
+and to do so the \textit{Kan operation} are added to \CTT{} as a structure.
+
+The motivation is that with only the interval type and Martin-L\"of type theory,
+we may not be able to describe every cube that makes geometric or topological sense.
+For example, the squares in~\cref{ex:concat-sym} must be constructed using the Kan operation.
+Kan operation takes a description of some parts of an $n$-dimensional cube
+(an \textit{incomplete} cube, or a \textit{partial} cube) and completes it.
+To describe the input of Kan operations, we introduce partial elements.
 \begin{terminology}
 We follow the terminology in~\cite{CubicalAgda}.
 In~\cite{CCHM}, partial elements are called \textit{systems}.
 \end{terminology}
-Suppose we want to describe a square \fbox{$i:\II,j:\II\vdash u:A$},
-where $i$ goes from left to right and $j$ goes from bottom to top.
-For simplicity we assume \fbox{$\vdash \isType{A}$}, say, $A$ does not depend on $i$ or $j$.
-% https://q.uiver.app/?q=WzAsMyxbMCwxXSxbMSwxXSxbMCwwXSxbMCwxLCJpIl0sWzAsMiwiaiIsMl1d
-\[\begin{tikzcd}
-	{} \\
-	{} & {}
-	\arrow["i", from=2-1, to=2-2]
-	\arrow["j"', from=2-1, to=1-1]
-\end{tikzcd}\]
-The goal is to make $u[\lcon/i, \rcon/j]\equiv a$ and $u[\rcon/i]\equiv v$.
-From the goal we may deduce $\vdash a:A$ and $j:\II\vdash v:A$.
+Suppose we want to use the Kan operation to construct
+a square \fbox{$x:\II,y:\II\vdash u:A$},
+given the following directions of $x$ and $y$:
+\begin{center}
+\carloTikZ{\carloXy
+\foreach \x in {0,1}
+\foreach \y in {0,1}
+  \node (\x\y) at (\x , \y) {\textbullet} ;
+\node (center) at (0.5, 0.5) {$u:A$} ;
+\fill [pattern color=gray,pattern=north west lines] (0,0) rectangle (1,1) ;}
+\end{center}
+For simplicity we assume \fbox{$\vdash \isType{A}$}, say, $A$ does not depend on $x$ or $y$.
+
+\TODO
+
+The goal is to make $u[\lcon/x, \rcon/y]\equiv a$ and $u[\rcon/x]\equiv v$.
+From the goal we may deduce $\vdash a:A$ and $y:\II\vdash v:A$.
 % https://q.uiver.app/?q=WzAsMyxbMCwwLCJhIl0sWzEsMCwiXFxidWxsZXQiXSxbMSwxLCJcXGJ1bGxldCJdLFswLDFdLFsyLDEsInYiLDJdXQ==
 \[\begin{tikzcd}
 	a & \bullet \\
@@ -196,9 +207,13 @@ The meaning of cofibrations is simple. Suppose we are talking about a $3$-dimens
 so we are in a context with $3$ intervals, say, $\Phi=x:\II,y:\II,z:\II$.
 Then:
 \begin{itemize}
+\item As mentioned before, the term \fbox{$\Phi\vdash u:A$} corresponds to a cube:
+\begin{center}
+\carloTikZ{\carloXyz \refcube{Empty}}
+\end{center}
 \item $\cond$ specifies a $2$-cube (a square) in $\Phi$.
-\item $\conj$ specifies any $n$-cube (for $n\leq 2$) in $\Phi$. For example, $i=\lcon\land j=\rcon$ specifies a line,
-and $i=\lcon\land j=\rcon\land k=\lcon$ specifies a point (note that this point is on the line).
+\item $\conj$ specifies any $n$-cube (for $n\leq 2$) in $\Phi$. For example, $x=\lcon\land y=\rcon$ specifies a line,
+and $x=\lcon\land y=\rcon\land z=\lcon$ specifies a point:
 \item $\disj$ talks about several $n$-cubes (for $n\leq 2$) in $\Phi$ at the same time.
 \end{itemize}
 Using cofibrations, we define the syntax of partial elements
