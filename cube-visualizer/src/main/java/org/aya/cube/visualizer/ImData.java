@@ -20,6 +20,9 @@ public interface ImData {
   JImStr[] sideHidden = Arrays.stream(CompiledLine.Side.values())
     .map(s -> new JImStr("##Hidden" + s.name()))
     .toArray(JImStr[]::new);
+  JImStr[] sideInput = Arrays.stream(CompiledLine.Side.values())
+    .map(s -> new JImStr("##Input" + s.name()))
+    .toArray(JImStr[]::new);
 
 
   @NotNull JImStr[][] orientToggle = Arrays.stream(CompiledFace.Orient.values())

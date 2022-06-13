@@ -198,6 +198,7 @@ public final class GuiMain implements AutoCloseable {
         window.toggleButton(ImData.sideEqual[side.ordinal()], ptr.isEqual());
         window.sameLine();
         window.text("Equal");
+        window.inputTextWithHint(ImData.sideInput[side.ordinal()], ImData.latexCodeStr, ptr.latex());
       }
       window.endTabItem();
     }
@@ -287,9 +288,9 @@ public final class GuiMain implements AutoCloseable {
   }
 
   private boolean wantDraw(CompiledLine.Side side) {
-    thickness = cube.doubled(side) ? 3F : 1F;
+    thickness = cube.doubled(side) ? 9F : 3F;
     if (highlight == side) {
-      alphaDiff = 0x40000000;
+      alphaDiff = 0x80000000;
       return true;
     } else alphaDiff = 0;
     return cube.enabled(side);
@@ -297,17 +298,17 @@ public final class GuiMain implements AutoCloseable {
 
   private void hline(float x, float y) {
     var ui = window.getWindowDrawList();
-    ui.addLine(x, y, x + userLen, y, 0x99DDA0DD + alphaDiff, thickness);
+    ui.addLine(x, y, x + userLen, y, 0x66DDA0DD + alphaDiff, thickness);
   }
 
   private void vline(float x, float y) {
     var ui = window.getWindowDrawList();
-    ui.addLine(x, y, x, y + userLen, 0x99DDA0DD + alphaDiff, thickness);
+    ui.addLine(x, y, x, y + userLen, 0x66DDA0DD + alphaDiff, thickness);
   }
 
   private void aline(float x, float y) {
     var ui = window.getWindowDrawList();
-    ui.addLine(x + projectedLen, y, x, y + projectedLen, 0x99DDA0DD + alphaDiff, thickness);
+    ui.addLine(x + projectedLen, y, x, y + projectedLen, 0x66DDA0DD + alphaDiff, thickness);
   }
 
   private void hParallelogram(float x, float y) {
