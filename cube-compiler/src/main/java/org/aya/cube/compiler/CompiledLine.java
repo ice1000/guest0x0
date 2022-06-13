@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public record CompiledLine(
-  byte[] code,
+  byte @NotNull [] code,
   boolean isHidden,
   boolean isDashed,
   boolean isEqual
@@ -28,7 +28,7 @@ public record CompiledLine(
       builder.append(code, isHighlight);
       builder.append("\"]", isHighlight);
     }
-    builder.appendln(" (" + side.to + ");", isHighlight);
+    builder.appendln("(" + side.to + ");", isHighlight);
   }
 
   public enum Side {

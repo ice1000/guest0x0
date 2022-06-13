@@ -60,5 +60,7 @@ public record CubeData(
     for (var i = 0; i < vertices.length; i++) vertices[i].deserialize(serialized.vertices()[i]);
     for (var i = 0; i < lines.length; i++) lines[i].deserialize(serialized.lines()[i]);
     for (var i = 0; i < faces.length; i++) faces[i].deserialize(serialized.faces()[i]);
+    name.clear();
+    for (byte b : serialized.name()) name.append(b);
   }
 }
