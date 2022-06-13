@@ -153,43 +153,38 @@ In~\cite{CCHM}, partial elements are called \textit{systems}.
 \end{terminology}
 When we write \fbox{$x:\II,y:\II\vdash u:A$},
 we are describing the following 2-dimensional cube, which is a square:
-\begin{center}
-\carloTikZ{\carloXy
+\carloCTikZ{\carloXy
 \foreach \x in {0,1}
 \foreach \y in {0,1}
   \node (\x\y) at (\x , \y) {\textbullet} ;
 \fill [pattern color=gray,pattern=north west lines] (0,0) rectangle (1,1) ;
 \node (center) at (0.5, 0.5) {$u:A$} ;}
-\end{center}
 For simplicity we assume \fbox{$\vdash \isType{A}$}, say, $A$ does not depend on $x$ or $y$.
 
 Suppose we want to use the Kan operation to construct
 a square \fbox{$x:\II,y:\II\vdash u:A$}
 such that its top-left corner is a point $a:A$, and the line on its
 right-hand side is a line $y:\II \vdash v:A$:
-\begin{center}
-\carloTikZ{\carloXy
+\carloCTikZ{\carloXy
 \foreach \y in {0,1} \node (1\y) at (1 , \y) {\textbullet} ;
 \node (00) at (0, 0) {$a$};
 \node (01) at (0, 1) {\textbullet};
-\draw (10) -- node [right] {$v$} (11);
+\draw (10) -- node [right] {$v$} (11); %
 % \fill [pattern color=gray,pattern=north west lines] (0,0) rectangle (1,1) ;
 % \node (center) at (0.5, 0.5) {$u:A$} ;
 }
-\end{center}
 
 Translating that to type theory,
 the goal is to construct the term $u$ such that
 $u[\lcon/x, \rcon/y]\equiv a$ and $u[\rcon/x]\equiv v$.
-
-The above ``describing a cube by describing parts of its boundaries''
-process is a just-need of \CTT, and such descriptions are called \textit{partial elements}
-(also informally called a \textit{configuration} of a cube).
-In \CTT, we need a syntax for partial elements.
-Intuitively we may write something like this:
+The construction will be discussed in later sections,
+and for now we focus on how to describe these partial boundaries
+(also known as \textit{configurations} of a cube).
+We introduce a straightforward syntax called \textit{partial elements}
+for these cubes, e.g. the above partial element is written as:
 \[\LRbbar{\begin{array}{rc}
-  i\equiv\lcon \land j\equiv\rcon&\mapsto a\\
-  i\equiv\rcon &\mapsto v
+  x\equiv\lcon \land y\equiv\rcon&\mapsto a\\
+  x\equiv\rcon &\mapsto v
 \end{array}}\]
 To define this formally, we need to define the syntax of the left-hand-side of $\mapsto$.
 They are called \textit{cofibrations} in \CTT.
@@ -199,10 +194,10 @@ which is more (geometrically) intuitive but also longer.
 \end{terminology}
 The syntax of a cofibration is defined to be a disjunction normal form
 (a disjunction list of conjunctions) of
-face ``conditions'' like $i\equiv\lcon$ or $i\equiv\rcon$, as in~\cref{fig:cofib}.
+face ``conditions'' like $x\equiv\lcon$ or $x\equiv\rcon$, as in~\cref{fig:cofib}.
 \begin{figure}[h!]
 \[\begin{array}{rll}
-  \cond ::= & i\equiv\lcon \mid i\equiv\rcon & \text{condition} \\
+  \cond ::= & x\equiv\lcon \mid x\equiv\rcon & \text{condition} \\
   \conj ::= & \cond \mid \cond \land \conj & \text{conjunction} \\
   \disj ::= & \conj \mid \conj \lor \disj & \text{disjunction}
 \end{array}\]
@@ -215,13 +210,13 @@ so we are in a context with $3$ intervals, say, $\Phi=x:\II,y:\II,z:\II$.
 Then:
 \begin{itemize}
 \item As mentioned before, the term \fbox{$\Phi\vdash u:A$} corresponds to a cube:
-\begin{center}
-\carloTikZ{\carloXyz \refcube{Empty}}
-\end{center}
-\item $\cond$ specifies a $2$-cube (a square) in $\Phi$.
-\item $\conj$ specifies any $n$-cube (for $n\leq 2$) in $\Phi$. For example, $x=\lcon\land y=\rcon$ specifies a line,
+\carloCTikZ{\carloXyz \refcube{Empty}}
+\item A $\cond$ specifies a $2$-cube (a square) face in $\Phi$. For example, $x\equiv\lcon$
+corresponds to the following square:
+\carloCTikZ{\carloXyz \refcube{XEquivL}}
+\item A $\conj$ specifies any $n$-cube (for $n\leq 2$) in $\Phi$. For example, $x=\lcon\land y=\rcon$ specifies a line,
 and $x=\lcon\land y=\rcon\land z=\lcon$ specifies a point:
-\item $\disj$ talks about several $n$-cubes (for $n\leq 2$) in $\Phi$ at the same time.
+\item A $\disj$ talks about several $n$-cubes (for $n\leq 2$) in $\Phi$ at the same time.
 \end{itemize}
 Using cofibrations, we define the syntax of partial elements
 by extending the syntax for terms in~\cref{fig:partial}

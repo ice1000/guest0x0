@@ -11,11 +11,12 @@ public record CompiledCube(
   @NotNull CompiledFace @NotNull [] faces
 ) implements Serializable {
   public void buildText(@NotNull TextBuilder builder, Object highlight) {
+    builder.appendln("\\carloTikZ{", false);
     builder.append("%<*", false);
     builder.append(name, false);
     builder.appendln(">", false);
 
-    builder.appendln("\\carloTikZ{\\begin{pgfonlayer}{frontmost}", false);
+    builder.appendln("\\begin{pgfonlayer}{frontmost}", false);
     Util.forEach3D((i, x, y, z) -> {
       var isHighlight = highlight == Integer.valueOf(i);
       builder.append("\\node (" + Util.binPad3(i) +
@@ -44,9 +45,9 @@ public record CompiledCube(
         lines[side.ordinal()].buildText(builder, side, highlight == side);
     }
     builder.appendln("\\end{scope}", false);
-    builder.appendln("}", false);
     builder.append("%</", false);
     builder.append(name, false);
     builder.appendln(">", false);
+    builder.appendln("}", false);
   }
 }
