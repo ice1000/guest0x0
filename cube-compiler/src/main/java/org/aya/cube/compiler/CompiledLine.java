@@ -19,12 +19,16 @@ public record CompiledLine(
 
   public void buildText(@NotNull TextBuilder builder, Side side, boolean isHighlight) {
     if (isHidden) return;
-    var fromTo = " (" + side.from + ") -- (" + side.to + ") ;";
-    // builder.appendln("\\draw " + Arrays.asList("line width=1.5pt", "draw opacity=0") + fromTo, isHighlight);
     var attrs = new ArrayList<String>();
     if (isEqual) attrs.add("equals arrow");
     if (isDashed) attrs.add("dashed");
-    builder.appendln("\\draw " + attrs + fromTo, isHighlight);
+    builder.append("\\draw" + attrs + "(" + side.from + ")edge", isHighlight);
+    if (code.length > 0) {
+      builder.append("[midway,sloped,\"", isHighlight);
+      builder.append(code, isHighlight);
+      builder.append("\"]", isHighlight);
+    }
+    builder.appendln(" (" + side.to + ");", isHighlight);
   }
 
   public enum Side {
