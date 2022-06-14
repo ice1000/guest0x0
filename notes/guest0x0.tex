@@ -215,10 +215,12 @@ Then:
 corresponds to the following square:
 \carloCTikZ{\carloXyz \refcube{XEquivL}}
 \item A $\conj$ specifies any $n$-cube (for $n\leq 2$) in $\Phi$.
-For example, $x=\lcon\land y=\rcon$ specifies a line $v$,
-and $x=\lcon\land y=\rcon\land z=\lcon$ specifies a point $\star$:
+For example, $x\equiv\lcon\land y\equiv\rcon$ specifies a line $v$,
+and $x\equiv\lcon\land y\equiv\rcon\land z\equiv\lcon$ specifies a point $\star$:
 \carloCTikZ{\carloXyz \refcube{XYLR}}
 \item A $\disj$ talks about several $n$-cubes (for $n\leq 2$) in $\Phi$ at the same time.
+For example, $x\equiv\lcon\lor x\equiv\rcon$ corresponds to the following two squares:
+\carloCTikZ{\carloXyz \refcube{LRFaces}}
 \end{itemize}
 Using cofibrations, we define the syntax of partial elements
 by extending the syntax for terms in~\cref{fig:partial}
@@ -238,10 +240,13 @@ and the type needs to contain the following two pieces of information:
 \item The faces being specified, $\disj$.
 \item The type of the faces, $A$.
 \end{itemize}
-There are several advantages to use a disjunction normal form:
+There are several advantages to use a disjunction normal form
+in the type of partial elements (hereafter as \textit{partial types}):
 \begin{itemize}
 \item We can put $\conj$ to the left-hand-side of $\mapsto$,
 so every clause in a partial element is a single face.
-\item It is easy to get the type of a partial element.
+\item It is easy to get the type of a partial element:
+since each clause specifies a face using $\conj$,
+their disjunction is the $\disj$ in the corresponding partial type.
 \end{itemize}
 
