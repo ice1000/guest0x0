@@ -17,7 +17,7 @@ introduction rules, eliminators, etc., and functional programming.
 and combine them into an algorithm.
 \item Basic understanding of De Morgan cubical type theory~\cite{CCHM,CHM}
 (hereafter as \CTT{}), including the interval type $\II$, the path type,
-and the idea of representing cubes using terms with interval variables in it.
+and the idea of representing $n$-dimensional cubes using terms with interval variables in it.
 \end{itemize}
 This tutorial will not treat substitution formally.
 Variable names are assumed to respect capture-avoiding substitution,
@@ -99,7 +99,7 @@ a new project to encourage the author of \GuestName{} to learn extensional type 
 \section{Type checking cubes}\label{sec:tyck-cube}
 This section motivates and explains typing judgments with cofibrations in the context.
 
-\subsection{Interval and contexts}\label{sub:interval}
+\subsection{The interval $\II$ and contexts}\label{sub:interval}
 In \CTT, we have the interval type:
 \[\vdash \isType\II\quad \vdash \lcon:\II \quad \vdash \rcon:\II\]
 The interval type and its products are used to represent dimensions
@@ -143,7 +143,8 @@ and to do so the \textit{Kan operation} are added to \CTT{} as a structure.
 
 The motivation is that with only the interval type and Martin-L\"of type theory,
 we may not be able to describe every cube that makes geometric or topological sense.
-For example, the squares in~\cref{ex:concat-sym} must be constructed using the Kan operation.
+For example, the squares in~\cref{ex:concat-sym} make perfect sense in
+geometry or topology, but in \CTT{}, they have to be constructed using the Kan operation.
 Kan operation takes a description of some parts of an $n$-dimensional cube
 (an \textit{incomplete} cube, or a \textit{partial} cube) and completes it.
 To describe the input of Kan operations, we introduce partial elements.
@@ -223,30 +224,40 @@ For example, $x\equiv\lcon\lor x\equiv\rcon$ corresponds to the following two sq
 \carloCTikZ{\carloXyz \refcube{LRFaces}}
 \end{itemize}
 Using cofibrations, we define the syntax of partial elements
-by extending the syntax for terms in~\cref{fig:partial}
-(recall~\cref{not:pre}).
+by extending the syntax for terms in~\cref{fig:parEl}
+(recall~\cref{not:pre}):
 \begin{figure}[h!]
 \[\begin{array}{rl}
 	\face::=&\conj\mapsto u \mid \conj\mapsto u,\face\\
-	u,A::=&\lrbbar{\face} \mid \Partial{\disj}{A} \mid \cdots~\text{(other term formers)}
+	u,A::=&\lrbbar{\face} \mid \cdots~\text{(other term formers)}
 \end{array}\]
-\caption{Syntax of partial elements}
-\label{fig:partial}
+\caption{Syntax of partial elements}\label{fig:parEl}
 \end{figure}
 
-Note that we also need to define the type of partial elements,
+Note that we also need to define the type of partial elements
+(hereafter as \textit{partial types}),
 and the type needs to contain the following two pieces of information:
 \begin{itemize}
 \item The faces being specified, $\disj$.
 \item The type of the faces, $A$.
 \end{itemize}
-There are several advantages to use a disjunction normal form
-in the type of partial elements (hereafter as \textit{partial types}):
+Thus we directly define the syntax of partial types as in~\cref{fig:parTy}:
+\begin{figure}[h!]
+\[u,A::= \Partial{\disj}{A} \mid \cdots~\text{(see~\cref{fig:parEl})}\]
+\caption{Syntax of partial types}\label{fig:parTy}
+\end{figure}
+
+There are several advantages to arrange the cofibrations
+as disjunction-normal forms:
 \begin{itemize}
-\item We can put $\conj$ to the left-hand-side of $\mapsto$,
-so every clause in a partial element is a single face.
+\item We put $\conj$ to the left-hand-side of $\mapsto$,
+so every clause in a partial element specifies a single face.
 \item It is easy to get the type of a partial element:
 since each clause specifies a face using $\conj$,
 their disjunction is the $\disj$ in the corresponding partial type.
 \end{itemize}
+It remains to derive the typing rules for partial elements.
+
+\subsection{Type checking under cofibrations}\label{sub:tyck-cofib}
+Suppose $\Gvdash\isType{A}$, $\Gvdash u:A$, and $\conj$ is a valid cofibration.
 
