@@ -40,6 +40,8 @@ public record CompiledCube(
       if (side.adjacent1 == CompiledFace.Orient.Back)
         lines[side.ordinal()].buildText(builder, side, highlight == side);
     }
+    builder.appendln("\\end{scope}", false);
+    builder.appendln("\\begin{scope}[transparency group=knockout]", false);
     for (var side : CompiledLine.Side.values()) {
       if (side.adjacent1 != CompiledFace.Orient.Back)
         lines[side.ordinal()].buildText(builder, side, highlight == side);

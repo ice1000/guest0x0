@@ -37,8 +37,6 @@ In this tutorial, we will use $x, y, z$ for variables
 and other Latin letters like $u,v,a,b,c,A,B,C$ for terms
 (preferably uppercase for types and lowercase for terms).
 
-We will write $u, A::=$ for syntax definition of terms.
-
 Instead of the more traditional \fbox{$\lambda x.b$},
 the notation for $\lambda$-abstraction is \fbox{$\lam x b$} 
 following the style of the Arend language.
@@ -50,6 +48,13 @@ Other authors may use $u[x\mapsto v]$, $u[x:=v]$, $[v/x]u$, etc.
 
 Propositional equality and path equivalence are both denoted $u=v$,
 while definitional equality (a.k.a. judgmental equality) is denoted $u\equiv v$.
+\end{notation}
+\begin{notation}\label{not:syntax-def}
+We will write $u, A::=$ for syntax definition of terms,
+and define the syntax of \CTT{} by extending the syntax of Martin-L\"of type theory
+with a few term former at a time, instaed of putting everything together
+in a single, unified BNF grammar.
+The typing rules will be introduced similarly.
 \end{notation}
 \begin{exercise}\label{ex:concat-sym}
 Consider path concatenation and symmetry in \CTT{}:
@@ -162,7 +167,7 @@ we are describing the following 2-dimensional cube, which is a square:
 \node (center) at (0.5, 0.5) {$u:A$} ;}
 For simplicity we assume \fbox{$\vdash \isType{A}$}, say, $A$ does not depend on $x$ or $y$.
 
-Suppose we want to use the Kan operation to construct
+Suppose we want to use the Kan operation to create
 a square \fbox{$x:\II,y:\II\vdash u:A$}
 such that its top-left corner is a point $a:A$, and the line on its
 right-hand side is a line $y:\II \vdash v:A$:
@@ -175,9 +180,12 @@ right-hand side is a line $y:\II \vdash v:A$:
 % \node (center) at (0.5, 0.5) {$u:A$} ;
 }
 
-Translating that to type theory,
-the goal is to construct the term $u$ such that
-$u[\lcon/x, \rcon/y]\equiv a$ and $u[\rcon/x]\equiv v$.
+Translating that into type theory,
+the goal is to construct a term $u$ such that the following holds:
+\begin{align*}
+u[\lcon/x, \rcon/y]&\equiv a\\
+u[\rcon/x]&\equiv v
+\end{align*}
 The construction will be discussed in later sections,
 and for now we focus on how to describe these partial boundaries
 (also known as \textit{configurations} of a cube).
@@ -195,7 +203,7 @@ which is more (geometrically) intuitive but also longer.
 \end{terminology}
 The syntax of a cofibration is defined to be a disjunction normal form
 (a disjunction list of conjunctions) of
-face ``conditions'' like $x\equiv\lcon$ or $x\equiv\rcon$, as in~\cref{fig:cofib}.
+face ``conditions'' like \fbox{$x\equiv\lcon$} or \fbox{$x\equiv\rcon$}, as in~\cref{fig:cofib}.
 \begin{figure}[h!]
 \[\begin{array}{rll}
   \cond ::= & x\equiv\lcon \mid x\equiv\rcon & \text{condition} \\
@@ -206,26 +214,27 @@ face ``conditions'' like $x\equiv\lcon$ or $x\equiv\rcon$, as in~\cref{fig:cofib
 \label{fig:cofib}
 \end{figure}
 
-The meaning of cofibrations is simple. Suppose we are talking about a $3$-dimensional cube,
-so we are in a context with $3$ intervals, say, $\Phi=x:\II,y:\II,z:\II$.
+The meaning of cofibrations is simple. Suppose we are in a $3$-dimensional context,
+which means there are $3$ intervals in the context, i.e. \fbox{$\Phi=x:\II,y:\II,z:\II$}.
 Then:
 \begin{itemize}
-\item As mentioned before, the term \fbox{$\Phi\vdash u:A$} corresponds to a cube:
+\item As mentioned before, the term \fbox{$\Phi\vdash u:A$} corresponds to
+(the \textit{filling} of) a $3$-dimensional cube:
 \carloCTikZ{\carloXyz \refcube{Empty}}
-\item A $\cond$ specifies a $2$-cube (a square) face in $\Phi$. For example, $x\equiv\lcon$
+\item A $\cond$ specifies a $2$-dimensional cube (a square) face in $\Phi$, e.g. \fbox{$x\equiv\lcon$}
 corresponds to the following square:
 \carloCTikZ{\carloXyz \refcube{XEquivL}}
-\item A $\conj$ specifies any $n$-cube (for $n\leq 2$) in $\Phi$.
-For example, $x\equiv\lcon\land y\equiv\rcon$ specifies a line $v$,
-and $x\equiv\lcon\land y\equiv\rcon\land z\equiv\lcon$ specifies a point $\star$:
+\item A $\conj$ specifies any $n$-cube (for $n\leq 2$) in $\Phi$, e.g.
+\fbox{$x\equiv\lcon\land y\equiv\rcon$} specifies a line $v$,
+and \fbox{$x\equiv\lcon\land y\equiv\rcon\land z\equiv\lcon$} specifies a point $\star$:
 \carloCTikZ{\carloXyz \refcube{XYLR}}
-\item A $\disj$ talks about several $n$-cubes (for $n\leq 2$) in $\Phi$ at the same time.
-For example, $x\equiv\lcon\lor x\equiv\rcon$ corresponds to the following two squares:
+\item A $\disj$ talks about several $n$-cubes (for $n\leq 2$) in $\Phi$ at the same time, e.g.
+\fbox{$x\equiv\lcon\lor x\equiv\rcon$} corresponds to the following two squares:
 \carloCTikZ{\carloXyz \refcube{LRFaces}}
 \end{itemize}
 Using cofibrations, we define the syntax of partial elements
 by extending the syntax for terms in~\cref{fig:parEl}
-(recall~\cref{not:pre}):
+(recall~\cref{not:syntax-def}):
 \begin{figure}[h!]
 \[\begin{array}{rl}
 	\face::=&\conj\mapsto u \mid \conj\mapsto u,\face\\
@@ -259,5 +268,11 @@ their disjunction is the $\disj$ in the corresponding partial type.
 It remains to derive the typing rules for partial elements.
 
 \subsection{Type checking under cofibrations}\label{sub:tyck-cofib}
-Suppose $\Gvdash\isType{A}$, $\Gvdash u:A$, and $\conj$ is a valid cofibration.
+Consider $\Phi=x:\II, y:\II,z:\II$ and the following:
+\begin{mathpar}
+\inferrule{}{\Gvdash\isType{A}} \and
+\inferrule{}{x:\II;\Gvdash u:A}\and
+\inferrule{}{x:\II;\Gvdash v:A}
+\end{mathpar}
+
 
