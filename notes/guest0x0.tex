@@ -84,9 +84,9 @@ This tutorial is intended to help readers get more familiar with how
 what it can already do, and what it cannot do yet.
 
 \CTT{} is a type theory evolved from a model using Kan cubical sets~\cite{CubicalSets},
-which uses sophisticated mathematics, while computer scientists
+which uses sophisticated mathematics. Computer scientists, on the other hand,
 usually do not have relevant courses taught in their undergraduate program.
-But it is also the computer scientists who are suppose to implement \CTT{} as
+However, it is also the computer scientists who are suppose to implement \CTT{} as
 programming languages. This tutorial tries to help those who did not study homotopy
 theory, but wish to learn the internals of \CTT.
 
@@ -271,8 +271,9 @@ It remains to derive the typing rules for partial elements.
 Consider $\Phi=x:\II, y:\II,z:\II$ and the following:
 \begin{mathpar}
 \inferrule{}{\Gvdash\isType{A}} \and
-\inferrule{}{x:\II;\Gvdash u:A}\and
-\inferrule{}{x:\II;\Gvdash v:A}
+\inferrule{}{\Gvdash u:\II\to\II\to A}\and
+\inferrule{}{\Gvdash v:\II\to\II\to A}
 \end{mathpar}
-
+We want to construct the following partial element:
+\carloCTikZ{\carloXyz \refcube{BBFaces}}
 

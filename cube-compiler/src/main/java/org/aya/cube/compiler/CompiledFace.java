@@ -12,14 +12,14 @@ public record CompiledFace(int status, byte @NotNull [] latex) implements Serial
     // Early return
     switch (Status.values()[status]) {
       case Shaded -> draw = "\\fill[fill=black, fill opacity=0.3, draw=white, draw opacity=0, line width=2.5pt]";
-      case Lines -> draw = "\\fill [pattern color=gray,pattern=north west lines]";
+      case Lines -> draw = "\\fill[pattern color=gray,pattern=north west lines]";
       case Invisible -> {
         return;
       }
     }
 
     // Build the face
-    builder.appendln("\\begin{scope}[transparency group=knockout]", false);
+    // builder.appendln("\\begin{scope}[transparency group=knockout]", false);
     builder.appendln(draw, isHighlight);
     builder.appendln(orient.tikz + " -- cycle ;", isHighlight);
 
@@ -31,7 +31,7 @@ public record CompiledFace(int status, byte @NotNull [] latex) implements Serial
       builder.append(latex, isHighlight);
       builder.appendln("} ;", isHighlight);
     }
-    builder.appendln("\\end{scope}", false);
+    // builder.appendln("\\end{scope}", false);
     builder.appendln("% ^ " + orient.name(), isHighlight);
   }
 

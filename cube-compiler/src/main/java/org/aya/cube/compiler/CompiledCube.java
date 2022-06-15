@@ -33,7 +33,7 @@ public record CompiledCube(
         faces[orient.ordinal()].buildText(builder, orient, highlight == orient);
     }
     for (var side : CompiledLine.Side.values()) {
-      if (side.adjacent1 == CompiledFace.Orient.Back)
+      if (side.isLowerLayer())
         lines[side.ordinal()].buildText(builder, side, highlight == side);
     }
     builder.appendln("\\end{scope}", false);
@@ -43,7 +43,7 @@ public record CompiledCube(
         faces[orient.ordinal()].buildText(builder, orient, highlight == orient);
     }
     for (var side : CompiledLine.Side.values()) {
-      if (side.adjacent1 != CompiledFace.Orient.Back)
+      if (!side.isLowerLayer())
         lines[side.ordinal()].buildText(builder, side, highlight == side);
     }
     builder.appendln("\\end{scope}", false);
@@ -52,4 +52,5 @@ public record CompiledCube(
     builder.appendln(">", false);
     builder.appendln("}", false);
   }
+
 }
