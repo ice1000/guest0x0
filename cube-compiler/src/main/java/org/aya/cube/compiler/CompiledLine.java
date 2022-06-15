@@ -24,7 +24,7 @@ public record CompiledLine(
     var attrs = new ArrayList<String>();
     attrs.add(isEqual ? "equals arrow" : "->");
     if (isDashed) attrs.add("dashed");
-    builder.append("\\draw" + attrs + fromTo + Arrays.asList("midway", "sloped") + "node", isHighlight);
+    builder.append("\\draw" + attrs + fromTo + "node" + Arrays.asList("midway", "above", "sloped"), isHighlight);
     builder.append("{", isHighlight);
     if (code.length > 0) {
       builder.append(code, isHighlight);

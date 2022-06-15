@@ -27,21 +27,21 @@ public record CompiledCube(
       return null;
     });
     builder.appendln("\\end{pgfonlayer}", false);
+    builder.appendln("\\begin{scope}[transparency group=knockout]", false);
     for (var orient : CompiledFace.Orient.values()) {
       if (orient.contains(0b010))
         faces[orient.ordinal()].buildText(builder, orient, highlight == orient);
     }
-    for (var orient : CompiledFace.Orient.values()) {
-      if (!orient.contains(0b010))
-        faces[orient.ordinal()].buildText(builder, orient, highlight == orient);
-    }
-    builder.appendln("\\begin{scope}[transparency group=knockout]", false);
     for (var side : CompiledLine.Side.values()) {
       if (side.adjacent1 == CompiledFace.Orient.Back)
         lines[side.ordinal()].buildText(builder, side, highlight == side);
     }
     builder.appendln("\\end{scope}", false);
     builder.appendln("\\begin{scope}[transparency group=knockout]", false);
+    for (var orient : CompiledFace.Orient.values()) {
+      if (!orient.contains(0b010))
+        faces[orient.ordinal()].buildText(builder, orient, highlight == orient);
+    }
     for (var side : CompiledLine.Side.values()) {
       if (side.adjacent1 != CompiledFace.Orient.Back)
         lines[side.ordinal()].buildText(builder, side, highlight == side);
