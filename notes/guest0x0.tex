@@ -110,7 +110,7 @@ In \CTT, we have the interval type:
 The interval type and its products are used to represent dimensions
 (ignoring the De Morgan structures for now).
 \begin{example}\label{ex:interval-in-ctx}
-Suppose \fbox{$i:\II\vdash\isType{A}$} and \fbox{$i:\II\vdash u:A$}.
+Suppose \fbox{$x:\II\vdash\isType{A}$} and \fbox{$x:\II\vdash u:A$}.
 From a semantical or a topological perspective, we can say:
 \begin{itemize}
 \item $A$ is a (type) line between $A[\lcon/x]$ and $A[\rcon/x]$.
@@ -118,7 +118,12 @@ From a semantical or a topological perspective, we can say:
 \item The type of a line is a line, so the type of $u$ is $A$.
 \end{itemize}
 Then, because \emph{typing relations are preserved by substitution},
-we have $u[\rcon/x]:A[\rcon/x]$ and $u[\lcon/x]:A[\lcon/x]$.
+the following typing relations hold:
+\begin{mathpar}
+\inferrule{}{u[\rcon/x]:A[\rcon/x]}\and
+\inferrule{}{u[\lcon/x]:A[\lcon/x]}
+\end{mathpar}
+We may visualize the fact as:
 % https://q.uiver.app/?q=WzAsNixbMCwwLCJ1W1xcbGNvbi9pXSJdLFswLDEsInVbXFxyY29uL2ldIl0sWzIsMCwiQVtcXGxjb24vaV0iXSxbMiwxLCJBW1xcbGNvbi9pXSJdLFsxLDBdLFsxLDFdLFswLDEsInUiXSxbMiwzLCJBIl0sWzQsNSwiOiIsMSx7InN0eWxlIjp7ImJvZHkiOnsibmFtZSI6Im5vbmUifSwiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dXQ==
 \[\begin{tikzcd}
 	{u[\lcon/x]} & {} & {A[\lcon/x]} \\
@@ -140,6 +145,52 @@ This convention is borrowed from~\cite{ABCFHL}.
 Note that~\cref{not:ctx} does not imply that contexts has to be classified
 in the implementations. The \GuestName{} type checker mix intervals
 and other bindings in a unified context, just like usual dependent type checkers.
+\begin{remark}\label{rem:line-ori}
+Consider \fbox{$x:\II\vdash u:A$} and \fbox{$\vdash v:\II\to A$}.
+Usually both are referred to as a \textit{line}, but they are very different.
+Suppose we weaken the context with $y:\II$ to be a $2$-dimensional space,
+in which $u$ exists as a line:
+\carloCTikZ{\carloXy
+\node (0) at (0 , 0) {\textbullet} ;
+\node (1) at (1 , 0) {\textbullet} ;
+\draw[->] (0) -- (1) node [midway, above] {$u$};}
+Note that the orientation of $u$ is fixed to be horizontal.
+However, for $v$, we can apply either $x$ or $y$ to get a line oriented differently:
+\carloCTikZ{\carloXy
+\node (0) at (0 , 0) {\textbullet} ;
+\node (1) at (1 , 0) {\textbullet} ;
+\node (2) at (0 , 1) {\textbullet} ;
+\draw[->] (0) -- (1) node [midway, above] {$v~x$};
+\draw[->] (0) -- (2) node [midway, left] {$v~y$};}
+So, interval application may also be thought of as
+\textit{placing an $n$-dimensional cube at the given orientation}.
+\end{remark}
+\begin{remark}\label{rem:sq-ori}
+Unlike lines as discussed in~\cref{rem:line-ori}, squares are much more flexible.
+Consider \fbox{$\vdash u:\II\to\II\to A$} in a $2$-dimensional context,
+there are already two different ways to place it:
+\carloCTikZ{\carloXy
+\carloSqBullets
+\fill [pattern color=gray,pattern=horizontal lines] (0,0) rectangle (1,1) ;
+\node (c) at (0.5, 0.5) {$u~x~y$} ;
+\shiftTikZ{1.5,0}{
+\carloSqBullets
+\fill [pattern color=gray,pattern=vertical lines] (0,0) rectangle (1,1) ;
+\node[rotate=90,xscale=-1] (c) at (0.5, 0.5) {$u~y~x$} ;
+}}
+Note that these two placements are reflection by the diagonal.
+
+In case of contexts and cubes of higher dimensions,
+the situations are much more complicated.
+For example, with one more dimension $z:\II$,
+we may place $u$ in three orientations:
+\carloCTikZ{\carloXyz
+\refcube{TopUXY}
+\shiftTikZ{0,0.3}{\refcube{FrontUXY}}
+\shiftTikZ{1.3,0.2}{\refcube{LeftUXY}}
+}
+Note that all of them can also be reflected by the diagonal.
+\end{remark}
 
 \subsection{Partial elements}\label{sub:partial}
 In \CTT{}, the idea that \textit{open shapes can be filled}
@@ -160,9 +211,7 @@ In~\cite{CCHM}, partial elements are called \textit{systems}.
 When we write \fbox{$x:\II,y:\II\vdash u:A$},
 we are describing the following 2-dimensional cube, which is a square:
 \carloCTikZ{\carloXy
-\foreach \x in {0,1}
-\foreach \y in {0,1}
-  \node (\x\y) at (\x , \y) {\textbullet} ;
+\carloSqBullets
 \fill [pattern color=gray,pattern=north west lines] (0,0) rectangle (1,1) ;
 \node (center) at (0.5, 0.5) {$u:A$} ;}
 For simplicity we assume \fbox{$\vdash \isType{A}$}, say, $A$ does not depend on $x$ or $y$.
@@ -276,4 +325,10 @@ Consider $\Phi=x:\II, y:\II,z:\II$ and the following:
 \end{mathpar}
 We want to construct the following partial element:
 \carloCTikZ{\carloXyz \refcube{BBFaces}}
-
+Recall~\cref{fig:parEl}, the corresponding term is evident:
+\[\LRbbar{\begin{array}{rcl}
+z&\equiv\rcon&\mapsto u~x~y\\
+y&\equiv\lcon&\mapsto v~x~z
+\end{array}}\]
+However, since they share a line \fbox{$z\equiv\rcon\land y\equiv\lcon$},
+\TODO

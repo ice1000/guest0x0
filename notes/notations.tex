@@ -41,6 +41,9 @@
       \foreach \z in {0,1}
         \node (\x\y\z) at (\x , \y , \z) {\textbullet} ;
 \end{pgfonlayer}}
+\newcommand{\carloSqBullets}{\foreach \x in {0,1}
+\foreach \y in {0,1}
+  \node (\x\y) at (\x , \y) {\textbullet} ;}
 \newcommand{\carloTikZ}[1]{
   \begin{tikzpicture}[carlo-axes, scale = 1.6]
 		#1
@@ -60,3 +63,6 @@
 \newcommand{\carloCTikZ}[1]{\begin{center}
 \carloTikZ{#1}
 \end{center}}
+\newcommand{\shiftTikZ}[2]{\begin{scope}[shift={(#1)}]
+#2
+\end{scope}}
