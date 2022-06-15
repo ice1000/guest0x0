@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 @SuppressWarnings("AccessStaticViaInstance")
 public final class GuiMain implements AutoCloseable {
@@ -33,10 +34,12 @@ public final class GuiMain implements AutoCloseable {
   private @Nullable Object highlight;
   public static @NotNull Path CUBE_BIN = Paths.get("cubes.bin");
   private float thickness = 3F;
+  private final @NotNull NativeFloat vertexRadius = new NativeFloat();
 
   public GuiMain(JImGui window) {
     this.window = window;
     cubeLen.modifyValue(100);
+    vertexRadius.modifyValue(4F);
   }
 
   @Override public void close() {
@@ -45,6 +48,7 @@ public final class GuiMain implements AutoCloseable {
     cube.close();
     customPreamble.close();
     cubeSelection.close();
+    vertexRadius.close();
   }
 
   public static void main(String... args) {
@@ -93,6 +97,15 @@ public final class GuiMain implements AutoCloseable {
       e.printStackTrace();
     }
     if (window.button("Append")) database.add(cube.serialize());
+    var anyMatch = database.stream()
+      .filter(c -> Arrays.equals(c.name(), cube.name().toBytes()))
+      .findFirst();
+    if (anyMatch.isPresent()) {
+      window.sameLine();
+      if (window.button("Update")) {
+        database.set(database.indexOf(anyMatch.get()), cube.serialize());
+      }
+    }
     window.pushID(ImData.ID.CubeRadio.id);
     var toRemove = -1;
     var toMoveUp = -1;
@@ -155,6 +168,7 @@ public final class GuiMain implements AutoCloseable {
   private void mainControlWindow() {
     window.text("FPS: " + window.getIO().getFramerate());
     window.sliderFloat("Width", cubeLen, 5, 200);
+    window.sliderFloat("Vertex Radius", vertexRadius, 1F, 10F);
     window.inputText("Name", cube.name(), JImInputTextFlags.AutoSelectAll);
     var hasHover = cubeFaces(cube);
     window.separator();
@@ -186,6 +200,9 @@ public final class GuiMain implements AutoCloseable {
 
   private boolean cubeEdges(CubeData cube) {
     window.text("Lines");
+    if (window.button("Hide All")) hideLines(true);
+    window.sameLine();
+    if (window.button("Unhide All")) hideLines(false);
     if (!window.beginTabBar("Edges")) return false;
     var hasHover = false;
     for (var side : CompiledLine.Side.values()) {
@@ -213,6 +230,10 @@ public final class GuiMain implements AutoCloseable {
     }
     window.endTabBar();
     return hasHover;
+  }
+
+  private void hideLines(boolean newValue) {
+    for (var line : cube.lines()) line.isHidden().modifyValue(newValue);
   }
 
   private boolean cubeFaces(CubeData cube) {
@@ -279,11 +300,12 @@ public final class GuiMain implements AutoCloseable {
 
     var ui = window.getWindowDrawList();
     Util.forEach3D((i, x, y, z) -> {
+      if (cube.vertices()[i].latex().isEmpty()) return null;
       var centreX = baseX + projectedLen + x * userLen - z * projectedLen;
       var centreY = baseY + y * userLen + z * projectedLen;
       if (highlight == Integer.valueOf(i)) {
-        ui.addCircleFilled(centreX, centreY, 4F, 0xFF0000FF);
-      } else ui.addCircle(centreX, centreY, 4F, 0xFF0000FF);
+        ui.addCircleFilled(centreX, centreY, vertexRadius.accessValue(), 0xFF0000FF);
+      } else ui.addCircle(centreX, centreY, vertexRadius.accessValue(), 0xFF0000FF);
       return null;
     });
   }
