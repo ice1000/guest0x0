@@ -4,7 +4,6 @@ import org.aya.cube.compiler.CompiledFace.Orient;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -14,9 +13,6 @@ public record CompiledLine(
   boolean isDashed,
   boolean isEqual
 ) implements Serializable {
-  public CompiledLine {
-    if (code == null) code = "".getBytes(StandardCharsets.US_ASCII);
-  }
 
   public void buildText(@NotNull TextBuilder builder, Side side, boolean isHighlight) {
     if (isHidden) return;

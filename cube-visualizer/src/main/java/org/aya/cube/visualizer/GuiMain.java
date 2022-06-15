@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -55,6 +56,10 @@ public final class GuiMain implements AutoCloseable {
   }
 
   public void mainLoop() {
+    if (Files.exists(CUBE_BIN)) try {
+      loadCubesBin();
+    } catch (IOException | ClassNotFoundException ignored) {
+    }
     while (!window.windowShouldClose()) {
       window.initNewFrame();
       if (window.begin("Rumor")) {
@@ -83,10 +88,7 @@ public final class GuiMain implements AutoCloseable {
     }
     window.sameLine();
     if (window.button("Load cubes.bin")) try {
-      var cubeDatabase = Util.tryLoad(CUBE_BIN);
-      customPreamble.clear();
-      for (var b : cubeDatabase.customPreamble()) customPreamble.append(b);
-      database = cubeDatabase.cubes();
+      loadCubesBin();
     } catch (IOException | ClassNotFoundException e) {
       e.printStackTrace();
     }
@@ -127,6 +129,13 @@ public final class GuiMain implements AutoCloseable {
       database.set(toMoveDown + 1, a);
     }
     window.popID();
+  }
+
+  private void loadCubesBin() throws IOException, ClassNotFoundException {
+    var cubeDatabase = Util.tryLoad(CUBE_BIN);
+    customPreamble.clear();
+    for (var b : cubeDatabase.customPreamble()) customPreamble.append(b);
+    database = cubeDatabase.cubes();
   }
 
   private void tikzWindow() {
