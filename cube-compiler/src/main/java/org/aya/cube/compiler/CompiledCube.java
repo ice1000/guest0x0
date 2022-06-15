@@ -16,7 +16,7 @@ public record CompiledCube(
     builder.append(name, false);
     builder.appendln(">", false);
 
-    builder.appendln("\\begin{pgfonlayer}{frontmost}", false);
+    builder.appendln("\\begin{pgfonlayer}{frontmost}\\begin{scope}[every node/.style = {inner sep = 0pt}]", false);
     Util.forEach3D((i, x, y, z) -> {
       var isHighlight = highlight == Integer.valueOf(i);
       builder.append("\\node (" + Util.binPad3(i) +
@@ -26,7 +26,7 @@ public record CompiledCube(
       builder.appendln("\\)};", isHighlight);
       return null;
     });
-    builder.appendln("\\end{pgfonlayer}", false);
+    builder.appendln("\\end{scope}\\end{pgfonlayer}", false);
     builder.appendln("\\begin{scope}[transparency group=knockout]", false);
     for (var orient : CompiledFace.Orient.values()) {
       if (orient.contains(0b010))

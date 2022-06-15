@@ -20,7 +20,7 @@ public record CompiledLine(
   public void buildText(@NotNull TextBuilder builder, Side side, boolean isHighlight) {
     if (isHidden) return;
     var fromTo = "(" + side.from + ")--(" + side.to + ")";
-    builder.appendln("\\draw[line width=1.5pt,draw=white,draw opacity=0.7]" + fromTo + ";", isHighlight);
+    builder.appendln("\\draw[line width=2pt,draw=white,draw opacity=0.7]" + fromTo + ";", isHighlight);
     var attrs = new ArrayList<String>();
     attrs.add(isEqual ? "equals arrow" : "->");
     if (isDashed) attrs.add("dashed");
