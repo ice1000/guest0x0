@@ -19,27 +19,20 @@ and combine them into an algorithm.
 (hereafter as \CTT{}), including the interval type $\II$, the path type,
 and the idea of representing $n$-dimensional cubes using terms with interval variables in it.
 \end{itemize}
-This tutorial will not treat substitution formally.
-Variable names are assumed to respect capture-avoiding substitution,
-and can be implemented using any nameless representations.
-
-Some quick warm-ups:
-\begin{exercise}
-Translate the following typing rules into an algorithmic description:
-\begin{mathpar}
-\inferrule{\Gamma,x:A\vdash b:B[x/y]}{\Gvdash \fbox{$\lam x b$} : (y:A)\to B} \and
-\inferrule{\Gvdash u : (x:A)\to B \\ \Gvdash v:A}{\Gvdash u~v:B[v/x]}
-\end{mathpar}
-Which of them is an introduction rule, and which is an elimination rule?
-\end{exercise}
+This tutorial will not treat substitution formally --
+variable names are assumed to respect capture-avoiding substitution.
+In the implementations, any binding representation that works for untyped
+$\lambda$-calculus should work for the type theory introduced in this tutorial too.
 \begin{notation}\label{not:pre}
-In this tutorial, we will use $x, y, z$ for variables
+We will prefer using $x, y, z$ for variables
 and other Latin letters like $u,v,a,b,c,A,B,C$ for terms
 (preferably uppercase for types and lowercase for terms).
 
 Instead of the more traditional \fbox{$\lambda x.b$},
 the notation for $\lambda$-abstraction is \fbox{$\lam x b$} 
 following the style of the Arend language.
+We will also use the conventional shorthand
+\fbox{$(x:A)~(y:B)\to C$} for nested $\Pi$-types.
 
 Substitution is denoted by $u[v/x]$.
 One may think of this notation as ``fractional multiplication'' $u\times \frac v x$,
@@ -56,6 +49,15 @@ with a few term former at a time, instaed of putting everything together
 in a single, unified BNF grammar.
 The typing rules will be introduced similarly.
 \end{notation}
+Some quick warm-ups:
+\begin{exercise}
+Translate the following typing rules into an algorithmic description:
+\begin{mathpar}
+\inferrule{\Gamma,x:A\vdash b:B[x/y]}{\Gvdash \fbox{$\lam x b$} : (y:A)\to B} \and
+\inferrule{\Gvdash u : (x:A)\to B \\ \Gvdash v:A}{\Gvdash u~v:B[v/x]}
+\end{mathpar}
+Which of them is an introduction rule, and which is an elimination rule?
+\end{exercise}
 \begin{exercise}\label{ex:concat-sym}
 Consider path concatenation and symmetry in \CTT{}:
 \begin{align*}
@@ -257,7 +259,7 @@ face ``conditions'' like \fbox{$x\equiv\lcon$} or \fbox{$x\equiv\rcon$}, as in~\
 \[\begin{array}{rll}
   \cond ::= & x\equiv\lcon \mid x\equiv\rcon & \text{condition} \\
   \conj ::= & \cond \mid \cond \land \conj & \text{conjunction} \\
-  \disj ::= & \conj \mid \conj \lor \disj & \text{disjunction}
+  \disj ::= & \bot \mid \top \mid \conj \mid \conj \lor \disj & \text{disjunction}
 \end{array}\]
 \caption{Syntax of cofibrations}
 \label{fig:cofib}
@@ -280,6 +282,10 @@ and \fbox{$x\equiv\lcon\land y\equiv\rcon\land z\equiv\lcon$} specifies a point 
 \item A $\disj$ talks about several $n$-cubes (for $n\leq 2$) in $\Phi$ at the same time, e.g.
 \fbox{$x\equiv\lcon\lor x\equiv\rcon$} corresponds to the following two squares:
 \carloCTikZ{\carloXyz \refcube{LRFaces}}
+\item A $\bot$ cofibration is called the \textit{absurd} cofibration,
+which specifies nothing.
+\item A $\top$ cofibration is called the \textit{truth} cofibration,
+which specifies everything.
 \end{itemize}
 Using cofibrations, we define the syntax of partial elements
 by extending the syntax for terms in~\cref{fig:parEl}
@@ -316,7 +322,26 @@ their disjunction is the $\disj$ in the corresponding partial type.
 \end{itemize}
 It remains to derive the typing rules for partial elements.
 
+\subsection{Reduction of partial elements}\label{sub:red-cofib}
+Consider a well-defined (we will define well-typedness of
+partial elements later in~\cref{sub:tyck-cofib}) simple partial element:
+\[\LRbbar{\begin{array}{rll}
+x\equiv\lcon\mapsto u\\
+\conj\mapsto v\\
+\end{array}}:\Partial{x\equiv\lcon\lor \conj}A\]
+We may substitute $x$ with many possible terms of type $\II$:
+\begin{itemize}
+\item $\lcon$, i.e. take the face that $x\equiv\lcon$,
+then evidently we get the face $u$, so the term should reduce to $u$.
+\item $\rcon$, i.e. take the face that $x\equiv\rcon$,
+which is unspecified by the first clause, so we remove it and
+the term becomes $\lrbbar{\conj\mapsto u}[\rcon/x]:\Partial{\conj}A$.
+\end{itemize}
+\TODO
+
 \subsection{Type checking under cofibrations}\label{sub:tyck-cofib}
+We start from an example of type checking a partial element.
+\begin{example}\label{ex:parTyck}
 Consider $\Phi=x:\II, y:\II,z:\II$ and the following:
 \begin{mathpar}
 \inferrule{}{\Gvdash\isType{A}} \and
@@ -325,10 +350,33 @@ Consider $\Phi=x:\II, y:\II,z:\II$ and the following:
 \end{mathpar}
 We want to construct the following partial element:
 \carloCTikZ{\carloXyz \refcube{BBFaces}}
-Recall~\cref{fig:parEl}, the corresponding term is evident:
-\[\LRbbar{\begin{array}{rcl}
+Recall~\cref{fig:parEl}, we may directly translate that into:
+\[\LRbbar{\begin{array}{rll}
 z&\equiv\rcon&\mapsto u~x~y\\
 y&\equiv\lcon&\mapsto v~x~z
 \end{array}}\]
-However, since they share a line \fbox{$z\equiv\rcon\land y\equiv\lcon$},
+Note that they share the same line \fbox{$z\equiv\rcon\land y\equiv\lcon$}.
+The shared line can be represented as $u~x~\lcon$ or $v~x~\rcon$,
+but these two lines are actually the same line,
+so they have to be definitionally the same, i.e. $u~x~\lcon\equiv v~x~\rcon$.
+In this case, we say that the given two faces \textit{agree}.
+For a well-defined partial element, every pair of faces should agree.
+The typing rule ends up like this:
+\begin{mathpar}
+\inferrule{\Gvdash\isType{A}\\
+\PGvdash u~x~y:A\\
+\PGvdash v~x~z:A\\
+\PGvdash u~x~\lcon\equiv v~x~\rcon}{\Phi\vdash\LRbbar{\begin{array}{rll}
+z&\equiv\rcon&\mapsto u~x~y\\
+y&\equiv\lcon&\mapsto v~x~z
+\end{array}}:\Partial{(z\equiv\rcon\lor y\equiv\lcon)}A}
+\end{mathpar}
+This seems good enough.
+\end{example}
+
+We generalize~\cref{ex:parTyck} to an arbitrary partial element
+$\lrbbar{\conj_0\mapsto u_0, \conj_1\mapsto u_1, \cdots, \conj_n\mapsto u_n}$ for $n\in\mathbb{N}$.
+We need to find an algorithm that makes sure they agree.
+For two faces $\conj_i\mapsto u_i$ and $\conj_j\mapsto u_j$, from~\cref{ex:parTyck} we can tell that
+they overlap at $\conj_i\land\conj_j$. In case they do not overlap
 \TODO
