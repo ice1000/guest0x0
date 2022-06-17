@@ -421,8 +421,8 @@ from~\cref{ex:parTyck} we know that they overlap at $\conj_i\land\conj_j$
 The rule becomes something like:
 \begin{mathpar}
 \inferrule{\Gvdash\isType{A}\\
-\forall i\in I.\PGvdash u_i:A\\\\
-\forall i,j\in I.\PGvdash[\text{overlap-check}]}
+\forall i\in I.(\PGvdash u_i:A)\\\\
+\forall i,j\in I.(\PGvdash[\text{overlap-check}])}
 {\PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
 :\Partial{\left(\bigvee_{i\in I} \conj_i\right)}A}
 \end{mathpar}
@@ -469,8 +469,8 @@ refer to variables in $\Phi$), as in~\cref{fig:tyck-par}.
 \begin{figure}[h!]
 \begin{mathpar}
 \inferrule{\PGvdash\isType{A}\\
-\forall i\in I.\Phi;\Gamma,\conj_i\vdash u_i:A\\\\
-\forall i,j\in I.\Phi;\Gamma,\conj_i,\conj_j\vdash u_i\equiv u_j:A}
+\forall i\in I.(\Phi;\Gamma,\conj_i\vdash u_i:A)\\\\
+\forall i,j\in I.(\Phi;\Gamma,\conj_i,\conj_j\vdash u_i\equiv u_j:A)}
 {\PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
 :\Partial{\left(\bigvee_{i\in I} \conj_i\right)}A}
 \end{mathpar}
@@ -481,9 +481,37 @@ refer to variables in $\Phi$), as in~\cref{fig:tyck-par}.
 In~\cite{CCHM}, the path type is defined using the following rules
 (slightly paraphrased for notational consistency):
 \begin{mathpar}
-\inferrule{\PGvdash\isType A\\ \PGvdash u:A\\ \PGvdash v:A}
-{\PGvdash\isTypeBox{\Path A u v}}\and
-\inferrule{\Hint{\PGvdash\isTypeBox{\Path A u v}} \\ \Phi,x:\II;\Gvdash u:A}
-{\PGvdash \plam x u : \Path A{(u[\lcon/x])}{(u[\rcon/x])}}
+\inferrule{\Phi,x:\II;\isType A\\ \PGvdash a:A[\lcon/x]\\ \PGvdash b:A[\rcon/x]}
+{\PGvdash\isTypeBox{\PathTy{(\lam x A)} a b}}\and
+\inferrule{\Phi,x:\II;\Gvdash u:A}
+{\PGvdash \plam x u : \PathTy A{(u[\lcon/x])}{(u[\rcon/x])}}\and
+\inferrule{\Hint{\Phi,x:\II;\isType A}\\\Phi,x:\II;\Gvdash u:A\\\PGvdash v:\II}{
+\PGvdash (\plam x u)~@~v \equiv u[v/x]:A[v/x]}\and
+\inferrule{\Hint{\Phi,x:\II;\isType A}\\\PGvdash u:\PathTy A a b}{
+\PGvdash u~@~\lcon \equiv a:A[\lcon/x] \\ \text{and} \\ \PGvdash u~@~\rcon \equiv b:A[\rcon/x]}
 \end{mathpar}
+We may rephrase these rules using the idea of cofibrations and partial elements:
+\begin{itemize}
+\item The path type \fbox{$\PathTy A a b$}
+is a $\Pi$-type \fbox{$(x:\II)\to A$} carrying a partial element, denoted as:
+\[\ExtTy{x}{A}{rll}
+{x&\equiv\lcon&\mapsto a\\
+x&\equiv\rcon&\mapsto b}\]
+\item The introduction rule takes a type
+\fbox{$\extTy{x}{A}{\overline{\conj_i\mapsto v_i}}$} and check the following:
+\begin{itemize}
+\item \fbox{$\Phi,x:\II;\Gvdash u:A$}, just like checking \fbox{$\lam x u:(x:\II)\to A$}.
+\item \fbox{$\forall i. (\Phi,x:\II;\Gamma,\conj_i\vdash u\equiv v_i:A)$},
+like saying ``$u$ \textit{matches} every given face''.
+\end{itemize}
+\item The elimination rule is the same as $\Pi$-types.
+\item The computation rules combine the computation rule of $\Pi$-types
+and the reduction of partial elements (defined in~\cref{sub:red-cofib}).
+\end{itemize}
+In particular, we can relax the formation rule to allow multiple intervals
+and an arbitrary partial element, and the rest of the rules will still work.
+This gives us a better definition of the path type,
+which is more convenient to work with.
+\begin{example}
 \TODO
+\end{example}
