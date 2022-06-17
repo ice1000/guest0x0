@@ -63,6 +63,7 @@
 \newcommand{\Gvdash}{\Gamma \vdash}
 \newcommand{\SGvdash}{\Sigma;\Gamma \vdash}
 \newcommand{\isType}[1]{#1~\text{type}}
+\newcommand{\isTypeBox}[1]{\fbox{\(#1\)}~\text{type}}
 
 % tokens
 \newcommand{\fs}[1]{\mathrm{#1}}
@@ -83,7 +84,7 @@
 \newcommand{\lam}[2]{\lambda #1\Rightarrow#2}
 \newcommand{\fstProj}{\fs{fst}}
 \newcommand{\sndProj}{\fs{snd}}
-\newcommand{\plam}[2]{\braket{#1}~#2}
+\newcommand{\plam}[2]{\braket{#1}{#2}}
 
 \newcommand{\lrbracket}[1]{\llbracket #1 \rrbracket}
 \newcommand{\brakett}[1]{\llangle#1\rrangle}

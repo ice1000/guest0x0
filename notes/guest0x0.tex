@@ -325,7 +325,7 @@ their disjunction is the $\disj$ in the corresponding partial type.
 \end{itemize}
 It remains to derive the evaluation and typing rules for partial elements.
 
-\subsection{Reducing partial elements by substitution on cofibrations}\label{sub:red-cofib}
+\subsection{Reducing partial elements by cofibrations}\label{sub:red-cofib}
 We reduce well-typed (we will define well-typedness of
 partial elements later in~\cref{sub:tyck-cofib}) partial elements by
 iterating their face clauses. Consider the following face clause
@@ -338,7 +338,7 @@ and the face becomes $y\equiv\lcon\mapsto u$.
 \item $\lcon$, i.e. take the face that $x\equiv\lcon$ in this partial element.
 Then, evidently, we get the face $u$, so the partial element should reduce to $u$.
 Other faces can be safely dropped.
-In this case, we say that the face is \textit{satisifed}.
+In this case, we say that the face is \textit{satisfied}.
 \item $\rcon$, i.e. take the face that $x\equiv\rcon$,
 which is unspecified by this face, so we drop this particular face and
 proceed with the rest of the faces.
@@ -347,6 +347,21 @@ In this case, we say that the face is \textit{contradicted}.
 With the presence of conjunctions, we iterate through each $\cond$,
 drop the conditions that are satisfied, and drop the faces
 if one of their conditions is contradicted.
+
+There are two more special cases in a conjunction $\conj$:
+\begin{itemize}
+\item It can be self-contradictory.
+This happens when for a variable $x$, we have both $x\equiv\lcon\in\conj$
+and $x\equiv\rcon\in\conj$. In this case, we also remove the face.
+\item It can contain duplicated information.
+For example, we may write $x\equiv\lcon\land x\equiv\lcon$.
+It is encouraged to deduplicate these conditions for spatial efficiency.
+In this tutorial, we assume deduplication of cofibrations everywhere.
+\end{itemize}
+By that we may claim the following:
+\begin{prop}\label{prop:unique}
+In a $\conj$ cofibration, every variable appears uniquely in a $\cond$.
+\end{prop}
 
 Substitution may also change partial types \fbox{$\Partial\disj A$}.
 The rules are essentially the same as partial elements,
@@ -369,9 +384,19 @@ Recall~\cref{fig:parEl}, we may directly translate that into:
 z&\equiv\rcon&\mapsto u~x~y\\
 y&\equiv\lcon&\mapsto v~x~z
 \end{array}}\]
-Note that they share the same line \fbox{$z\equiv\rcon\land y\equiv\lcon$}.
-The shared line can be represented as $u~x~\lcon$ or $v~x~\rcon$,
-but these two lines are actually the same line,
+Note that they share the same line \fbox{$z\equiv\rcon\land y\equiv\lcon$}
+(obtained by taking the conjunction of both cofibrations).
+This line is represented as a cofibration, and we can also use it as
+a \textit{substitution}, i.e. $[\rcon/z,\lcon/y]$.
+Substituting with this line corresponds to the operation of
+taking this line from a cube (that has this line).
+Since both faces have this line, we may represent the shared line
+by substituting either of them:
+\begin{align*}
+(u~x~y)[\rcon/z,\lcon/y]&\implies u~x~\lcon\\
+(v~x~z)[\rcon/z,\lcon/y]&\implies v~x~\rcon
+\end{align*}
+However, these two lines are actually the same line,
 so they have to be definitionally the same, i.e. $u~x~\lcon\equiv v~x~\rcon$.
 In this case, we say that the given two faces \textit{agree}.
 For a well-defined partial element, every pair of faces should agree.
@@ -380,17 +405,85 @@ The typing rule ends up like this:
 \inferrule{\Gvdash\isType{A}\\
 \PGvdash u~x~y:A\\
 \PGvdash v~x~z:A\\\\
-\PGvdash u~x~\lcon\equiv v~x~\rcon}{\Phi\vdash\LRbbar{\begin{array}{rll}
+\PGvdash u~x~\lcon\equiv v~x~\rcon:A}{\PGvdash\LRbbar{\begin{array}{rll}
 z&\equiv\rcon&\mapsto u~x~y\\
 y&\equiv\lcon&\mapsto v~x~z
 \end{array}}:\Partial{(z\equiv\rcon\lor y\equiv\lcon)}A}
 \end{mathpar}
-This seems good enough.
 \end{example}
 
-We generalize~\cref{ex:parTyck} to an arbitrary partial element
-$\lrbbar{\overline{\conj_i\mapsto u_i}$ for $i\in I$.
+We generalize~\cref{ex:parTyck} to an arbitrary partial element (let $i\in I$ for some index set $I$):
+\[\lrbbar{\overline{\conj_i\mapsto u_i}}\]
 We need to find an algorithm that makes sure every pair of faces agree.
-For two faces $\conj_i\mapsto u_i$ and $\conj_j\mapsto u_j$, from~\cref{ex:parTyck} we can tell that
-they overlap at $\conj_i\land\conj_j$. In case they do not overlap
+For two faces $\conj_i\mapsto u_i$ and $\conj_j\mapsto u_j$,
+from~\cref{ex:parTyck} we know that they overlap at $\conj_i\land\conj_j$
+(in case they do not overlap, this cofibration is self-contradictory).
+The rule becomes something like:
+\begin{mathpar}
+\inferrule{\Gvdash\isType{A}\\
+\forall i\in I.\PGvdash u_i:A\\\\
+\forall i,j\in I.\PGvdash[\text{overlap-check}]}
+{\PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
+:\Partial{\left(\bigvee_{i\in I} \conj_i\right)}A}
+\end{mathpar}
+In~\cref{ex:parTyck}, the overlap-check step is a conversion check
+between a \textit{substituted version} of the two faces $u_i$ and $u_j$.
+For convenience, we introduce the typing judgment as in~\cref{fig:conv-cofib}.
+\begin{figure}[h!]
+\[\Phi;\Gamma,\conj\vdash u\equiv v:A\]
+\caption{Conversion check under a conjunction cofibration}\label{fig:conv-cofib}
+\end{figure}
+
+To implement this judgment, we convert $\conj$ into a substitution
+(this is possible due to~\cref{prop:unique}),
+apply to the three terms on the right-hand side of $\vdash$,
+and then apply the normal conversion check under $\Phi;\Gamma$.
+The idea in~\cref{fig:conv-cofib} can be extended in the following ways:
+\begin{itemize}
+\item To type check under several conjunctions,
+we combine them together using conjunctions.
+\item To do a normal type-check under conjunctions,
+e.g. \fbox{$\Phi;\Gamma,\conj\vdash u:A$}, we apply the substitution to $A$
+and run the normal type-check.
+\item To check anything that results in a \textit{yes} or \textit{no},
+we may check them under a disjunction cofibration $\disj$
+by iterating the conjunctions in $\disj$ and run the check under that conjunction.
+We return \textit{yes} only when all these checks return \textit{yes},
+and return \textit{no} otherwise.
+We may further extend the judgment to allow multiple disjunctions too.
+\end{itemize}
+These ideas give rise to the judgments in~\cref{fig:tyck-cofib}.
+\begin{figure}[h!]
+\begin{align*}
+\Phi;\Gamma,\overline{\conj_i}&\vdash u\equiv v:A\\
+\Phi;\Gamma,\overline{\disj_i}&\vdash u\equiv v:A\\
+\Phi;\Gamma,\overline{\conj_i}&\vdash u:A\\
+\Phi;\Gamma,\overline{\conj_i}&\vdash \isType{A}
+\end{align*}
+\caption{Judgments under cofibrations}\label{fig:tyck-cofib}
+\end{figure}
+
+With all these preparations we can get the typing rule
+for partial elements (note that we also add support for $A$ to
+refer to variables in $\Phi$), as in~\cref{fig:tyck-par}.
+\begin{figure}[h!]
+\begin{mathpar}
+\inferrule{\PGvdash\isType{A}\\
+\forall i\in I.\Phi;\Gamma,\conj_i\vdash u_i:A\\\\
+\forall i,j\in I.\Phi;\Gamma,\conj_i,\conj_j\vdash u_i\equiv u_j:A}
+{\PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
+:\Partial{\left(\bigvee_{i\in I} \conj_i\right)}A}
+\end{mathpar}
+\caption{Typing rule of partial elements}\label{fig:tyck-par}
+\end{figure}
+
+\subsection{Generalized path type}\label{sub:extTy}
+In~\cite{CCHM}, the path type is defined using the following rules
+(slightly paraphrased for notational consistency):
+\begin{mathpar}
+\inferrule{\PGvdash\isType A\\ \PGvdash u:A\\ \PGvdash v:A}
+{\PGvdash\isTypeBox{\Path A u v}}\and
+\inferrule{\Hint{\PGvdash\isTypeBox{\Path A u v}} \\ \Phi,x:\II;\Gvdash u:A}
+{\PGvdash \plam x u : \Path A{(u[\lcon/x])}{(u[\rcon/x])}}
+\end{mathpar}
 \TODO
