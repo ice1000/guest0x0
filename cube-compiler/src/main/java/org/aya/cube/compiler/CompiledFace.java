@@ -11,8 +11,8 @@ public record CompiledFace(int status, byte @NotNull [] latex) implements Serial
     String draw = "";
     // Early return
     switch (Status.values()[status]) {
-      case Shaded -> draw = "\\fill[fill=black, fill opacity=0.3, draw=white, draw opacity=0, line width=2.5pt]";
-      case Lines -> draw = "\\fill[pattern color=gray,pattern=north west lines]";
+      case Shaded -> draw = "\\fill[fill=black, fill opacity=0.2, draw=white, draw opacity=0, line width=2.5pt]";
+      case Lines -> draw = "\\fill[pattern color=lightgray,pattern=north west lines]";
       case Invisible -> {
         return;
       }
