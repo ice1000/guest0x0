@@ -176,11 +176,11 @@ Consider \fbox{$\vdash u:\II\to\II\to A$} in a $2$-dimensional context,
 there are already two different ways to place it:
 \carloCTikZ{\carloXy
 \carloSqBullets
-\fill [pattern color=gray,pattern=horizontal lines] (0,0) rectangle (1,1) ;
+\fill [pattern color=lightgray,pattern=horizontal lines] (0,0) rectangle (1,1) ;
 \node (c) at (0.5, 0.5) {$u~x~y$} ;
 \shiftTikZ{1.5,0}{
 \carloSqBullets
-\fill [pattern color=gray,pattern=vertical lines] (0,0) rectangle (1,1) ;
+\fill [pattern color=lightgray,pattern=vertical lines] (0,0) rectangle (1,1) ;
 \node[rotate=90,xscale=-1] (c) at (0.5, 0.5) {$u~y~x$} ;
 }}
 Note that these two placements are symmetric with respect to the diagonal.
@@ -217,7 +217,7 @@ When we write \fbox{$x:\II,y:\II\vdash u:A$},
 we are describing the following 2-dimensional cube, which is a square:
 \carloCTikZ{\carloXy
 \carloSqBullets
-\fill [pattern color=gray,pattern=north west lines] (0,0) rectangle (1,1) ;
+\fill [pattern color=lightgray,pattern=north west lines] (0,0) rectangle (1,1) ;
 \node (center) at (0.5, 0.5) {$u:A$} ;}
 For simplicity we assume \fbox{$\vdash \isType{A}$}, say, $A$ does not depend on $x$ or $y$.
 
@@ -230,7 +230,7 @@ right-hand side is a line $y:\II \vdash v:A$:
 \node (00) at (0, 0) {$a$};
 \node (01) at (0, 1) {\textbullet};
 \draw (10) -- node [right] {$v$} (11); %
-% \fill [pattern color=gray,pattern=north west lines] (0,0) rectangle (1,1) ;
+% \fill [pattern color=lightgray,pattern=north west lines] (0,0) rectangle (1,1) ;
 % \node (center) at (0.5, 0.5) {$u:A$} ;
 }
 
@@ -590,9 +590,13 @@ or programming languages that does not support implicit arguments.
 
 \begin{example}\label{ex:gsquare}
 Consider \fbox{$p_i:\PathTy{\lam\_ A} \bullet \bullet$}
-for $i\in\set{1,2,3,4}$ and the following square \fbox{$x:\II,y:\II\vdash u$}:
+for $i\in\set{0,1,2,3}$ and the following square \fbox{$x:\II,y:\II\vdash u$}:
 \carloCTikZ{\carloXy
 \carloSqBullets
-\fill [pattern color=gray,pattern=north west lines] (0,0) rectangle (1,1) ;
+\fill [pattern color=lightgray,pattern=north west lines] (0,0) rectangle (1,1) ;
+\draw[->] (00) -- (01) node [midway,left] {$p_2$} ;
+\draw[->] (10) -- (11) node [midway,right] {$p_3$} ;
+\draw[->] (00) -- (10) node [midway,above] {$p_0$} ;
+\draw[->] (01) -- (11) node [midway,below] {$p_1$} ;
 \node (center) at (0.5, 0.5) {$u$} ;}
 \end{example}

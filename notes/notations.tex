@@ -40,15 +40,19 @@
   } ,
 }
 
-\newcommand{\carloCubeBullets}{\begin{pgfonlayer}{frontmost}
-  \foreach \x in {0,1}
-    \foreach \y in {0,1}
-      \foreach \z in {0,1}
-        \node (\x\y\z) at (\x , \y , \z) {\textbullet} ;
-\end{pgfonlayer}}
-\newcommand{\carloSqBullets}{\foreach \x in {0,1}
-\foreach \y in {0,1}
-  \node (\x\y) at (\x , \y) {\textbullet} ;}
+\newcommand{\carloCubeBullets}{
+\begin{pgfonlayer}{frontmost}\begin{scope}[every node/.style = {inner sep = 0pt}]
+\foreach \x in {0,1}
+ \foreach \y in {0,1}
+  \foreach \z in {0,1}
+   \node (\x\y\z) at (\x , \y , \z) {\textbullet} ;
+\end{scope}\end{pgfonlayer}}
+\newcommand{\carloSqBullets}{
+\begin{pgfonlayer}{frontmost}\begin{scope}[every node/.style = {inner sep = 0pt}]
+\foreach \x in {0,1}
+ \foreach \y in {0,1}
+  \node (\x\y) at (\x , \y) {\textbullet} ;
+\end{scope}\end{pgfonlayer}}
 \newcommand{\carloTikZ}[1]{
   \begin{tikzpicture}[carlo-axes, scale = 1.6]
 		#1
