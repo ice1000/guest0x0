@@ -527,24 +527,45 @@ and an arbitrary partial element (but the cofibrations may only use the
 provided intervals), and the rest of the rules will still work.
 This gives us a better definition of the path type,
 which is more convenient to work with.
-We may specify only one endpoint of a generalized path as in~\cref{ex:gconcat},
-or specify the horizontal boundaries as in~\cref{ex:gconcat}.
+We may specify only one endpoint (unlike a traditional path,
+which always requires two endpoints) of a generalized path as in~\cref{ex:gconcat},
+or specify the inner boundaries of squares as in~\cref{ex:gsquare}.
 
 We extend the syntax with generalized paths in~\cref{fig:path}.
 \begin{figure}[h!]
-\[u,A::= \extTy{\overline{x_i}}{A}{\overline{\face}}
+\[u,A::= \extTy{\overline{x}}{A}{\overline{\face}}
 \mid \plam x u \mid \papp u v
 \mid \cdots~\text{(see~\cref{fig:parTy})}\]
 \caption{Syntax of generalized paths}\label{fig:path}
 \end{figure}
 
 The typing rules are defined in~\cref{fig:tyck-path}.
+Note that we make use of reduction on partial elements (\cref{sub:red-cofib}).
 \begin{figure}[h!]
 \begin{mathpar}
-\inferrule{\Phi\overline{,x_i:\II};\Gvdash \isType{A}\\
+\inferrule{\Phi\overline{,x:\II};\Gvdash \isType{A}\\
+\forall i.(\overline{x:\II}\vdash\conj_i) \\\\
 \PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
-:\Partial{\left(\bigvee\nolimits_{i\in I} \conj_i\right)}A}
-{\TODO}
+:\Partial{\left(\bigvee\nolimits_{i} \conj_i\right)}A}
+{\PGvdash\isTypeBox{\extTy{\overline{x}}{A}{\overline{\conj_i\mapsto u_i}}}}
+\and
+\inferrule{\Phi\overline{,x:\II};\Gamma,\vdash v:A\\\\
+\forall i. (\Phi\overline{,x:\II};\Gamma,\conj_i\vdash v\equiv u_i:A)}
+{\PGvdash \plam{\overline x}{v}:\extTy{\overline{x}}{A}{\overline{\conj_i\mapsto u_i}}}
+\and
+\inferrule{\PGvdash \overline {u_i:\II}\\\\
+\PGvdash v:\extTy{\overline{x_i}}{A}{\overline\face}}
+{\PGvdash \papp v {\overline{u_i}} : A[\overline{u_i/x_i}]}
+\and
+\inferrule{\PGvdash \overline {u_i:\II}\\
+\Phi\overline{,x_i:\II};\Gamma,\vdash v:A}
+{\PGvdash \papp{(\plam{\overline{x_i}}v)}{\overline{u_i}}\equiv
+v[\overline{u_i/x_i}] : A[\overline{u_i/x_i}]}
+\and
+\inferrule{\PGvdash \overline {u_i:\II}\\
+\PGvdash v:\extTy{\overline{x_i}}{A}{\overline\face}\\\\
+\PGvdash \lrbbar{\overline\face}[\overline{u_i/x_i}]\equiv v_0 : A[\overline{u_i/x_i}]}
+{\PGvdash \papp v {\overline{u_i}}\equiv v_0 : A[\overline{u_i/x_i}]}
 \end{mathpar}
 \caption{Typing rules of generalized paths}\label{fig:tyck-path}
 \end{figure}
@@ -552,14 +573,26 @@ The typing rules are defined in~\cref{fig:tyck-path}.
 \begin{example}\label{ex:gconcat}
 The path concatenation operation can have a simpler type signature.
 With the path type, its type is:
-\[\textsf{concat}~(a:A)~(b:A)~(c:A)~(p:\PathTy A a b)~(q:\PathTy A b c):\PathTy A a c\]
+\[\textsf{concat}~(a:A)~(b:A)~(c:A)~(p:\PathTy{\lam \_ A} a b)
+~(q:\PathTy{\lam \_ A} b c):\PathTy{\lam \_ A} a c\]
 The first three parameters can be inferred from the last two,
 but we have to quantify over them anyway.
 Using the generalized path type, we may simplify it as:
 \begin{align*}
-\textsf{concat}~&(p:\extTy{x}{A}{})~(q:\extTy{x}{A}{x=\lcon\mapsto p~@~\rcon})\\
-&:{\ExtTy{x}{A}{rll}{x&=\lcon&\mapsto p~@~\lcon\\
+\textsf{concat}~&(p:\extTy{\_}{A}{})~(q:\extTy{\_}{A}{x=\lcon\mapsto p~@~\rcon})\\
+&:{\ExtTy{\_}{A}{rll}{x&=\lcon&\mapsto p~@~\lcon\\
 x&=\rcon&\mapsto q~@~\rcon}}
 \end{align*}
 It becomes longer, but the new definition has fewer parameters.
+The new definition can be more friendly to program synthesizers
+or programming languages that does not support implicit arguments.
+\end{example}
+
+\begin{example}\label{ex:gsquare}
+Consider \fbox{$p_i:\PathTy{\lam\_ A} \bullet \bullet$}
+for $i\in\set{1,2,3,4}$ and the following square \fbox{$x:\II,y:\II\vdash u$}:
+\carloCTikZ{\carloXy
+\carloSqBullets
+\fill [pattern color=gray,pattern=north west lines] (0,0) rectangle (1,1) ;
+\node (center) at (0.5, 0.5) {$u$} ;}
 \end{example}
