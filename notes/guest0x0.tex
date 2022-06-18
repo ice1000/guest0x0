@@ -39,8 +39,7 @@ One may think of this notation as ``fractional multiplication'' $u\times \frac v
 where the denominator $x$ is cancelled out from $u$ and \textit{replaced} with the numerator $v$.
 Other authors may use $u[x\mapsto v]$, $u[x:=v]$, $[v/x]u$, etc.
 
-Propositional equality and path equivalence are both denoted $u=v$,
-while definitional equality (a.k.a. judgmental equality) is denoted $u\equiv v$.
+Definitional equality (a.k.a. judgmental equality) is denoted $u\equiv v$.
 \end{notation}
 \begin{notation}\label{not:syntax-def}
 We will write \fbox{$u, A::=$} for syntax definition of terms,
@@ -247,8 +246,8 @@ and for now we focus on how to describe these partial boundaries
 We introduce a straightforward syntax called \textit{partial elements}
 for these cubes, e.g. the above partial element is written as:
 \[\LRbbar{\begin{array}{rc}
-  x\equiv\lcon \land y\equiv\rcon&\mapsto a\\
-  x\equiv\rcon &\mapsto v
+  x=\lcon \land y=\rcon&\mapsto a\\
+  x=\rcon &\mapsto v
 \end{array}}\]
 To define this formally, we need to define the syntax of the left-hand-side of $\mapsto$.
 They are called \textit{cofibrations} in \CTT.
@@ -258,33 +257,45 @@ which is more (geometrically) intuitive but also longer.
 \end{terminology}
 The syntax of a cofibration is defined to be a disjunction normal form
 (a disjunction list of conjunctions) of face \textit{conditions}
-like \fbox{$x\equiv\lcon$} or \fbox{$x\equiv\rcon$}, as in~\cref{fig:cofib} (recall~\cref{not:syntax-def}).
+like \fbox{$x=\lcon$} or \fbox{$x=\rcon$}, as in~\cref{fig:cofib} (recall~\cref{not:syntax-def}).
 \begin{figure}[h!]
 \[\begin{array}{rll}
-  \cond ::= & x\equiv\lcon \mid x\equiv\rcon & \text{condition} \\
+  \cond ::= & x=\lcon \mid x=\rcon & \text{condition} \\
   \conj ::= & \cond~\overline{\land~\cond} & \text{conjunction} \\
   \disj ::= & \bot \mid \top \mid \conj~\overline{\lor~\conj} & \text{disjunction}
 \end{array}\]
-\caption{Syntax of cofibrations}
-\label{fig:cofib}
+\caption{Syntax of cofibrations}\label{fig:cofib}
+\end{figure}
+
+The typing rules for cofibrations is also straightforward, as in~\cref{fig:tyck-cofib}.
+\begin{figure}[h!]
+\begin{mathpar}
+\inferrule{(x:\II) \in \Phi}{\Phi\vdash \isCond{x=\lcon}} \and
+\inferrule{(x:\II) \in \Phi}{\Phi\vdash \isCond{x=\rcon}}\and
+\inferrule{\forall i. (\Phi\vdash \isCond{\cond_i})}{\Phi\vdash \bigwedge\nolimits_{i} \cond_i}\and
+\inferrule{\forall i. (\Phi\vdash \conj_i)}{\Phi\vdash \bigvee\nolimits_{i} \conj_i}\and
+\inferrule{}{\Phi\vdash \top} \and
+\inferrule{}{\Phi\vdash \bot}
+\end{mathpar}
+\caption{Typing rules of cofibrations}\label{fig:tyck-cofib}
 \end{figure}
 
 The meaning of cofibrations is simple. Suppose we are in a $3$-dimensional context,
-which means there are $3$ intervals in the context, i.e. \fbox{$\Phi=x:\II,y:\II,z:\II$}.
+which means there are $3$ intervals in the context, i.e. \fbox{$\Phi:=x:\II,y:\II,z:\II$}.
 Then:
 \begin{itemize}
 \item As mentioned before, the term \fbox{$\Phi\vdash u:A$} corresponds to
 (the \textit{filling} of) a $3$-dimensional cube:
 \carloCTikZ{\carloXyz \refcube{Empty}}
-\item A $\cond$ specifies a $2$-dimensional cube (a square) face in $\Phi$, e.g. \fbox{$x\equiv\lcon$}
+\item A $\cond$ specifies a $2$-dimensional cube (a square) face in $\Phi$, e.g. \fbox{$x=\lcon$}
 corresponds to the following square:
 \carloCTikZ{\carloXyz \refcube{XEquivL}}
 \item A $\conj$ specifies any $n$-cube (for $n\leq 2$) in $\Phi$, e.g.
-\fbox{$x\equiv\lcon\land y\equiv\rcon$} specifies a line $v$,
-and \fbox{$x\equiv\lcon\land y\equiv\rcon\land z\equiv\lcon$} specifies a point $\star$:
+\fbox{$x=\lcon\land y=\rcon$} specifies a line $v$,
+and \fbox{$x=\lcon\land y=\rcon\land z=\lcon$} specifies a point $\star$:
 \carloCTikZ{\carloXyz \refcube{XYLR}}
 \item A $\disj$ talks about several $n$-cubes (for $n\leq 2$) in $\Phi$ at the same time, e.g.
-\fbox{$x\equiv\lcon\lor x\equiv\rcon$} corresponds to the following two squares:
+\fbox{$x=\lcon\lor x=\rcon$} corresponds to the following two squares:
 \carloCTikZ{\carloXyz \refcube{LRFaces}}
 \item A $\bot$ cofibration is called the \textit{absurd} cofibration,
 which specifies nothing.
@@ -330,16 +341,16 @@ We reduce well-typed (we will define well-typedness of
 partial elements later in~\cref{sub:tyck-cofib}) partial elements by
 iterating their face clauses. Consider the following face clause
 with no conjunction:
-\[x\equiv\lcon\mapsto u\]
+\[x=\lcon\mapsto u\]
 We may substitute the variable $x$ with three possible terms of type $\II$:
 \begin{itemize}
 \item Another variable $y$. In this case, we simply replace $x$ with $y$
-and the face becomes $y\equiv\lcon\mapsto u$.
-\item $\lcon$, i.e. take the face that $x\equiv\lcon$ in this partial element.
+and the face becomes $y=\lcon\mapsto u$.
+\item $\lcon$, i.e. take the face that $x=\lcon$ in this partial element.
 Then, evidently, we get the face $u$, so the partial element should reduce to $u$.
 Other faces can be safely dropped.
 In this case, we say that the face is \textit{satisfied}.
-\item $\rcon$, i.e. take the face that $x\equiv\rcon$,
+\item $\rcon$, i.e. take the face that $x=\rcon$,
 which is unspecified by this face, so we drop this particular face and
 proceed with the rest of the faces.
 In this case, we say that the face is \textit{contradicted}.
@@ -351,10 +362,10 @@ if one of their conditions is contradicted.
 There are two more special cases in a conjunction $\conj$:
 \begin{itemize}
 \item It can be self-contradictory.
-This happens when for a variable $x$, we have both $x\equiv\lcon\in\conj$
-and $x\equiv\rcon\in\conj$. In this case, we also remove the face.
+This happens when for a variable $x$, we have both $x=\lcon\in\conj$
+and $x=\rcon\in\conj$. In this case, we also remove the face.
 \item It can contain duplicated information.
-For example, we may write $x\equiv\lcon\land x\equiv\lcon$.
+For example, we may write $x=\lcon\land x=\lcon$.
 It is encouraged to deduplicate these conditions for spatial efficiency.
 In this tutorial, we assume deduplication of cofibrations everywhere.
 \end{itemize}
@@ -371,7 +382,7 @@ the partial type into the annotated type $A$.
 \subsection{Type checking under cofibrations}\label{sub:tyck-cofib}
 We start from an example of type checking a partial element.
 \begin{example}\label{ex:parTyck}
-Consider $\Phi=x:\II, y:\II,z:\II$ and the following:
+Consider $\Phi:=x:\II, y:\II,z:\II$ and the following:
 \begin{mathpar}
 \inferrule{}{\Gvdash\isType{A}} \and
 \inferrule{}{\Gvdash u:\II\to\II\to A}\and
@@ -381,10 +392,10 @@ We want to construct the following partial element (recall~\cref{rem:sq-ori}):
 \carloCTikZ{\carloXyz \refcube{BBFaces}}
 Recall~\cref{fig:parEl}, we may directly translate that into:
 \[\LRbbar{\begin{array}{rll}
-z&\equiv\rcon&\mapsto u~x~y\\
-y&\equiv\lcon&\mapsto v~x~z
+z&=\rcon&\mapsto u~x~y\\
+y&=\lcon&\mapsto v~x~z
 \end{array}}\]
-Note that they share the same line \fbox{$z\equiv\rcon\land y\equiv\lcon$}
+Note that they share the same line \fbox{$z=\rcon\land y=\lcon$}
 (obtained by taking the conjunction of both cofibrations).
 This line is represented as a cofibration, and we can also use it as
 a \textit{substitution}, i.e. $[\rcon/z,\lcon/y]$.
@@ -406,9 +417,9 @@ The typing rule ends up like this:
 \PGvdash u~x~y:A\\
 \PGvdash v~x~z:A\\\\
 \PGvdash u~x~\lcon\equiv v~x~\rcon:A}{\PGvdash\LRbbar{\begin{array}{rll}
-z&\equiv\rcon&\mapsto u~x~y\\
-y&\equiv\lcon&\mapsto v~x~z
-\end{array}}:\Partial{(z\equiv\rcon\lor y\equiv\lcon)}A}
+z&=\rcon&\mapsto u~x~y\\
+y&=\lcon&\mapsto v~x~z
+\end{array}}:\Partial{(z=\rcon\lor y=\lcon)}A}
 \end{mathpar}
 \end{example}
 
@@ -421,10 +432,11 @@ from~\cref{ex:parTyck} we know that they overlap at $\conj_i\land\conj_j$
 The rule becomes something like:
 \begin{mathpar}
 \inferrule{\Gvdash\isType{A}\\
+\forall i\in I.(\Phi\vdash \conj_i)\\
 \forall i\in I.(\PGvdash u_i:A)\\\\
 \forall i,j\in I.(\PGvdash[\text{overlap-check}])}
 {\PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
-:\Partial{\left(\bigvee_{i\in I} \conj_i\right)}A}
+:\Partial{\left(\bigvee\nolimits_{i\in I} \conj_i\right)}A}
 \end{mathpar}
 In~\cref{ex:parTyck}, the overlap-check step is a conversion check
 between a \textit{substituted version} of the two faces $u_i$ and $u_j$.
@@ -469,10 +481,11 @@ refer to variables in $\Phi$), as in~\cref{fig:tyck-par}.
 \begin{figure}[h!]
 \begin{mathpar}
 \inferrule{\PGvdash\isType{A}\\
+\forall i\in I.(\Phi\vdash \conj_i)\\
 \forall i\in I.(\Phi;\Gamma,\conj_i\vdash u_i:A)\\\\
 \forall i,j\in I.(\Phi;\Gamma,\conj_i,\conj_j\vdash u_i\equiv u_j:A)}
 {\PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
-:\Partial{\left(\bigvee_{i\in I} \conj_i\right)}A}
+:\Partial{\left(\bigvee\nolimits_{i\in I} \conj_i\right)}A}
 \end{mathpar}
 \caption{Typing rule of partial elements}\label{fig:tyck-par}
 \end{figure}
@@ -486,17 +499,17 @@ In~\cite{CCHM}, the path type is defined using the following rules
 \inferrule{\Phi,x:\II;\Gvdash u:A}
 {\PGvdash \plam x u : \PathTy A{(u[\lcon/x])}{(u[\rcon/x])}}\and
 \inferrule{\Hint{\Phi,x:\II;\isType A}\\\Phi,x:\II;\Gvdash u:A\\\PGvdash v:\II}{
-\PGvdash (\plam x u)~@~v \equiv u[v/x]:A[v/x]}\and
+\PGvdash \papp{(\plam x u)}v \equiv u[v/x]:A[v/x]}\and
 \inferrule{\Hint{\Phi,x:\II;\isType A}\\\PGvdash u:\PathTy A a b}{
-\PGvdash u~@~\lcon \equiv a:A[\lcon/x] \\ \text{and} \\ \PGvdash u~@~\rcon \equiv b:A[\rcon/x]}
+\PGvdash \papp u\lcon \equiv a:A[\lcon/x] \\ \text{and} \\ \PGvdash \papp u\rcon \equiv b:A[\rcon/x]}
 \end{mathpar}
 We may rephrase these rules using the idea of cofibrations and partial elements:
 \begin{itemize}
 \item The path type \fbox{$\PathTy A a b$}
 is a $\Pi$-type \fbox{$(x:\II)\to A$} carrying a partial element, denoted as:
 \[\ExtTy{x}{A}{rll}
-{x&\equiv\lcon&\mapsto a\\
-x&\equiv\rcon&\mapsto b}\]
+{x&=\lcon&\mapsto a\\
+x&=\rcon&\mapsto b}\]
 \item The introduction rule takes a type
 \fbox{$\extTy{x}{A}{\overline{\conj_i\mapsto v_i}}$} and check the following:
 \begin{itemize}
@@ -509,9 +522,41 @@ like saying ``$u$ \textit{matches} every given face''.
 and the reduction of partial elements (defined in~\cref{sub:red-cofib}).
 \end{itemize}
 In particular, we can relax the formation rule to allow multiple intervals
-and an arbitrary partial element, and the rest of the rules will still work.
+and an arbitrary partial element (but the cofibrations may only use the
+provided intervals), and the rest of the rules will still work.
 This gives us a better definition of the path type,
 which is more convenient to work with.
+
+We extend the syntax with generalized paths in~\cref{fig:path}.
+\begin{figure}[h!]
+\[u,A::= \extTy{\overline{x_i}}{A}{\overline{\face}}
+\mid \plam x u \mid \papp u v
+\mid \cdots~\text{(see~\cref{fig:parTy})}\]
+\caption{Syntax of generalized paths}\label{fig:path}
+\end{figure}
+
+The typing rules are defined in~\cref{fig:tyck-path}.
+\begin{figure}[h!]
+\begin{mathpar}
+\inferrule{\Phi\overline{,x_i:\II};\Gvdash \isType{A}\\
+\PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
+:\Partial{\left(\bigvee\nolimits_{i\in I} \conj_i\right)}A}
+{\TODO}
+\end{mathpar}
+\caption{Typing rules of generalized paths}\label{fig:tyck-path}
+\end{figure}
+
 \begin{example}
-\TODO
+The path concatenation operation can have a simpler type signature.
+With the path type, its type is:
+\[\textsf{concat}~(a:A)~(b:A)~(c:A)~(p:\PathTy A a b)~(q:\PathTy A b c):\PathTy A a c\]
+The first three parameters can be inferred from the last two,
+but we have to quantify over them anyway.
+Using the generalized path type, we may simplify it as:
+\begin{align*}
+\textsf{concat}~&(p:\extTy{x}{A}{})~(q:\extTy{x}{A}{x=\lcon\mapsto p~@~\rcon})\\
+&:{\ExtTy{x}{A}{rll}{x&=\lcon&\mapsto p~@~\lcon\\
+x&=\rcon&\mapsto q~@~\rcon}}
+\end{align*}
+It becomes longer, but the new definition has fewer parameters.
 \end{example}
