@@ -413,7 +413,7 @@ In this case, we say that the given two faces \textit{agree}.
 For a well-defined partial element, every pair of faces should agree.
 The typing rule ends up like this:
 \begin{mathpar}
-\inferrule{\Gvdash\isType{A}\\
+\inferrule{\Hint{\Gvdash\isType{A}}\\
 \PGvdash u~x~y:A\\
 \PGvdash v~x~z:A\\\\
 \PGvdash u~x~\lcon\equiv v~x~\rcon:A}{\PGvdash\LRbbar{\begin{array}{rll}
@@ -431,7 +431,7 @@ from~\cref{ex:parTyck} we know that they overlap at $\conj_i\land\conj_j$
 (in case they do not overlap, this cofibration is self-contradictory).
 The rule becomes something like:
 \begin{mathpar}
-\inferrule{\Gvdash\isType{A}\\
+\inferrule{\Hint{\Gvdash\isType{A}}\\
 \forall i\in I.(\Phi\vdash \conj_i)\\
 \forall i\in I.(\PGvdash u_i:A)\\\\
 \forall i,j\in I.(\PGvdash[\text{overlap-check}])}
@@ -480,7 +480,8 @@ for partial elements (note that we also add support for $A$ to
 refer to variables in $\Phi$), as in~\cref{fig:tyck-par}.
 \begin{figure}[h!]
 \begin{mathpar}
-\inferrule{\PGvdash\isType{A}\\
+\inferrule{\Phi\vdash \disj\\ \PGvdash\isType{A}}{\PGvdash \isTypeBox{\Partial{\disj}A}}\and
+\inferrule{
 \forall i\in I.(\Phi\vdash \conj_i)\\
 \forall i\in I.(\Phi;\Gamma,\conj_i\vdash u_i:A)\\\\
 \forall i,j\in I.(\Phi;\Gamma,\conj_i,\conj_j\vdash u_i\equiv u_j:A)}
@@ -495,17 +496,17 @@ In~\cite{CCHM}, the path type is defined using the following rules
 (slightly paraphrased for notational consistency):
 \begin{mathpar}
 \inferrule{\Phi,x:\II;\isType A\\ \PGvdash a:A[\lcon/x]\\ \PGvdash b:A[\rcon/x]}
-{\PGvdash\isTypeBox{\PathTy{(\lam x A)} a b}}\and
+{\PGvdash\isTypeBox{\PathTy{\lam x A} a b}}\and
 \inferrule{\Phi,x:\II;\Gvdash u:A}
-{\PGvdash \plam x u : \PathTy A{(u[\lcon/x])}{(u[\rcon/x])}}\and
+{\PGvdash \plam x u : \PathTy{\lam x A}{(u[\lcon/x])}{(u[\rcon/x])}}\and
 \inferrule{\Hint{\Phi,x:\II;\isType A}\\\Phi,x:\II;\Gvdash u:A\\\PGvdash v:\II}{
 \PGvdash \papp{(\plam x u)}v \equiv u[v/x]:A[v/x]}\and
-\inferrule{\Hint{\Phi,x:\II;\isType A}\\\PGvdash u:\PathTy A a b}{
+\inferrule{\Hint{\Phi,x:\II;\isType A}\\\PGvdash u:\PathTy{\lam x A} a b}{
 \PGvdash \papp u\lcon \equiv a:A[\lcon/x] \\ \text{and} \\ \PGvdash \papp u\rcon \equiv b:A[\rcon/x]}
 \end{mathpar}
 We may rephrase these rules using the idea of cofibrations and partial elements:
 \begin{itemize}
-\item The path type \fbox{$\PathTy A a b$}
+\item The path type \fbox{$\PathTy{\lam x A} a b$}
 is a $\Pi$-type \fbox{$(x:\II)\to A$} carrying a partial element, denoted as:
 \[\ExtTy{x}{A}{rll}
 {x&=\lcon&\mapsto a\\
@@ -526,6 +527,8 @@ and an arbitrary partial element (but the cofibrations may only use the
 provided intervals), and the rest of the rules will still work.
 This gives us a better definition of the path type,
 which is more convenient to work with.
+We may specify only one endpoint of a generalized path as in~\cref{ex:gconcat},
+or specify the horizontal boundaries as in~\cref{ex:gconcat}.
 
 We extend the syntax with generalized paths in~\cref{fig:path}.
 \begin{figure}[h!]
@@ -546,7 +549,7 @@ The typing rules are defined in~\cref{fig:tyck-path}.
 \caption{Typing rules of generalized paths}\label{fig:tyck-path}
 \end{figure}
 
-\begin{example}
+\begin{example}\label{ex:gconcat}
 The path concatenation operation can have a simpler type signature.
 With the path type, its type is:
 \[\textsf{concat}~(a:A)~(b:A)~(c:A)~(p:\PathTy A a b)~(q:\PathTy A b c):\PathTy A a c\]
