@@ -453,8 +453,6 @@ apply to the three terms on the right-hand side of $\vdash$,
 and then apply the normal conversion check under $\Phi;\Gamma$.
 The idea in~\cref{fig:conv-cofib} can be extended in the following ways:
 \begin{itemize}
-\item To type check under several conjunctions,
-we combine them together using conjunctions.
 \item To do a normal type-check under conjunctions,
 e.g. \fbox{$\Phi;\Gamma,\conj\vdash u:A$}, we apply the substitution to $A$
 and run the normal type-check.
@@ -463,7 +461,6 @@ we may check them under a disjunction cofibration $\disj$
 by iterating the conjunctions in $\disj$ and run the check under that conjunction.
 We return \textit{yes} only when all these checks return \textit{yes},
 and return \textit{no} otherwise.
-We may further extend the judgment to allow multiple disjunctions too.
 \item To check if two cofibrations $\disj_0,\disj_1$ are equivalent.
 We simply check if they satisfy each other. So, $\vdash \disj_0\equiv\disj_1$
 is equivalent to $\disj_0\vdash \disj_1\equiv\top$ and $\disj_1\vdash \disj_0\equiv\top$.
@@ -471,12 +468,11 @@ is equivalent to $\disj_0\vdash \disj_1\equiv\top$ and $\disj_1\vdash \disj_0\eq
 These ideas give rise to the judgments in~\cref{fig:tyck-cofib}.
 \begin{figure}[h!]
 \begin{align*}
-\Phi;\Gamma,\overline{\conj}&\vdash u\equiv v:A\\
-\Phi;\Gamma,\overline{\disj}&\vdash u\equiv v:A\\
-\Phi;\Gamma,\overline{\conj}&\vdash u:A\\
-\Phi;\Gamma,\overline{\conj}&\vdash \isType{A\equiv B}\\
-\Phi;\Gamma,\overline{\conj}&\vdash \isType{A}\\
-\Phi;\Gamma,\overline{\disj}&\vdash \disj_0\equiv \disj_1
+\Phi;\Gamma,\disj&\vdash u\equiv v:A\\
+\Phi;\Gamma,\conj&\vdash u:A\\
+\Phi;\Gamma,\disj&\vdash \isType{A\equiv B}\\
+\Phi;\Gamma,\conj&\vdash \isType{A}\\
+\Phi;\Gamma,\disj&\vdash \disj_0\equiv \disj_1
 \end{align*}
 \caption{Judgments under cofibrations}\label{fig:tyck-cofib}
 \end{figure}
@@ -490,7 +486,7 @@ refer to variables in $\Phi$), as in~\cref{fig:tyck-par}.
 \inferrule{
 \forall i\in I.(\Phi\vdash \conj_i)\\
 \forall i\in I.(\Phi;\Gamma,\conj_i\vdash u_i:A)\\\\
-\forall i,j\in I.(\Phi;\Gamma,\conj_i,\conj_j\vdash u_i\equiv u_j:A)}
+\forall i,j\in I.(\Phi;\Gamma,\conj_i\land\conj_j\vdash u_i\equiv u_j:A)}
 {\PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
 :\Partial{\left(\bigvee\nolimits_{i\in I} \conj_i\right)}A}
 \end{mathpar}
@@ -513,12 +509,13 @@ In~\cite{CCHM}, the path type is defined using the following rules
 We may rephrase these rules using the idea of cofibrations and partial elements:
 \begin{itemize}
 \item The path type \fbox{$\PathTy{\lam x A} a b$}
-is a $\Pi$-type \fbox{$(x:\II)\to A$} carrying a partial element, denoted as:
+is similar to a $\Pi$-type \fbox{$(x:\II)\to A$} carrying a partial element.
+We denote the whole thing as:
 \[\ExtTy{x}{A}{rll}
 {x&=\lcon&\mapsto a\\
 x&=\rcon&\mapsto b}\]
 \item The introduction rule takes a type
-\fbox{$\extTy{x}{A}{\overline{\conj_i\mapsto v_i}}$} and check the following:
+\fbox{$\extTy{x}{A}{\overline{\conj_i\mapsto v_i}}$} and checks the following:
 \begin{itemize}
 \item \fbox{$\Phi,x:\II;\Gvdash u:A$}, just like checking \fbox{$\lam x u:(x:\II)\to A$}.
 \item \fbox{$\forall i. (\Phi,x:\II;\Gamma,\conj_i\vdash u\equiv v_i:A)$},
@@ -626,7 +623,7 @@ satisfying the following properties:
 \begin{itemize}
 \item It is an isomorphism -- so we want
 an inverse $\transpLong^{-1}:A[\rcon/x]\to A[\lcon/x]$.
-\item If there is a cofibration $\disj$ such that $A$ does not refer to $x$ under $\disj$.
+\item There exists a cofibration $\disj$ such that $A$ does not refer to $x$ under $\disj$.
 We may apply the following check:
 \[\Phi,\Gamma,\disj\vdash \isTypeBox{A[\lcon/x]\equiv A[\rcon/x]}\]
 As in~\cite[\S 2.1]{HCompPDF}, we may also check:
