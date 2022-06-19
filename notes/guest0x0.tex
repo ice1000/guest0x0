@@ -630,7 +630,20 @@ As in~\cite[\S 2.1]{HCompPDF}, we may also check:
 \[\Phi,x:\II,\Gamma,\disj\vdash \isTypeBox{A\equiv A[\lcon/x]}\]
 Furthermore, we want that for every $\PGvdash u:A[\lcon/x]$:
 \[\Phi,x:\II,\Gamma,\disj\vdash \transpLong(u)\equiv u:A[\lcon/x]\]
-\item It computes on introduction rules.
+\item It computes on type formers, e.g. for the type line $\lam x{A~x\to B~x}$, we have:
+\[\transpLong:(A~\lcon\to B~\lcon)\to(A~\rcon\to B~\rcon)\]
+And we expect this function to behave like:
+\begin{align*}
+&\text{take}~f:A~\lcon\to B~\lcon~\text{and}~a:A~\rcon&&\text{from input}\\
+\implies &\transpLong^{-1}(a):A~\lcon&&\text{by type line}~\lam x{A~x}\\
+\implies &f(\transpLong^{-1}(a)):B~\lcon&&\text{by function application}\\
+\implies &\transpLong(f(\transpLong^{-1}(a))):B~\rcon&&\text{by type line}~\lam x{B~x}\\
+\end{align*}
+Hence the well-typed result: an instance of type $B~\rcon$.
 This means the function does not obviously break canonicity.
 \end{itemize}
+The behavior of $\transpLong$ is considered an extra set of \textit{rules}
+called \textit{transportation rules} on each type former,
+just like introduction rules, elimination rules,
+and computation rules.
 \TODO
