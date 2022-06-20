@@ -37,7 +37,7 @@ public interface Util {
     }
 
     \\newcommand{\\carloTikZ}[1]{
-      \\begin{tikzpicture}[carlo-axes, scale = 2]
+      \\begin{tikzpicture}[carlo-axes, scale = 1.6]
       #1
       \\end{tikzpicture}}
     """;

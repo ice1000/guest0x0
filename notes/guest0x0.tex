@@ -465,7 +465,7 @@ and return \textit{no} otherwise.
 We simply check if they satisfy each other. So, $\vdash \disj_0\equiv\disj_1$
 is equivalent to $\disj_0\vdash \disj_1\equiv\top$ and $\disj_1\vdash \disj_0\equiv\top$.
 \end{itemize}
-These ideas give rise to the judgments in~\cref{fig:tyck-cofib}.
+These ideas give rise to the judgments in~\cref{fig:tyck-w-cofib}.
 \begin{figure}[h!]
 \begin{align*}
 \Phi;\Gamma,\disj&\vdash u\equiv v:A\\
@@ -474,12 +474,12 @@ These ideas give rise to the judgments in~\cref{fig:tyck-cofib}.
 \Phi;\Gamma,\conj&\vdash \isType{A}\\
 \Phi;\Gamma,\disj&\vdash \disj_0\equiv \disj_1
 \end{align*}
-\caption{Judgments under cofibrations}\label{fig:tyck-cofib}
+\caption{Judgments under cofibrations}\label{fig:tyck-w-cofib}
 \end{figure}
 
 With all these preparations we can get the typing rule
 for partial elements (note that we also add support for $A$ to
-refer to variables in $\Phi$), as in~\cref{fig:tyck-par}.
+reference variables in $\Phi$), as in~\cref{fig:tyck-par}.
 \begin{figure}[h!]
 \begin{mathpar}
 \inferrule{\Phi\vdash \disj\\ \PGvdash\isType{A}}{\PGvdash \isTypeBox{\Partial{\disj}A}}\and
@@ -612,18 +612,34 @@ y&=\lcon&\mapsto \papp{p_0}x\\
 y&=\rcon&\mapsto \papp{p_1}x}\]
 \end{example}
 
+\subsection{Cubical subtypes}\label{sub:cubsub}
+Cofibrations in generalized paths are always \textit{bounded}
+in the sense that they cannot reference arbitrary local variables.
+We add the \textit{open} version of generalized paths,
+called \textit{cubical subtypes}, into our type theory.
+Cubical subtypes will be useful later in~\cref{sub:transp}.
+\TODO
+
 \section{De Morgan structure}
 This section introduces the notion of \textit{transportation rules} and
 motivates the De Morgan structure on the interval type.
 
-\subsection{Transportation rules and cubical subtypes}\label{sub:transp}
+\subsection{Minimum and maximum squares}\label{sub:minmax}
+Consider a path \fbox{$p:\PathTy{\lam\_ A} a b$},
+it makes geometric sense to have some path between $p$ and the identity path,
+because they are all connected together:
+\carloCTikZ{\carloXy
+}
+\TODO
+
+\subsection{Transportation rules}\label{sub:transp}
 In \CTT, for every line on types \fbox{$\Phi,x:\II,\Gamma\vdash\isType{A}$},
 we add a function $\transpLong:A[\lcon/x]\to A[\rcon/x]$ to the type theory,
 satisfying the following properties:
 \begin{itemize}
 \item It is an isomorphism -- so we want
 an inverse $\transpLong^{-1}:A[\rcon/x]\to A[\lcon/x]$.
-\item There exists a cofibration $\disj$ such that $A$ does not refer to $x$ under $\disj$.
+\item There exists a cofibration $\disj$ such that $A$ does not reference $x$ under $\disj$.
 We may apply the following check:
 \[\Phi,\Gamma,\disj\vdash \isTypeBox{A[\lcon/x]\equiv A[\rcon/x]}\]
 As in~\cite[\S 2.1]{HCompPDF}, we may also check:
