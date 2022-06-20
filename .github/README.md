@@ -50,6 +50,18 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+![image](https://user-images.githubusercontent.com/16398479/174672647-a49403e9-98b9-4b2f-ac61-47d67e56b442.png)
+
+Slightly improved the UX of the editor. Updated the tutorial.
+
+### v0.13.1
+
+![image](https://user-images.githubusercontent.com/16398479/174672175-140b57dd-eb0e-4fee-87e3-862db89bcf54.png)
+
+Implemented a simple TikZ 3D cube WYSIWYG editor using `java.io.Serialization` serialization. It has a separate serialized-to-tex compiler and a jimgui-based editor. The generated cube should be referenced in a LaTeX document with `\ExecuteMetadata[cubes]{cube name}`.
+
+Started working on the implementation notes (as a cubical tutorial).
+
 ### v0.13
 
 ![image](https://user-images.githubusercontent.com/16398479/168640908-c1be4ea2-cc35-443d-ada9-84e754fef322.png)
