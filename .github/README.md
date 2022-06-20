@@ -50,6 +50,8 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+### v0.13.2
+
 ![image](https://user-images.githubusercontent.com/16398479/174672647-a49403e9-98b9-4b2f-ac61-47d67e56b442.png)
 
 Slightly improved the UX of the editor. Updated the tutorial.
