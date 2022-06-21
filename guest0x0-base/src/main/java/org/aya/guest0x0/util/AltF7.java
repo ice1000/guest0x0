@@ -1,6 +1,7 @@
 package org.aya.guest0x0.util;
 
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.BdryData;
 import org.aya.guest0x0.syntax.Term;
 import org.jetbrains.annotations.NotNull;
@@ -22,20 +23,23 @@ public record AltF7(@NotNull LocalVar var) {
       case Term.Mula mula -> formula(mula.asFormula());
       case Term.Cof cof -> cof.restr().instView().anyMatch(this::press);
       case Term.PartTy par -> press(par.ty()) || press(par.restr());
-      case Term.PartEl par -> par.clauses().anyMatch(clause ->
-        press(clause.u()) || clause.cof().view().anyMatch(this::press));
+      case Term.PartEl par -> par.clauses().anyMatch(this::clause);
     };
   }
 
   private boolean boundaries(BdryData<Term> data) {
-    return press(data.type()) || data.boundaries().anyMatch(b -> press(b.body()));
+    return press(data.type()) || data.boundaries().anyMatch(this::clause);
   }
 
   private boolean formula(Formula<Term> formula) {
     return switch (formula) {
-      case Formula.Lit ignored -> false;
+      case Formula.Lit<?> ignored -> false;
       case Formula.Inv<Term> inv -> press(inv.i());
       case Formula.Conn<Term> conn -> press(conn.l()) || press(conn.r());
     };
+  }
+
+  private boolean clause(Restr.Side<Term> clause) {
+    return press(clause.u()) || clause.cof().view().anyMatch(this::press);
   }
 }

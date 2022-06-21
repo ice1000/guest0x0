@@ -3,7 +3,7 @@ package org.aya.guest0x0.tyck;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
-import org.aya.guest0x0.cubical.Boundary;
+import kala.value.Ref;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
@@ -16,6 +16,8 @@ import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
 
 public record Normalizer(
   @NotNull MutableMap<LocalVar, Def<Term>> sigma,
@@ -65,7 +67,9 @@ public record Normalizer(
         // Either a tuple or a stuck term is preserved
         if (!two.isApp() || !(f instanceof Term.Lam lam)) yield new Term.Two(two.isApp(), f, a);
         rho.put(lam.x(), a);
-        yield term(lam.body());
+        var body = term(lam.body());
+        rho.remove(lam.x());
+        yield body;
       }
       case Term.Proj proj -> {
         var t = term(proj.t());
@@ -87,10 +91,14 @@ public record Normalizer(
         if (p instanceof Term.PLam pLam) {
           pLam.dims().zipView(i).forEach(rho::put);
           var fill = term(pLam.fill());
-          yield pLam.dims().sizeEquals(1) ? fill : new Term.PLam(pLam.dims().drop(1), fill);
+          pLam.dims().forEach(rho::remove);
+          yield fill;
         }
-        var heaven = stairway(pApp.b(), i); // Important: use unnormalized pApp.b()
-        yield heaven != null ? heaven : new Term.PCall(p, i, pApp.b().fmap(this::term));
+        var b = pApp.b();
+        var ur = new Ref<Term>();
+        var clauses = clauses(b.boundaries(), ur::set);
+        if (ur.value != null) yield ur.value;
+        yield new Term.PCall(p, i, new BdryData<>(b.dims(), term(b.type()), clauses));
       }
       case Term.Mula f -> formulae(f.asFormula().fmap(this::term));
       case Term.Cof cof -> new Term.Cof(restr(cof.restr()));
@@ -101,15 +109,23 @@ public record Normalizer(
         yield transp(new LocalVar("i"), term(transp.cover()), new Term.Cof(parkerLiu));
       }
       case Term.PartTy par -> new Term.PartTy(term(par.ty()), term(par.restr()));
-      case Term.PartEl par -> {
-        var clauses = MutableArrayList.<Restr.Side<Term>>create();
-        for (var clause : par.clauses()) {
-          var u = term(clause.u());
-          CofThy.normalizeCof(clause.cof(), clauses, cofib -> new Restr.Side<>(cofib, u));
-        }
-        yield new Term.PartEl(clauses.toImmutableArray());
-      }
+      // TODO: do nothing for now, need a new term for 'to reduce' partials
+      case Term.PartEl par -> new Term.PartEl(clauses(par.clauses(), u -> {}));
     };
+  }
+
+  private ImmutableSeq<Restr.Side<Term>> clauses(
+    @NotNull ImmutableSeq<Restr.Side<Term>> sides,
+    @NotNull Consumer<Term> truthHandler
+  ) {
+    var clauses = MutableArrayList.<Restr.Side<Term>>create();
+    for (var clause : sides) {
+      var u = term(clause.u());
+      if (CofThy.normalizeCof(clause.cof(), clauses, cofib -> new Restr.Side<>(cofib, u))) {
+        truthHandler.accept(u);
+      }
+    }
+    return clauses.toImmutableArray();
   }
 
   public Restr<Term> restr(@NotNull Restr<Term> restr) {
@@ -165,30 +181,6 @@ public record Normalizer(
         : (conn.isAnd() ? conn.l() : rf);
       default -> new Term.Mula(formula);
     };
-  }
-
-  /** She's buying a stairway to heaven. */
-  private @Nullable Term stairway(
-    @NotNull BdryData<Term> thoughts,
-    @NotNull ImmutableSeq<Term> word // With a word she can get what she came for.
-  ) {
-    assert word.sizeEquals(thoughts.dims().size());
-    for (var thought : thoughts.boundaries()) {
-      var reason = piper(word, thought.face(), thoughts.dims());
-      if (reason != null) return reason.term(thought.body());
-    }
-    return null; // Sometimes all of our thoughts are misgiven.
-  }
-
-  /** A piper that will lead us to reason. */
-  private Normalizer piper(ImmutableSeq<Term> word, Boundary.Face face, ImmutableSeq<LocalVar> dims) {
-    var sign = derive();
-    for (var ct : face.pats().zipView(dims.zipView(word))) {
-      if (ct._1 == Boundary.Case.VAR) sign.rho.put(ct._2);
-      else if (!(ct._2._2.asFormula() instanceof Formula.Lit<Term> lit
-        && lit.isLeft() == (ct._1 == Boundary.Case.LEFT))) return null;
-    }
-    return sign;
   }
 
   record Renamer(MutableMap<LocalVar, LocalVar> map) {

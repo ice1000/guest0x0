@@ -30,15 +30,16 @@ expr
  | (cof (OR cof)* | TRUTH | ABSURD) # restr
 
  // Cubical features
- | '[|' ID+ '|]' expr '{' boundary* '}' # cube
+ | '[|' ID+ '|]' expr partial # cube
  | 'tr' expr '#{' expr '}' # trans
  | 'Partial' expr '#{' expr '}' # partTy
- | '{|' '|'? subSystem ('|' subSystem)* '|}' # partEl
+ | partial # partEl
  | iPat # iLit
  | '~' expr # inv
  | expr (AND | OR) expr # iConn
  ;
 
+partial : '{|' '|'? subSystem ('|' subSystem)* '|}';
 cond : ID '=' (LEFT | RIGHT);
 subSystem : cof '|->' expr;
 cof : cond (AND cond)*;

@@ -232,7 +232,6 @@ public record Elaborator(
         var ty = inherit(path.data().type(), Term.U);
         var boundaries = elaborateClauses(expr, path.data().boundaries(), ty);
         var data = new BdryData<>(dims, ty, boundaries);
-        YouTrack.jesperCockx(data, path.pos());
         for (var dim : dims) gamma.remove(dim);
         yield new Synth(new Term.Path(data), Term.U);
       }

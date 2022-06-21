@@ -52,14 +52,14 @@ public record Parser(@NotNull SourceFile source) {
         new Formula.Conn<>(ic.AND() != null, expr(ic.expr(0)), expr(ic.expr(1))));
       case Guest0x0Parser.CubeContext cube -> new Expr.Path(sourcePosOf(cube), new BdryData<>(
         localVars(cube.ID()), expr(cube.expr()),
-        Seq.wrapJava(cube.boundary()).map(b -> new Boundary<>(face(b), expr(b.expr())))));
+        Seq.wrapJava(cube.partial().subSystem()).map(this::clause)));
       // case Guest0x0Parser.SubContext sub -> {
       //   var sys = sub.subSystem();
       //   yield new Expr.Sub(sourcePosOf(sub), expr(sub.expr()), expr(sys.expr(0)), expr(sys.expr(1)));
       // }
       case Guest0x0Parser.PartTyContext par -> new Expr.PartTy(sourcePosOf(par), expr(par.expr(0)), expr(par.expr(1)));
       case Guest0x0Parser.PartElContext par -> new Expr.PartEl(sourcePosOf(par),
-        Seq.wrapJava(par.subSystem()).map(this::clause));
+        Seq.wrapJava(par.partial().subSystem()).map(this::clause));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
   }
@@ -68,7 +68,7 @@ public record Parser(@NotNull SourceFile source) {
     return new Restr.Side<>(cofib(clause.cof()), expr(clause.expr()));
   }
 
-  public @NotNull Restr<Expr> restr(Guest0x0Parser.RestrContext psi) {
+  /*package*/ @NotNull Restr<Expr> restr(Guest0x0Parser.RestrContext psi) {
     if (psi.ABSURD() != null) return new Restr.Const<>(false);
     if (psi.TRUTH() != null) return new Restr.Const<>(true);
     return new Restr.Vary<>(Seq.wrapJava(psi.cof()).map(this::cofib));
@@ -90,13 +90,8 @@ public record Parser(@NotNull SourceFile source) {
       : new Expr.Hole(pos, ImmutableSeq.empty());
   }
 
-  private @NotNull Boundary.Face face(Guest0x0Parser.BoundaryContext boundary) {
-    return new Boundary.Face(Seq.wrapJava(boundary.iPat()).map(i ->
-      i.LEFT() != null ? Boundary.Case.LEFT : i.RIGHT() != null
-        ? Boundary.Case.RIGHT : Boundary.Case.VAR));
-  }
-
-  public @NotNull Def<Expr> def(@NotNull Guest0x0Parser.DeclContext decl) {
+  /*package*/
+  @NotNull Def<Expr> def(@NotNull Guest0x0Parser.DeclContext decl) {
     return switch (decl) {
       case Guest0x0Parser.PrintDeclContext def -> new Def.Print<>(
         Seq.wrapJava(def.param()).flatMap(this::param),
