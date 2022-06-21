@@ -1,13 +1,11 @@
 package org.aya.guest0x0.tyck;
 
-import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
 import kala.control.Option;
 import kala.tuple.Tuple;
-import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
@@ -65,12 +63,11 @@ public record Elaborator(
         if (!(normalize(type) instanceof Term.PartTy par)) throw new SPE(el.pos(),
           Doc.english("Expects partial type for partial elements"), expr, Doc.plain("got"), type);
         var cof = cof(par.restr(), el.pos());
-        var clauses = el.clauses().flatMap(cl -> clause(el.pos(), cl, par.ty()));
+        var clauses = elaborateClauses(el, el.clauses(), par.ty());
         var face = new Restr.Vary<>(clauses.map(Restr.Side::cof));
         if (!CofThy.conv(cof.restr(), Normalizer.create(), norm -> CofThy.satisfied(norm.restr(face))))
           throw new SPE(el.pos(), Doc.english("The faces in the partial element"), face,
             Doc.english("must cover the face(s) specified in type:"), cof);
-        confluence(el, clauses, el.pos());
         yield new Term.PartEl(clauses);
       }
       case Expr.Two two && !two.isApp() -> {
@@ -121,6 +118,14 @@ public record Elaborator(
     };
   }
 
+  private ImmutableSeq<Restr.Side<Term>> elaborateClauses(
+    Expr on, @NotNull ImmutableSeq<Restr.Side<Expr>> clauses, @NotNull Term ty
+  ) {
+    var sides = clauses.flatMap(cl -> clause(on.pos(), cl, ty));
+    confluence(on, sides, on.pos());
+    return sides;
+  }
+
   private void confluence(Docile on, ImmutableSeq<Restr.Side<Term>> clauses, @NotNull SourcePos pos) {
     for (int i = 1; i < clauses.size(); i++) {
       var lhs = clauses.get(i);
@@ -158,6 +163,10 @@ public record Elaborator(
     return line1;
   }
 
+  /**
+   * @param coreSupplier Already substituted with the variables in the type
+   * @param lamDims      Bindings in the type
+   */
   private @NotNull Term boundaries(
     @NotNull MutableList<LocalVar> lamDims,
     @NotNull Supplier<Term> coreSupplier,
@@ -166,8 +175,11 @@ public record Elaborator(
     lamDims.forEach(t -> gamma.put(t, Term.I));
     var core = coreSupplier.get();
     for (var boundary : data.boundaries()) {
-      var jon = jonSterling(lamDims.view(), boundary.face()).term(core);
-      unify(boundary.body(), boundary.face(), jon, pos, Doc.english("Boundary mismatch, oh no."));
+      CofThy.conv(boundary.cof(), normalizer(), norm -> {
+        unify(norm.term(core), boundary, norm.term(boundary.u()), pos,
+          Doc.english("Boundary mismatch, oh no."));
+        return true;
+      });
     }
     lamDims.forEach(gamma::remove);
     return new Term.PLam(lamDims.toImmutableArray(), core);
@@ -218,14 +230,8 @@ public record Elaborator(
         var dims = path.data().dims();
         for (var dim : dims) gamma.put(dim, Term.I);
         var ty = inherit(path.data().type(), Term.U);
-        var boundaries = MutableArrayList.<Boundary<Term>>create(path.data().boundaries().size());
-        for (var boundary : path.data().boundaries()) {
-          if (!dims.sizeEquals(boundary.face().pats())) throw new SPE(path.pos(),
-            Doc.english("Expects " + dims.size() + " patterns, got: " + boundary.face().pats().size()));
-          var term = inherit(boundary.body(), jonSterling(dims.view(), boundary.face()).term(ty));
-          boundaries.append(new Boundary<>(boundary.face(), term));
-        }
-        var data = new BdryData<>(dims, ty, boundaries.toImmutableArray());
+        var boundaries = elaborateClauses(expr, path.data().boundaries(), ty);
+        var data = new BdryData<>(dims, ty, boundaries);
         YouTrack.jesperCockx(data, path.pos());
         for (var dim : dims) gamma.remove(dim);
         yield new Synth(new Term.Path(data), Term.U);
@@ -244,7 +250,7 @@ public record Elaborator(
         var sample = cover.app(new Term.Ref(detective.var()));
         var ty = Term.mkPi(cover.app(Term.end(true)), cover.app(Term.end(false)));
         var cof = cof(transp.restr());
-        // I believe find-usages is slightly more efficient than what Huber wrotes in hcomp.pdf
+        // I believe find-usages is slightly more efficient than what Huber wrote in hcomp.pdf
         var capture = new Object() {
           Term under = sample;
         };
@@ -292,12 +298,6 @@ public record Elaborator(
       throw new SPE(pos, Doc.english("The cofibration in"), cofib,
         Doc.english("is not well-defined"));
     return u.map(uu -> new Restr.Side<>(cofib, uu));
-  }
-
-  private @NotNull Normalizer jonSterling(SeqView<LocalVar> dims, Boundary.Face face) {
-    return new Normalizer(sigma, MutableMap.from(dims
-      .zip(face.pats()).filter(p -> p._2 != Boundary.Case.VAR)
-      .map(p -> Tuple.of(p._1, Term.end(p._2 == Boundary.Case.LEFT)))));
   }
 
   private <T> T hof(@NotNull LocalVar x, @NotNull Term type, @NotNull Supplier<T> t) {

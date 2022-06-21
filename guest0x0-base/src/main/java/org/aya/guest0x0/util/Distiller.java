@@ -1,6 +1,7 @@
 package org.aya.guest0x0.util;
 
 import kala.collection.Seq;
+import kala.collection.SeqView;
 import kala.collection.mutable.MutableList;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
@@ -54,12 +55,9 @@ public interface Distiller {
       //   expr(sub.ty(), Free), Doc.symbol("[|"), expr(sub.phi(), Free),
       //   Doc.symbol("|->"), expr(sub.u(), Free), Doc.symbol("|]"));
       case Expr.PartEl par -> Doc.wrap("[|", "|]",
-        Doc.join(Doc.symbol("|"), par.clauses().map(Distiller::clause)));
+        Doc.join(Doc.symbol("|"), clauses(par.clauses())));
       case Expr.PartTy par -> fibred("Partial", par.ty(), par.restr());
     };
-  }
-  static Doc clause(Restr.Side<?> clause) {
-    return Doc.spaced(Doc.sep(clause.cof().toDoc(), Doc.symbol("|->"), clause.u().toDoc()));
   }
   private static @NotNull Doc fibred(String kw, Docile cover, Docile restr) {
     return Doc.sep(Doc.plain(kw), cover.toDoc(),
@@ -129,7 +127,12 @@ public interface Distiller {
       }
       case Term.PartTy par -> fibred("Partial", par.ty(), par.restr());
       case Term.PartEl par -> Doc.wrap("[|", "|]",
-        Doc.join(Doc.symbol("|"), par.clauses().map(Distiller::clause)));
+        Doc.join(Doc.symbol("|"), clauses(par.clauses())));
     };
+  }
+  static <T extends Restr.TermLike<T>> SeqView<Doc> clauses(@NotNull Seq<Restr.Side<T>> clauses) {
+    return clauses.view()
+      .map(Restr.Side::toDoc)
+      .map(Doc::spaced);
   }
 }

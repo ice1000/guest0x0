@@ -162,6 +162,7 @@ public final class GuiMain implements AutoCloseable {
     if (window.button("Copy preamble")) {
       window.setClipboardText(Util.carloPreamble);
     }
+    window.inputTextMultiline("Custom preamble", customPreamble);
     serialize.buildText(new ImGuiTextBuilder(window), highlight);
   }
 
