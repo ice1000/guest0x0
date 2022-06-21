@@ -93,7 +93,8 @@ which uses sophisticated mathematics. Computer scientists, on the other hand,
 usually do not have relevant courses taught in their undergraduate program.
 However, it is also the computer scientists who are suppose to implement \CTT{} as
 programming languages. This tutorial tries to help those who did not study homotopy
-theory, but wish to learn the internals of \CTT.
+theory, but have learned about the informal concepts of \CTT{}
+(like what is written in~\cite{NCTT}) and wish to learn the implementation details of \CTT.
 
 \CTT{} extends Martin-L\"{o}f type theory with a huge amount of new constructions,
 especially the typing rules are written in a very compact way (like in~\cite{HCompPDF}).
@@ -617,8 +618,19 @@ Cofibrations in generalized paths are always \textit{bounded}
 in the sense that they cannot reference arbitrary local variables.
 We add the \textit{open} version of generalized paths,
 called \textit{cubical subtypes}, into our type theory.
-Cubical subtypes will be useful later in~\cref{sub:transp}.
+The syntax and typing rules are defined in~\cref{fig:subtype,fig:typing-subtype}, respectively.
+\begin{figure}[h!]
+\[u,A::= \subTy{A}{\overline{\face}}
+\mid \outS u \mid \inS u
+\mid \cdots~\text{(see~\cref{fig:path})}\]
+\caption{Syntax of cubical subtypes}\label{fig:subtype}
+\end{figure}
+\begin{figure}[h!]
 \TODO
+\caption{Syntax of generalized paths}\label{fig:typing-subtype}
+\end{figure}
+
+Cubical subtypes will be useful later in~\cref{sub:transp}.
 
 \section{De Morgan structure}
 This section introduces the notion of \textit{transportation rules} and
