@@ -638,10 +638,10 @@ The syntax is defined in~\cref{fig:subtype}.
 \caption{Syntax of cubical subtypes}\label{fig:subtype}
 \end{figure}
 
-The type $\subTy{A}{\disj}{\overline\face}$ has three parameters: the \textit{ambient} type $A$,
+The type \fbox{$\subTy{A}{\disj}{\overline\face}$} has three parameters: the \textit{ambient} type $A$,
 a cofibration $\disj$, and a set of faces ${\overline\face}$ such that:
 \[\lrbbar{\overline\face}:\Partial{\disj}A\]
-Then, if $\PGvdash u:A$ and $u$ \textit{matches} all the given faces
+Then, if \fbox{$\PGvdash u:A$} and $u$ \textit{matches} all the given faces
 (``match'' as in introduction of generalized paths), then:
 \[\inS\disj u:\subTy{A}{\disj}{\overline\face}\]
 This gives the introduction rule.
@@ -702,7 +702,7 @@ based on the idea of cofibrations. Here's a brief table for comparison:
  Have faces in type? & \checkmark & $\times$ & \checkmark \\ \hline
  Have faces in terms? & $\times$ & \checkmark & $\times$ \\ \hline
  Scope of cofibrations & Open & Open & Bound \\ \hline
- Number of faces & $1$ & $\geq 1$ & $\geq 0$ \\ \hline
+%  Number of faces & $1$ & $\geq 1$ & $\geq 0$ \\ \hline
 %  Support composition & $\times$ & $\times$ & \checkmark \\ \hline
 %  Support transport & $\times$ & $\times$ & \checkmark \\ \hline
 \end{tabular}
