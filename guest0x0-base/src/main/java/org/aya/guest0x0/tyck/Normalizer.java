@@ -121,7 +121,7 @@ public record Normalizer(
     var clauses = MutableArrayList.<Restr.Side<Term>>create();
     for (var clause : sides) {
       var u = term(clause.u());
-      if (CofThy.normalizeCof(clause.cof(), clauses, cofib -> new Restr.Side<>(cofib, u))) {
+      if (CofThy.normalizeCof(clause.cof().fmap(this::term), clauses, cofib -> new Restr.Side<>(cofib, u))) {
         truthHandler.accept(u);
       }
     }

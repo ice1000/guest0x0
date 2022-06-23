@@ -29,7 +29,7 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
     }
 
     @Override public Vary<E> fmap(@NotNull Function<E, E> g) {
-      return new Vary<>(orz.map(x -> x.rename(g)));
+      return new Vary<>(orz.map(x -> x.fmap(g)));
     }
 
     @Override public Vary<E> or(Cond<E> cond) {
@@ -68,7 +68,7 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
     }
   }
   record Cond<E>(@NotNull E inst, boolean isLeft) {
-    public Cond<E> rename(@NotNull Function<E, E> g) {
+    public Cond<E> fmap(@NotNull Function<E, E> g) {
       return new Cond<>(g.apply(inst), isLeft);
     }
   }
@@ -78,8 +78,8 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
         Doc.sep(and.inst.toDoc(), Doc.symbol("="), Doc.symbol(and.isLeft() ? "0" : "1"))));
     }
 
-    public Cofib<E> rename(@NotNull Function<E, E> g) {
-      return new Cofib<>(ands.map(c -> c.rename(g)));
+    public Cofib<E> fmap(@NotNull Function<E, E> g) {
+      return new Cofib<>(ands.map(c -> c.fmap(g)));
     }
 
     public @NotNull SeqView<E> view() {
@@ -97,7 +97,7 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
     }
 
     public Side<E> rename(@NotNull Function<E, E> g) {
-      return new Side<>(cof.rename(g), g.apply(u));
+      return new Side<>(cof.fmap(g), g.apply(u));
     }
   }
 }

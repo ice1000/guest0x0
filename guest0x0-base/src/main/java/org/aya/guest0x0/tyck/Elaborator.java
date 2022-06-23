@@ -50,11 +50,12 @@ public record Elaborator(
           var lamDims = MutableArrayList.<LocalVar>create(tyDims.size());
           var unlam = Expr.unlam(lamDims, tyDims.size(), lam);
           if (unlam == null) throw new SPE(lam.pos(), Doc.english("Expected path lambda"));
+          var substForTy = new Normalizer(sigma, MutableMap.from(
+            lamDims.zipView(tyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
+          ));
           yield boundaries(lamDims, () -> inherit(unlam,
-            new Normalizer(sigma, MutableMap.from(
-              lamDims.zipView(tyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
-            )).term(path.data().type()) // The expected type if the lambda body
-          ), unlam.pos(), path.data());
+            substForTy.term(path.data().type())
+          ), unlam.pos(), path.data(), substForTy);
         }
         default -> throw new SPE(lam.pos(),
           Doc.english("Expects a right adjoint for"), expr, Doc.plain("got"), type);
@@ -104,10 +105,11 @@ public record Elaborator(
             var acTyDims = MutableArrayList.<LocalVar>create(exTyDims.size());
             var unpi = Term.unpi(acTyDims, synth.type, exTyDims.size());
             if (unlam == null || unpi == null) throw new SPE(expr.pos(), Doc.english("Expected (path) lambda"));
-            unify(unpi, unlam, new Normalizer(sigma, MutableMap.from(
+            var substForTy = new Normalizer(sigma, MutableMap.from(
               exTyDims.zipView(acTyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
-            )).term(path.data().type()), expr.pos());
-            yield boundaries(lamDims, () -> unlam, expr.pos(), path.data());
+            ));
+            unify(unpi, unlam, substForTy.term(path.data().type()), expr.pos());
+            yield boundaries(lamDims, () -> unlam, expr.pos(), path.data(), substForTy);
           }
           case Term ty -> {
             unify(ty, synth.wellTyped, synth.type, expr.pos());
@@ -164,19 +166,22 @@ public record Elaborator(
   }
 
   /**
+   * @param subst        Must be purely variable-to-variable
    * @param coreSupplier Already substituted with the variables in the type
    * @param lamDims      Bindings in the type
    */
   private @NotNull Term boundaries(
     @NotNull MutableList<LocalVar> lamDims,
     @NotNull Supplier<Term> coreSupplier,
-    SourcePos pos, BdryData<Term> data
+    SourcePos pos, BdryData<Term> data,
+    @NotNull Normalizer subst
   ) {
     lamDims.forEach(t -> gamma.put(t, Term.I));
     var core = coreSupplier.get();
     for (var boundary : data.boundaries()) {
-      CofThy.conv(boundary.cof(), normalizer(), norm -> {
-        unify(norm.term(core), boundary, norm.term(boundary.u()), pos,
+      // Based on the very assumption as in the function's javadoc
+      CofThy.conv(boundary.cof().fmap(subst::term), subst, norm -> {
+        unify(norm.term(boundary.u()), boundary, norm.term(core), pos,
           Doc.english("Boundary mismatch, oh no."));
         return true;
       });

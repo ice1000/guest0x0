@@ -202,15 +202,15 @@ Note that all of them can also be reflected by their diagonals.
 \subsection{Partial elements}\label{sub:partial}
 In \CTT{}, the idea that \textit{open shapes can be filled}
 is the core concept that makes terms in type theory space-like,
-and to do so the \textit{Kan operation} are added to \CTT{} as a structure.
+and to do that, a \textit{composition operation} is added to \CTT{} as a structure.
 
 The motivation is that with only the interval type and Martin-L\"of type theory,
 we may not be able to describe every cube that makes geometric or topological sense.
 For example, the squares in~\cref{ex:concat-sym} make perfect sense in
-geometry or topology, but in \CTT{}, they have to be constructed using the Kan operation.
-Kan operation takes a description of some parts of an $n$-dimensional cube
+geometry or topology, but in \CTT{}, they have to be constructed using the composition operation.
+The composition operation takes a description of some parts of an $n$-dimensional cube
 (an \textit{incomplete} cube, or a \textit{partial} cube) and completes it.
-To describe the input of Kan operations, we introduce partial elements.
+To describe the input of composition, we introduce partial elements.
 \begin{terminology}
 We follow the terminology in~\cite{CubicalAgda}.
 In~\cite{CCHM}, partial elements are called \textit{systems}.
@@ -223,7 +223,7 @@ we are describing the following 2-dimensional cube, which is a square:
 \node (center) at (0.5, 0.5) {$u:A$} ;}
 For simplicity we assume \fbox{$\vdash \isType{A}$}, say, $A$ does not depend on $x$ or $y$.
 
-Suppose we want to use the Kan operation to create
+Suppose we want to use the composition operation to create
 a square \fbox{$x:\II,y:\II\vdash u:A$}
 such that its top-left corner is a point $a:A$, and the line on its
 right-hand side is a line $y:\II \vdash v:A$:
@@ -305,11 +305,16 @@ which specifies nothing.
 which specifies everything.
 \end{itemize}
 Using cofibrations, we define the syntax of partial elements
-by extending the syntax for terms in~\cref{fig:parEl}:
+by extending the syntax for terms in~\cref{fig:parEl}.
+We define a special kind of partial elements $\lrbbar u$,
+which is a partial element with a single face under the truth cofibration,
+called \textit{trivial} partial elements.
+These partial elements are actually not ``partial'', but ``full''
+in the sense that \textit{every} face is assigned with a single term.
 \begin{figure}[h!]
 \[\begin{array}{rl}
     \face::=&\overline{\conj\mapsto u}\\
-    u,A::=&\lrbbar{\face} \mid \cdots~\text{(other term formers, recall~\cref{not:syntax-def})}
+    u,A::=&\lrbbar{\face} \mid \lrbbar{u} \mid \cdots~\text{(other term formers, recall~\cref{not:syntax-def})}
 \end{array}\]
 \caption{Syntax of partial elements}\label{fig:parEl}
 \end{figure}
@@ -349,8 +354,8 @@ We may substitute the variable $x$ with three possible terms of type $\II$:
 \item Another variable $y$. In this case, we simply replace $x$ with $y$
 and the face becomes $y=\lcon\mapsto u$.
 \item $\lcon$, i.e. take the face that $x=\lcon$ in this partial element.
-Then, evidently, we get the face $u$, so the partial element should reduce to $u$.
-Other faces can be safely dropped.
+Then, evidently, we get the face $u$, so the partial element should reduce
+to the trivial cofibration $\lrbbar u$, with other faces ignored.
 In this case, we say that the face is \textit{satisfied}.
 \item $\rcon$, i.e. take the face that $x=\rcon$,
 which is unspecified by this face, so we drop this particular face and
@@ -484,6 +489,7 @@ reference variables in $\Phi$), as in~\cref{fig:tyck-par}.
 \begin{figure}[h!]
 \begin{mathpar}
 \inferrule{\Phi\vdash \disj\\ \PGvdash\isType{A}}{\PGvdash \isTypeBox{\Partial{\disj}A}}\and
+\inferrule{\PGvdash u:A}{\PGvdash \lrbbar u : \Partial\top A}\and
 \inferrule{
 \forall i\in I.(\Phi\vdash \conj_i)\\
 \forall i\in I.(\Phi;\Gamma,\conj_i\vdash u_i:A)\\\\
@@ -493,6 +499,8 @@ reference variables in $\Phi$), as in~\cref{fig:tyck-par}.
 \end{mathpar}
 \caption{Typing rule of partial elements}\label{fig:tyck-par}
 \end{figure}
+
+\section{Applications of partial elements}
 
 \subsection{Generalized paths}\label{sub:extTy}
 In~\cite{CCHM}, the path type is defined using the following rules
@@ -622,19 +630,83 @@ Cofibrations in generalized paths are always \textit{bounded}
 in the sense that they cannot reference arbitrary local variables.
 We add the \textit{open} version of generalized paths,
 called \textit{cubical subtypes}, into our type theory.
-The syntax and typing rules are defined in~\cref{fig:subtype,fig:typing-subtype}, respectively.
+The syntax is defined in~\cref{fig:subtype}.
 \begin{figure}[h!]
-\[u,A::= \subTy{A}{\overline{\face}}
-\mid \outS u \mid \inS u
+\[u,A::= \subTy{A}{\disj}{\overline\face}
+\mid \outS\disj u \mid \inS\disj u
 \mid \cdots~\text{(see~\cref{fig:path})}\]
 \caption{Syntax of cubical subtypes}\label{fig:subtype}
 \end{figure}
+
+The type $\subTy{A}{\disj}{\overline\face}$ has three parameters: the \textit{ambient} type $A$,
+a cofibration $\disj$, and a set of faces ${\overline\face}$ such that:
+\[\lrbbar{\overline\face}:\Partial{\disj}A\]
+Then, if $\PGvdash u:A$ and $u$ \textit{matches} all the given faces
+(``match'' as in introduction of generalized paths), then:
+\[\inS\disj u:\subTy{A}{\disj}{\overline\face}\]
+This gives the introduction rule.
+The elimination rule is just the obvious inverse of the introduction rule,
+denoted \outSLong.
+Hence the typing rules as in~\cref{fig:typing-subtype}.
+
 \begin{figure}[h!]
 \begin{mathpar}
-\inferrule{1}{1}
+\inferrule{\Hint{\PGvdash \isType A} \\
+\PGvdash \lrbbar{\overline\face}:\Partial{\disj}A}
+{\PGvdash\isTypeBox{\subTy{A}{\disj}{\overline\face}}}\and
+\inferrule{\TODO}{\TODO}
 \end{mathpar}
-\caption{Syntax of generalized paths}\label{fig:typing-subtype}
+\caption{Typing rules of cubical subtypes, typing part}\label{fig:typing-subtype}
 \end{figure}
+
+Cubical subtypes compute in the following cases:
+\begin{itemize}
+\item The elimination rule always cancels the introduction rule.
+\item The introduction rule cancels the elimination rule when
+they share the same cofibration.
+\item The elimination rule computes according to the partial element.
+\end{itemize}
+Hence the computation rules as in~\cref{fig:compute-subtype}.
+\begin{figure}[h!]
+\begin{mathpar}
+\inferrule{\PGvdash u:A \\ \PGvdash \disj_0 \\ \PGvdash \disj_1}
+{\PGvdash \outS{\disj_0}{\inS{\disj_1} u}\equiv u:A} \and
+\inferrule{\PGvdash u:\subTy{A}{\disj}{\overline\face}}
+{\PGvdash \inS{\disj}{\outS{\disj} u}\equiv u:\subTy{A}{\disj}{\overline\face}}\and
+\inferrule{\PGvdash u:\subTy{A}{\disj}{\overline{\conj_i\mapsto v_i}}}
+{\forall i.(\Phi;\Gamma\conj_i\vdash \outS{\disj}u\equiv v_i:A)}
+\end{mathpar}
+\caption{Typing rules of cubical subtypes, computation part}\label{fig:compute-subtype}
+\end{figure}
+
+The set of instances of this cubical subtype is similar\footnote
+{It would be nice to say \textit{canonically isomorphic to} here, but the word
+\textit{canonical} is being criticized on social media recently,
+so it's avoided.} to a subset of the instances of $A$
+such that these instances match the given faces.
+
+\begin{remark}
+Ideally, we would define cubical subtypes to be \textit{subtypes}
+in the sense of subtyping, instead of being explicitly coerced.
+However, subtyping in dependent type theories is extremely
+sophisticated and may have bad consequences.
+\end{remark}
+
+Cubical subtypes, partial elements, and generalized paths are all
+based on the idea of cofibrations. Here's a brief table for comparison:
+
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+ \hline
+ & \textsf{Sub} & \textsf{Partial} & \textsf{Ext} \\ \hline
+ Have faces in type? & \checkmark & $\times$ & \checkmark \\ \hline
+ Have faces in terms? & $\times$ & \checkmark & $\times$ \\ \hline
+ Scope of cofibrations & Open & Open & Bound \\ \hline
+ Number of faces & $1$ & $\geq 1$ & $\geq 0$ \\ \hline
+%  Support composition & $\times$ & $\times$ & \checkmark \\ \hline
+%  Support transport & $\times$ & $\times$ & \checkmark \\ \hline
+\end{tabular}
+\end{center}
 
 Cubical subtypes will be useful later in~\cref{sub:transp}.
 
