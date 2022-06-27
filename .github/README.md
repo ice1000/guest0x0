@@ -50,6 +50,10 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+![image](https://user-images.githubusercontent.com/16398479/176041818-8f264b87-34cb-492a-bbaa-2d36e655a1b0.png)
+
+Refactored the implementation of extension types.
+
 ### v0.13.2
 
 ![image](https://user-images.githubusercontent.com/16398479/174672647-a49403e9-98b9-4b2f-ac61-47d67e56b442.png)
