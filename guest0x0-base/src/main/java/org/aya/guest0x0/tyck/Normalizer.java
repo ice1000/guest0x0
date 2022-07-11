@@ -96,6 +96,7 @@ public record Normalizer(
         }
         var b = pApp.b();
         var ur = new Ref<Term>();
+        b.dims().zipView(i).forEach(zip -> rho.put(zip._1, zip._2));
         var clauses = clauses(b.boundaries(), ur::set);
         if (ur.value != null) yield ur.value;
         yield new Term.PCall(p, i, new BdryData<>(b.dims(), term(b.type()), clauses));
