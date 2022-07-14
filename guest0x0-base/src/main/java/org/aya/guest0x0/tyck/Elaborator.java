@@ -104,7 +104,7 @@ public record Elaborator(
             var unpi = Term.unpi(acTyDims, synth.type, exTyDims.size());
             if (unlam == null || unpi == null) throw new SPE(expr.pos(), Doc.english("Expected (path) lambda"));
             unify(unpi, unlam, normalizer(exTyDims, acTyDims).term(path.data().type()), expr.pos());
-            yield boundaries(lamDims, () -> unlam, expr.pos(), path.data(), normalizer(acTyDims, exTyDims));
+            yield boundaries(lamDims, () -> unlam, expr.pos(), path.data(), normalizer(exTyDims, lamDims));
           }
           case Term ty -> {
             unify(ty, synth.wellTyped, synth.type, expr.pos());
