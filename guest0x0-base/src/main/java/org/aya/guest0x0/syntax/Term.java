@@ -81,7 +81,7 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
   record UI(@NotNull Keyword keyword) implements Term {}
   record Path(@NotNull BdryData<Term> data) implements Term {}
   record PLam(@NotNull ImmutableSeq<LocalVar> dims, @NotNull Term fill) implements Term {}
-  record PCall(@NotNull Term p, @NotNull ImmutableSeq<Term> i, @NotNull BdryData<Term> b) implements Term {}
+  record PCall(@NotNull Term p, @NotNull ImmutableSeq<Term> i, @NotNull PartEl b) implements Term {}
   record Mula(@Override @NotNull Formula<Term> asFormula) implements Term {}
   static @NotNull Term end(boolean isLeft) {return new Mula(new Formula.Lit<>(isLeft));}
   static @NotNull Term neg(@NotNull Term term) {return new Mula(new Formula.Inv<>(term));}

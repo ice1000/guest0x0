@@ -12,7 +12,7 @@ public record AltF7(@NotNull LocalVar var) {
       case Term.Ref r -> r.var() == var;
       case Term.Lam lam -> press(lam.body());
       case Term.Transp transp -> press(transp.cover()) || press(transp.restr());
-      case Term.PCall pCall -> press(pCall.p()) || pCall.i().anyMatch(this::press) || boundaries(pCall.b());
+      case Term.PCall pCall -> press(pCall.p()) || pCall.i().anyMatch(this::press) || press(pCall.b());
       case Term.PLam pLam -> press(pLam.fill());
       case Term.Call call -> call.fn() == var || call.args().anyMatch(this::press);
       case Term.Two two -> press(two.f()) || press(two.a());

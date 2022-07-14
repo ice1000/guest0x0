@@ -274,7 +274,7 @@ public record Elaborator(
     if (type instanceof Term.Path path) {
       var dims = path.data().dims();
       return new Synth(Normalizer.rename(Term.mkLam(dims.view(),
-        new Term.PCall(synth.wellTyped, dims.map(Term.Ref::new), path.data()))),
+        new Term.PCall(synth.wellTyped, dims.map(Term.Ref::new), new Term.PartEl(path.data().boundaries())))),
         Term.mkPi(dims.map(x -> new Param<>(x, Term.I)), path.data().type()));
     } else return new Synth(synth.wellTyped, type);
   }
