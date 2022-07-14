@@ -563,8 +563,8 @@ Note that we make use of reduction on partial elements (\cref{sub:red-cofib}).
 {\PGvdash\isTypeBox{\extTy{\overline{x}}{A}{\overline{\conj_i\mapsto u_i}}}}
 \and
 % Introduction
-\inferrule{\Phi\overline{,y_i:\II};\Gamma,\vdash v:A\\\\
-\forall j. (\Phi\overline{,y_i:\II};\Gamma,\conj_j\vdash v[\overline{y_i/x_i}]\equiv u_j:A)}
+\inferrule{\Phi\overline{,x_i:\II};\Gamma,\vdash v:A[\overline{x_i/y_i}]\\\\
+\forall j. (\Phi\overline{,x_i:\II};\Gamma,\conj_j[\overline{x_i/y_i}]\vdash v\equiv u_j[\overline{x_i/y_i}]:A[\overline{x_i/y_i}])}
 {\PGvdash \plam{\overline{x_i}}{v}:\extTy{\overline{y_i}}{A}{\overline{\conj_j\mapsto u_j}}}
 \and
 % Elimination
