@@ -1,5 +1,6 @@
 package org.aya.guest0x0.tyck;
 
+import kala.collection.Seq;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
@@ -50,12 +51,9 @@ public record Elaborator(
           var lamDims = MutableArrayList.<LocalVar>create(tyDims.size());
           var unlam = Expr.unlam(lamDims, tyDims.size(), lam);
           if (unlam == null) throw new SPE(lam.pos(), Doc.english("Expected path lambda"));
-          var substForTy = new Normalizer(sigma, MutableMap.from(
-            lamDims.zipView(tyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
-          ));
           yield boundaries(lamDims, () -> inherit(unlam,
-            substForTy.term(path.data().type())
-          ), unlam.pos(), path.data(), substForTy);
+            normalizer(lamDims, tyDims).term(path.data().type())
+          ), unlam.pos(), path.data(), normalizer(tyDims, lamDims));
         }
         default -> throw new SPE(lam.pos(),
           Doc.english("Expects a right adjoint for"), expr, Doc.plain("got"), type);
@@ -105,11 +103,8 @@ public record Elaborator(
             var acTyDims = MutableArrayList.<LocalVar>create(exTyDims.size());
             var unpi = Term.unpi(acTyDims, synth.type, exTyDims.size());
             if (unlam == null || unpi == null) throw new SPE(expr.pos(), Doc.english("Expected (path) lambda"));
-            var substForTy = new Normalizer(sigma, MutableMap.from(
-              exTyDims.zipView(acTyDims).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
-            ));
-            unify(unpi, unlam, substForTy.term(path.data().type()), expr.pos());
-            yield boundaries(lamDims, () -> unlam, expr.pos(), path.data(), substForTy);
+            unify(unpi, unlam, normalizer(exTyDims, acTyDims).term(path.data().type()), expr.pos());
+            yield boundaries(lamDims, () -> unlam, expr.pos(), path.data(), normalizer(acTyDims, exTyDims));
           }
           case Term ty -> {
             unify(ty, synth.wellTyped, synth.type, expr.pos());
@@ -118,6 +113,12 @@ public record Elaborator(
         };
       }
     };
+  }
+
+  private Normalizer normalizer(Seq<LocalVar> from, Seq<LocalVar> to) {
+    return new Normalizer(sigma, MutableMap.from(
+      from.zipView(to).map(t -> Tuple.of(t._1, new Term.Ref(t._2)))
+    ));
   }
 
   private ImmutableSeq<Restr.Side<Term>> elaborateClauses(
