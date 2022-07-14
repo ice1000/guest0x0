@@ -50,9 +50,21 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+### v0.14
+
 ![image](https://user-images.githubusercontent.com/16398479/176041818-8f264b87-34cb-492a-bbaa-2d36e655a1b0.png)
 
-Refactored the implementation of extension types.
+Refactored the implementation of extension types. It now looks like this:
+
+```
+def Eq (A : U) (a b : A) : U =>
+  [| j |] A {| j = 0 |-> a | j = 1 |-> b |}
+def EqP (A : I -> U) (a : A 0) (b : A 1) : U =>
+  [| j |] A j {| j = 0 |-> a | j = 1 |-> b |}
+def =-trans (A : Type) (p : I -> A) (q : [| i |] A {| i = 0 |-> p 1 |})
+    : [| i |] A {| i = 0 |-> p 0 | i = 1 |-> q 1 |} =>
+  subst A (Eq A (p 0)) (\i. q i) (\i. p i)
+```
 
 ### v0.13.2
 
