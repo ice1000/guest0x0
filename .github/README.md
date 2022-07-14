@@ -1,11 +1,11 @@
 # Guest0x0
 
-[![maven]](https://repo1.maven.org/maven2/org/aya-prover/guest0x0-base/)
+[![maven]](https://repo1.maven.org/maven2/org/aya-prover/guest0x0/base/)
 [![test](https://github.com/ice1000/guest0x0/actions/workflows/gradle-check.yml/badge.svg)](https://github.com/ice1000/guest0x0/actions/workflows/gradle-check.yml)
 
 ![image](https://user-images.githubusercontent.com/16398479/162600129-d59a0c0c-de5a-49e4-b0dd-dd3c4fd51938.png)
 
-[maven]: https://img.shields.io/maven-central/v/org.aya-prover/guest0x0-base
+[maven]: https://img.shields.io/maven-central/v/org.aya-prover/guest0x0/base
 
 Experimenting with some basic programming in Java 18 and see the following:
 
@@ -53,6 +53,9 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 ### v0.14
 
 ![image](https://user-images.githubusercontent.com/16398479/176041818-8f264b87-34cb-492a-bbaa-2d36e655a1b0.png)
+
+The maven identifier is changed from `org.aya-prover:guest0x0-base` to `org.aya-prover.guest0x0:base`,
+similarly for `cubical` and `cli`.
 
 Refactored the implementation of extension types. It now looks like this:
 
