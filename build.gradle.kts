@@ -16,7 +16,7 @@ deps = Properties()
 file("gradle/deps.properties").reader().use(deps::load)
 
 allprojects {
-  group = "org.aya-prover"
+  group = "org.aya-prover.guest0x0"
   version = deps.getProperty("version.project")
 }
 
