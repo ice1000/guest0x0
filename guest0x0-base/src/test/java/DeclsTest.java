@@ -35,7 +35,7 @@ public class DeclsTest {
   @Test public void funExt() {
     tyck("""
       def Eq (A : U) (a b : A) : U =>
-        [| j |] A { | 0 => a | 1 => b }
+        [| j |] A {| j = 0 |-> a | j = 1 |-> b |}
       def refl (A : U) (a : A) : Eq A a a => \\i. a
       def funExt (A B : U) (f g : A -> B)
                  (p : Pi (a : A) -> Eq B (f a) (g a))
@@ -47,12 +47,12 @@ public class DeclsTest {
 
   @Test public void confluence() {
     assertThrowsExactly(SPE.class, () -> tyck(
-      "def feizhu (A : U) (a b : A) : U => [| i j |] A { | 0 _ => a | _ 1 => b }"));
+      "def feizhu (A : U) (a b : A) : U => [| i j |] A {| i = 0 |-> a | j = 1 |-> b |}"));
   }
 
   @Test public void boundaries() {
     assertThrowsExactly(SPE.class, () -> tyck(
-      "def feizhu (A : U) (a b : A) : [| i |] A { | 0 => a | 1 => b } => \\i. a"));
+      "def feizhu (A : U) (a b : A) : [| i |] A {| i = 0 |-> a | i = 1 |-> b |} => \\i. a"));
   }
 
   @Test public void constantViolation() {
@@ -64,7 +64,7 @@ public class DeclsTest {
     tyck("def f (i j : I) : I => (j /\\ i) \\/ j /\\ ~ i");
     tyck("""
       def Eq (A : U) (a b : A) : U =>
-        [| j |] A { | 0 => a | 1 => b }
+        [| j |] A {| j = 0 |-> a | j = 1 |-> b |}
       def sym (A : U) (a b : A) (p : Eq A a b)
         : Eq A b a => \\i. p (~ i)
       def symSym (A : U) (a b : A) (p : Eq A a b)
@@ -74,10 +74,10 @@ public class DeclsTest {
         : Eq (Eq A b a) (sym A a b q) (sym A a b p)
         => \\i j. s (~ i) (~ j)
       def minSq (A : U) (a b : A) (p : Eq A a b)
-        : [| i j |] A { | 0 _ => a | 1 0 => a | 1 1 => b }
+        : [| i j |] A {| i = 0 |-> a | i = 1 /\\ j = 0 |-> a | i = 1 /\\ j = 1 |-> b |}
         => \\i j. p (i /\\ j)
       def maxSq (A : U) (a b : A) (p : Eq A a b)
-        : [| i j |] A { | 0 0 => a | 1 0 => b | _ 1 => b }
+        : [| i j |] A {| i = 0 /\\ j = 0 |-> a | i = 1 /\\ j = 0 |-> b | j = 1 |-> b |}
         => \\i j. p (i \\/ j)
       """);
   }
@@ -85,11 +85,11 @@ public class DeclsTest {
   @Test public void square() {
     tyck("""
       def Eq (A : U) (a b : A) : U =>
-        [| j |] A { | 0 => a | 1 => b }
+        [| j |] A {| j = 0 |-> a | j = 1 |-> b |}
       def EqP (A : I -> U) (a : A 0) (b : A 1) : U =>
-        [| j |] A j { | 0 => a | 1 => b }
+        [| j |] A j {| j = 0 |-> a | j = 1 |-> b |}
       def Sq (A : U) (a b c d : A) (ab : Eq A a b) (cd : Eq A c d) : U =>
-        [| i j |] A { | 0 _ => ab j | 1 _ => cd j }
+        [| i j |] A {| i = 0 |-> ab j | i = 1 |-> cd j |}
       def refl (A : U) (a : A) : Eq A a a => \\i. a
       def SqExm (A : U) (a b c d : A) (ab : Eq A a b) (cd : Eq A c d)
            (sq : Sq A a b c d ab cd) : Eq A a (sq 0 0) => refl A a
@@ -98,8 +98,9 @@ public class DeclsTest {
 
   @Test public void transportTyping() {
     tyck("""
+      
       def Eq (A : U) (a b : A) : U =>
-        [| j |] A { | 0 => a | 1 => b }
+        [| j |] A {| j = 0 |-> a | j = 1 |-> b |}
       def trans (A : I -> U) (a : A 0) : A 1 => tr A #{0=1} a
       def transPi (A : I -> U) (B : Pi (i : I) -> A i -> U)
           (f : Pi (x : A 0) -> B 0 x) : Pi (x : A 1) -> B 1 x =>
@@ -123,8 +124,8 @@ public class DeclsTest {
       def subst (A : Type) (P : A -> Type) (p : I -> A)
                 (lhs : P (p 0)) : P (p 1) =>
         trans (\\i. P (p i)) lhs
-      def =-trans (A : Type) (p : I -> A) (q : [| i |] A { | 0 => p 1 })
-          : Eq A (p 0) (q 1) =>
+      def =-trans (A : Type) (p : I -> A) (q : [| i |] A {| i = 0 |-> p 1 |})
+          : [| i |] A {| i = 0 |-> p 0 | i = 1 |-> q 1 |} =>
         subst A (Eq A (p 0)) (\\i. q i) (\\i. p i)
 
       def transId (A : U) (a : A) : Eq A a (tr (\\i. A) #{1=1} a) => \\i. a
