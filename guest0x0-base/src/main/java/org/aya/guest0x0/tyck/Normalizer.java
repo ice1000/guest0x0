@@ -99,7 +99,9 @@ public record Normalizer(
         b.dims().zipView(i).forEach(zip -> rho.put(zip._1, zip._2));
         var clauses = clauses(b.boundaries(), ur::set);
         if (ur.value != null) yield ur.value;
-        yield new Term.PCall(p, i, new BdryData<>(b.dims(), term(b.type()), clauses));
+        var data = new BdryData<>(b.dims(), term(b.type()), clauses);
+        b.dims().forEach(rho::remove);
+        yield new Term.PCall(p, i, data);
       }
       case Term.Mula f -> formulae(f.asFormula().fmap(this::term));
       case Term.Cof cof -> new Term.Cof(restr(cof.restr()));
@@ -193,7 +195,7 @@ public record Normalizer(
           yield new Term.Lam(param, term(lam.body()));
         }
         case Term.UI u -> u;
-        case Term.Ref ref -> new Term.Ref(map.getOrDefault(ref.var(), ref.var()));
+        case Term.Ref ref -> new Term.Ref(vv(ref.var()));
         case Term.DT dt -> {
           var param = param(dt.param());
           yield new Term.DT(dt.isPi(), param, term(dt.cod()));
@@ -206,6 +208,7 @@ public record Normalizer(
           var params = pLam.dims().map(this::param);
           yield new Term.PLam(params, term(pLam.fill()));
         }
+        // TODO: do not use dims in PCall
         case Term.PCall pApp -> new Term.PCall(term(pApp.p()), pApp.i().map(this::term), boundaries(pApp.b()));
         case Term.Mula f -> new Term.Mula(f.asFormula().fmap(this::term));
         case Term.Transp tr -> new Term.Transp(term(tr.cover()), tr.restr().fmap(this::term));
@@ -217,6 +220,10 @@ public record Normalizer(
 
     private @NotNull BdryData<Term> boundaries(@NotNull BdryData<Term> data) {
       return data.fmap(this::term, data.dims().map(this::param));
+    }
+
+    private @NotNull LocalVar vv(@NotNull LocalVar var) {
+      return map.getOrDefault(var, var);
     }
 
     private Param<Term> param(Param<Term> param) {
