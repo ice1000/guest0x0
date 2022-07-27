@@ -1,6 +1,7 @@
 // Copyright (c) 2020-2021 Yinsen (Tesla) Zhang.
 // Use of this source code is governed by the GNU GPLv3 license that can be found in the LICENSE file.
 import java.util.*
+import org.aya.gradle.BuildUtil
 
 plugins {
   java
@@ -60,7 +61,7 @@ subprojects {
       tree.include("**/*.class")
       tree.exclude("module-info.class")
       val root = destinationDirectory.asFile.get().toPath()
-      tree.forEach { StripPreview.stripPreview(root, it.toPath(), true) }
+      tree.forEach { BuildUtil.stripPreview(root, it.toPath()) }
     }
   }
 

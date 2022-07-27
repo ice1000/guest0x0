@@ -1,5 +1,5 @@
+import org.aya.gradle.BuildUtil
 import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
@@ -16,14 +16,7 @@ class GenerateVersionTask extends DefaultTask {
   @Input def taskVersion = project.version
 
   @TaskAction def run() {
-    def proc = "git rev-parse HEAD".execute([], project.rootDir)
-    def stdout = new StringBuilder()
-    def stderr = new StringBuilder()
-    proc.consumeProcessOutput stdout, stderr
-    proc.waitForOrKill 1000
-    if (stdout.isEmpty()) {
-      throw new GradleException(stderr.toString())
-    }
+    def stdout = BuildUtil.gitRev(project.rootDir)
     def code = """\
       package ${basePackage}.prelude;
       import org.aya.util.Version;
