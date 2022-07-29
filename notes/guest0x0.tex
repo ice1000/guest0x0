@@ -563,7 +563,7 @@ Note that we make use of reduction on partial elements (\cref{sub:red-cofib}).
 {\PGvdash\isTypeBox{\extTy{\overline{x}}{A}{\overline{\conj_i\mapsto u_i}}}}
 \and
 % Introduction
-\inferrule{\Phi\overline{,x_i:\II};\Gamma,\vdash v:A[\overline{x_i/y_i}]\\\\
+\inferrule{\Phi\overline{,x_i:\II};\Gamma\vdash v:A[\overline{x_i/y_i}]\\\\
 \forall j. (\Phi\overline{,x_i:\II};\Gamma,\conj_j[\overline{x_i/y_i}]\vdash v\equiv u_j[\overline{x_i/y_i}]:A[\overline{x_i/y_i}])}
 {\PGvdash \plam{\overline{x_i}}{v}:\extTy{\overline{y_i}}{A}{\overline{\conj_j\mapsto u_j}}}
 \and
@@ -580,7 +580,7 @@ v[\overline{u_i/x_i}] : A[\overline{u_i/x_i}]}
 \and
 \inferrule{\PGvdash \overline {u_i:\II}\\
 \PGvdash v:\extTy{\overline{x_i}}{A}{\overline\face}\\\\
-\PGvdash \lrbbar{\overline\face}[\overline{u_i/x_i}]\equiv v_0 : A[\overline{u_i/x_i}]}
+\PGvdash \lrbbar{\overline\face}[\overline{u_i/x_i}]\equiv \lrbbar{v_0} : A[\overline{u_i/x_i}]}
 {\PGvdash \papp v {\overline{u_i}}\equiv v_0 : A[\overline{u_i/x_i}]}
 \end{mathpar}
 \caption{Typing rules of generalized paths}\label{fig:tyck-path}
@@ -601,7 +601,7 @@ x&=\rcon&\mapsto q~@~\rcon}}
 \end{align*}
 It becomes longer, but the new definition has fewer parameters.
 The new definition can be more friendly to program synthesizers
-or programming languages that does not support implicit arguments.
+or programming languages that do not support implicit arguments.
 \end{example}
 
 \begin{example}\label{ex:gsquare}
@@ -632,9 +632,11 @@ We add the \textit{open} version of generalized paths,
 called \textit{cubical subtypes}, into our type theory.
 The syntax is defined in~\cref{fig:subtype}.
 \begin{figure}[h!]
-\[u,A::= \subTy{A}{\disj}{\overline\face}
-\mid \outS\disj u \mid \inS\disj u
-\mid \cdots~\text{(see~\cref{fig:path})}\]
+\begin{align*}
+	u,A::= &~~ \subTy{A}{\disj}{\overline\face}\\
+\mid &~~ \outS\disj u \mid \inS\disj u\\
+\mid &~~ \cdots~\text{(see~\cref{fig:path})}
+\end{align*}
 \caption{Syntax of cubical subtypes}\label{fig:subtype}
 \end{figure}
 
@@ -654,7 +656,10 @@ Hence the typing rules as in~\cref{fig:typing-subtype}.
 \inferrule{\Hint{\PGvdash \isType A} \\
 \PGvdash \lrbbar{\overline\face}:\Partial{\disj}A}
 {\PGvdash\isTypeBox{\subTy{A}{\disj}{\overline\face}}}\and
-\inferrule{\TODO}{\TODO}
+\inferrule{\forall i.(\Phi;\Gamma,\conj_i\vdash u\equiv v_i)}
+{\PGvdash\inS\disj u:\subTy{A}{\disj}{\overline{\conj_i\mapsto v_i}}}\and
+\inferrule{\PGvdash u:\subTy{A}{\disj}{\overline\face}}
+{\PGvdash\outS\disj u:A}
 \end{mathpar}
 \caption{Typing rules of cubical subtypes, typing part}\label{fig:typing-subtype}
 \end{figure}
