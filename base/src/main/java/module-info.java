@@ -3,8 +3,8 @@ module aya.guest.base {
 
   requires aya.guest.cubical;
 
-  requires transitive org.aya.pretty;
-  requires transitive org.aya.util;
+  requires transitive aya.pretty;
+  requires transitive aya.util;
   requires transitive kala.base;
   requires transitive kala.collection;
 

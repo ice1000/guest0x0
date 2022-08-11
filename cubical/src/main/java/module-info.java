@@ -1,7 +1,7 @@
 module aya.guest.cubical {
   requires static org.jetbrains.annotations;
 
-  requires transitive org.aya.pretty;
+  requires transitive aya.pretty;
   requires transitive kala.base;
   requires transitive kala.collection;
 
