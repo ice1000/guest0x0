@@ -10,7 +10,7 @@
 Experimenting with some basic programming in Java 18 and see the following:
 
 + If Java competes with existing established independently typed languages for writing compilers, like Haskell
-+ If capture-avoiding substitution is not too bad (because with nestable pattern matching, de-bruijn indices are too bad)
++ If capture-avoiding substitution is not too bad (because with nestable pattern matching, de-Bruijn indices are too bad)
   + Cody [told me](https://twitter.com/codydroux/status/1512204955641389056) that locally nameless is survivable, hmm
 + If my understanding of basic programming is appropriate
 
@@ -19,7 +19,7 @@ Experimenting with some basic programming in Java 18 and see the following:
 + A "De Morgan flavored" cubical type theory with redtt flavored generalized path types (the so-called "extension types")
 + ~~A ✨new syntax✨ for cofibration theory that is more convenient for confluence checking and hopefully is equivalent to existing ones~~
   + Update: it's not. The new syntax is implemented, tested, and removed for not working well with substitutions.
-  + Unlike Cubical Agda, Guest0x0 sticks to the paper syntax, and is not constraint-based.
+  + Unlike Cubical Agda, Guest0x0 sticks to the paper syntax and is not constraint-based.
 + Inductive types with pattern matching (hopefully) and "simpler indices" (see my TyDe paper)
 + An equalizer of the first projection of evaluation and just the first projection :trollface:
 
@@ -137,7 +137,7 @@ Total lines of Java code in base (including spaces and comments): 1322, and in c
 
 ![image](https://user-images.githubusercontent.com/16398479/166834889-07041e0e-db7b-41b4-9081-282ab40b8e70.png)
 
-Changed the syntax of transport from `A #{cof}` to `tr A #{cof}` for future convenience, implemented many tools for systems. Added some tests for cofibration substitution, fixed some pretty-printing bugs. Below is a snippet that already works in old versions:
+Changed the syntax of transport from `A #{cof}` to `tr A #{cof}` for future convenience, and implemented many tools for systems. Added some tests for cofibration substitution, and fixed some pretty-printing bugs. Below is a snippet that already works in old versions:
 
 ```
 def transId (A : U) (a : A) : Eq A a (tr (\i. A) #{1=1} a) => refl A a
@@ -168,7 +168,7 @@ Replacing the cofibration with `i = 0` makes `A (i /\ j)` reduce to `A 0`, which
 
 ![image](https://user-images.githubusercontent.com/16398479/165893441-23c02472-d363-45fb-b460-9869552714a7.png)
 
-Refactored the implementation of restrictions, finished splitting disjunctions. The number of lines of Java code is 1366 now, quite a lot. There aren't many new features, so no new code snippet this time.
+Refactored the implementation of restrictions, and finished splitting disjunctions. The number of lines of Java code is 1366 now, quite a lot. There aren't many new features, so no new code snippets this time.
 
 ### v0.9
 
@@ -200,7 +200,7 @@ def =-trans (A : Type) (p : I -> A) (q : [| i |] A { | 0 => p 1 })
 
 ![image](https://user-images.githubusercontent.com/16398479/163415006-4c7ecf02-2ed1-4c8a-b3f6-779538401973.png)
 
-Updated the CLI frontend to hide stack traces by default. Fixed some core theory bugs (many thanks to Amélia, MBones, and Daniel for their helps), implemented structural lures for universe, Pi, and Sigma types. 1179 lines of Java. I'm sort of giving up on lines of code thingies -- I don't want to sacrifice readability.
+Updated the CLI frontend to hide stack traces by default. Fixed some core theory bugs (many thanks to Amélia, MBones, and Daniel for their helps), implemented structural lures for the universe, Pi, and Sigma types. 1179 lines of Java. I'm sort of giving up on lines of code thingies -- I don't want to sacrifice readability.
 
 ```
 def transPiEq (A : I -> U) (B : Pi (i : I) -> A i -> U)

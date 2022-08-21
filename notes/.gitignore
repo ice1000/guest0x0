@@ -1,5 +1,6 @@
 *.cmd
 *.sh
+!cubes.bin
 
 ## Agda
 *.agdai
