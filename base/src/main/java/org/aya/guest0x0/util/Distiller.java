@@ -55,6 +55,7 @@ public interface Distiller {
       case Expr.PartTy par -> fibred("Partial", par.ty(), par.restr());
       case Expr.Sub sub -> Doc.sep(Doc.plain("Sub"),
         expr(sub.ty(), Free), partial(sub.par()));
+      case Expr.SubEl subEl -> Doc.sep(Doc.plain(subEl.isIntro() ? "inS" : "outS"), expr(subEl.e(), Free));
     };
   }
   @NotNull private static Doc partial(Expr.PartEl par) {

@@ -43,6 +43,12 @@ public sealed interface Expr extends Docile, Restr.TermLike<Expr> {
   record Cof(@Override @NotNull SourcePos pos, @NotNull Restr<Expr> data) implements Expr {}
   record PartEl(@Override @NotNull SourcePos pos, @NotNull ImmutableSeq<Restr.Side<Expr>> clauses) implements Expr {}
   record PartTy(@Override @NotNull SourcePos pos, @NotNull Expr ty, @NotNull Expr restr) implements Expr {}
-  // "Proper" cubical subtypes
+  /** "Proper" cubical subtypes */
   record Sub(@Override @NotNull SourcePos pos, @NotNull Expr ty, @NotNull PartEl par) implements Expr {}
+  /**
+   * inS/outS, the introduction/elimination rules for the subtype relation
+   *
+   * @param isIntro true if inS
+   */
+  record SubEl(@Override @NotNull SourcePos pos, @NotNull Expr e, boolean isIntro) implements Expr {}
 }

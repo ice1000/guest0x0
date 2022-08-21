@@ -53,8 +53,8 @@ public record Parser(@NotNull SourceFile source) {
         localVars(cube.ID()), expr(cube.expr()),
         Seq.wrapJava(cube.partial().subSystem()).map(this::clause)));
       case Guest0x0Parser.SubContext sub -> new Expr.Sub(sourcePosOf(sub), expr(sub.expr()), partial(sub.partial()));
-      case Guest0x0Parser.InSContext inS -> throw new UnsupportedOperationException("inS");
-      case Guest0x0Parser.OutSContext outS -> throw new UnsupportedOperationException("outS");
+      case Guest0x0Parser.InSContext inS -> new Expr.SubEl(sourcePosOf(inS), expr(inS.expr()), true);
+      case Guest0x0Parser.OutSContext outS -> new Expr.SubEl(sourcePosOf(outS), expr(outS.expr()), false);
       case Guest0x0Parser.PartTyContext par -> new Expr.PartTy(sourcePosOf(par), expr(par.expr(0)), expr(par.expr(1)));
       case Guest0x0Parser.PartElContext par -> partial(par.partial());
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
