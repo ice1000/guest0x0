@@ -36,12 +36,13 @@ public record Elaborator(
 
   public Term inherit(Expr expr, Term type) {
     return switch (expr) {
-      case Expr.Lam lam -> switch (normalize(type)) {
-        case Term.DT dt && dt.isPi() -> new Term.Lam(lam.x(),
-          hof(lam.x(), dt.param().type(), () -> inherit(lam.a(), dt.codomain(new Term.Ref(lam.x())))));
-        default -> throw new SPE(lam.pos(),
+      case Expr.Lam lam -> {
+        if (normalize(type) instanceof Term.DT dt && dt.isPi())
+          yield new Term.Lam(lam.x(), hof(lam.x(), dt.param().type(), () ->
+            inherit(lam.a(), dt.codomain(new Term.Ref(lam.x())))));
+        else throw new SPE(lam.pos(),
           Doc.english("Expects a right adjoint for"), expr, Doc.plain("got"), type);
-      };
+      }
       case Expr.Two two && !two.isApp() -> {
         if (!(normalize(type) instanceof Term.DT dt) || dt.isPi()) throw new SPE(two.pos(),
           Doc.english("Expects a left adjoint for"), expr, Doc.plain("got"), type);
@@ -68,12 +69,8 @@ public record Elaborator(
       }
       default -> {
         var synth = synth(expr);
-        yield switch (normalize(type)) {
-          case Term ty -> {
-            unify(ty, synth.wellTyped, synth.type, expr.pos());
-            yield synth.wellTyped;
-          }
-        };
+        unify(normalize(type), synth.wellTyped, synth.type, expr.pos());
+        yield synth.wellTyped;
       }
     };
   }

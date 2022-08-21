@@ -41,14 +41,6 @@ public interface Distiller {
       case Expr.Hole ignored -> Doc.symbol("_");
     };
   }
-  @NotNull private static Doc partial(Expr.PartEl par) {
-    return Doc.wrap("[|", "|]",
-      Doc.join(Doc.symbol("|"), clauses(par.clauses())));
-  }
-  private static @NotNull Doc fibred(String kw, Docile cover, Docile restr) {
-    return Doc.sep(Doc.plain(kw), cover.toDoc(),
-      Doc.symbol("#{"), restr.toDoc(), Doc.symbol("}"));
-  }
   private static @NotNull Doc dependentType(boolean isPi, Param<?> param, Docile cod) {
     return Doc.sep(Doc.plain(isPi ? "Pi" : "Sig"),
       param.toDoc(), Doc.symbol(isPi ? "->" : "**"), cod.toDoc());
