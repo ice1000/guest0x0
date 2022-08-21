@@ -137,16 +137,16 @@ public class DeclsTest {
   @Test public void partial() {
     tyck("""
       def par1 (A : Type) (u : A) (i : I) : Partial A #{i = 0} =>
-        {| i = 0 |-> u |}
+        \\ {| i = 0 |-> u |}
       def par2 (A : Type) (u : A) (i : I) : Partial A #{i = 0} =>
-        {| i = 0 |-> u | i = 1 |-> u |}
+        \\ {| i = 0 |-> u | i = 1 |-> u |}
       def par3 (A : Type) (u : A) (v : A) (i : I) : Partial A #{i = 0 \\/ i = 1} =>
-        {| i = 0 |-> u | i = 1 |-> v |}
+        \\ {| i = 0 |-> u | i = 1 |-> v |}
       def par4 (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 \\/ i = 1 /\\ j = 0} =>
-        {| i = 0 |-> u | i = 1 /\\ j = 0 |-> v |}
+        \\ {| i = 0 |-> u | i = 1 /\\ j = 0 |-> v |}
       def par5 (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 \\/ i = 1 /\\ j = 0} =>
-        {| i = 0 |-> u | i = 1 |-> v |}
-      """);
+        \\ {| i = 0 |-> u | i = 1 |-> v |}
+            """);
   }
 
   @Test public void partialTooRestricted() {

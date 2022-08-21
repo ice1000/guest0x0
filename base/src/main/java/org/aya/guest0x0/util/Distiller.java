@@ -51,12 +51,15 @@ public interface Distiller {
         // Well, hopefully I guessed the precedence right.
         yield envPrec.ordinal() > AppSpine.ordinal() ? Doc.parened(doc) : doc;
       }
-      case Expr.PartEl par -> Doc.wrap("[|", "|]",
-        Doc.join(Doc.symbol("|"), clauses(par.clauses())));
+      case Expr.PartEl par -> Doc.sep(Doc.symbol("\\"), partial(par));
       case Expr.PartTy par -> fibred("Partial", par.ty(), par.restr());
       case Expr.Sub sub -> Doc.sep(Doc.plain("Sub"),
-        expr(sub.ty(), Free), expr(sub.par(), Free));
+        expr(sub.ty(), Free), partial(sub.par()));
     };
+  }
+  @NotNull private static Doc partial(Expr.PartEl par) {
+    return Doc.wrap("[|", "|]",
+      Doc.join(Doc.symbol("|"), clauses(par.clauses())));
   }
   private static @NotNull Doc fibred(String kw, Docile cover, Docile restr) {
     return Doc.sep(Doc.plain(kw), cover.toDoc(),

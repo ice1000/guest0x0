@@ -34,7 +34,7 @@ expr
  | 'tr' expr '#{' expr '}' # trans
  | 'Partial' expr '#{' expr '}' # partTy
  | 'Sub' expr partial # partTy
- | partial # partEl
+ | LAM partial # partEl
  | iPat # iLit
  | '~' expr # inv
  | expr (AND | OR) expr # iConn
