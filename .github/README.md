@@ -50,6 +50,10 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+### v0.14.1
+
+Fixed a bug in module-info.java with updated Aya, as reported by @imkiva. Started working on cubical subtypes.
+
 ### v0.14
 
 ![image](https://user-images.githubusercontent.com/16398479/176041818-8f264b87-34cb-492a-bbaa-2d36e655a1b0.png)

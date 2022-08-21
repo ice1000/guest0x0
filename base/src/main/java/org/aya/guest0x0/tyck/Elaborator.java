@@ -232,6 +232,11 @@ public record Elaborator(
         var cod = hof(x, param.wellTyped, () -> synth(dt.cod()));
         yield new Synth(new Term.DT(dt.isPi(), new Param<>(x, param.wellTyped), cod.wellTyped), cod.type);
       }
+      case Expr.Sub sub -> {
+        var ty = inherit(sub.ty(), Term.U);
+        var clauses = elaborateClauses(sub, sub.par().clauses(), ty);
+        throw new UnsupportedOperationException(clauses.toString());
+      }
       case Expr.Path path -> {
         var dims = path.data().dims();
         for (var dim : dims) gamma.put(dim, Term.I);
