@@ -3,7 +3,7 @@ package org.aya.guest0x0.tyck;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
-import kala.value.Ref;
+import kala.value.Var;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
@@ -95,7 +95,7 @@ public record Normalizer(
           yield fill;
         }
         var b = pApp.b();
-        var ur = new Ref<Term>();
+        var ur = new Var<Term>();
         // b.dims().zipView(i).forEach(zip -> rho.put(zip._1, zip._2));
         var clauses = clauses(b.clauses(), ur::set);
         if (ur.value != null) yield ur.value;
