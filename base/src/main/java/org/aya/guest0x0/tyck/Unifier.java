@@ -3,11 +3,9 @@ package org.aya.guest0x0.tyck;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableMap;
 import kala.tuple.Tuple;
-import org.aya.guest0x0.cubical.Boundary;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
-import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.LocalVar;
 import org.jetbrains.annotations.NotNull;
@@ -89,24 +87,5 @@ public class Unifier {
 
   private static @NotNull Term rhs(Term rhs, LocalVar rb, LocalVar lb) {
     return rhs.subst(rb, new Term.Ref(lb));
-  }
-
-  record Cof(@NotNull Normalizer l, @NotNull Normalizer r) {
-    public Cof(@NotNull MutableMap<LocalVar, Def<Term>> sigma) {
-      this(new Normalizer(sigma, MutableMap.create()), new Normalizer(sigma, MutableMap.create()));
-    }
-
-    public void unify(
-      @NotNull ImmutableSeq<LocalVar> dims,
-      @NotNull Boundary.Face lc, // Lambda calculus!!
-      @NotNull Boundary.Face rc  // Reference counting!!
-    ) {
-      assert lc.pats().sizeEquals(dims) && rc.pats().sizeEquals(dims);
-      for (var ttt : dims.zipView(lc.pats().zipView(rc.pats()))) {
-        if (ttt._2._1 == ttt._2._2) continue;
-        if (ttt._2._1 == Boundary.Case.VAR) r.rho().put(ttt._1, Term.end(ttt._2._2 == Boundary.Case.LEFT));
-        if (ttt._2._2 == Boundary.Case.VAR) l.rho().put(ttt._1, Term.end(ttt._2._1 == Boundary.Case.LEFT));
-      }
-    }
   }
 }
