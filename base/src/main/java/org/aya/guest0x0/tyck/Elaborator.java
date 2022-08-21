@@ -75,6 +75,17 @@ public record Elaborator(
         var lhs = inherit(two.f(), dt.param().type());
         yield new Term.Two(false, lhs, inherit(two.a(), dt.codomain(lhs)));
       }
+      case Expr.SubEl inS && inS.isIntro() -> {
+        if (!(normalize(type) instanceof Term.Sub sub)) throw new SPE(inS.pos(),
+          Doc.english("Expects cubical subtype, got"), type);
+        var arg = inherit(inS.e(), sub.ty());
+        boundaries(inS.pos(), normalizer(), arg, sub.par().clauses());
+        // yield new Term.SubEl(arg, true);
+        throw new UnsupportedOperationException("TODO");
+      }
+      case Expr.SubEl outS /*&& !outS.isIntro()*/ -> {
+        throw new UnsupportedOperationException("TODO");
+      }
       case Expr.Hole hole -> {
         var docs = MutableList.<Doc>create();
         gamma.forEach((k, v) -> {
@@ -175,11 +186,17 @@ public record Elaborator(
     @NotNull MutableList<LocalVar> lamDims,
     @NotNull Supplier<Term> coreSupplier,
     SourcePos pos, BdryData<Term> data,
-    @NotNull Normalizer subst
+    Normalizer subst
   ) {
     lamDims.forEach(t -> gamma.put(t, Term.I));
     var core = coreSupplier.get();
-    for (var boundary : data.boundaries()) {
+    boundaries(pos, subst, core, data.boundaries());
+    lamDims.forEach(gamma::remove);
+    return new Term.PLam(lamDims.toImmutableArray(), core);
+  }
+
+  private void boundaries(SourcePos pos, Normalizer subst, Term core, ImmutableSeq<Restr.Side<Term>> boundaries) {
+    for (var boundary : boundaries) {
       // Based on the very assumption as in the function's javadoc
       CofThy.conv(boundary.cof().fmap(subst::term), subst, norm -> {
         unify(norm.term(boundary.u()), boundary, norm.term(core), pos,
@@ -187,8 +204,6 @@ public record Elaborator(
         return true;
       });
     }
-    lamDims.forEach(gamma::remove);
-    return new Term.PLam(lamDims.toImmutableArray(), core);
   }
 
   public Synth synth(Expr expr) {
