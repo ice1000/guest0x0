@@ -113,6 +113,9 @@ public record Normalizer(
       case Term.PartTy par -> new Term.PartTy(term(par.ty()), term(par.restr()));
       case Term.PartEl par -> partial(par);
       case Term.Sub sub -> new Term.Sub(term(sub.ty()), partial(sub.par()));
+      // TODO: reductions
+      case Term.InS inS -> new Term.InS(term(inS.e()), restr(inS.restr()));
+      case Term.OutS outS -> new Term.OutS(term(outS.e()), partial(outS.par()));
     };
   }
 
@@ -219,6 +222,8 @@ public record Normalizer(
         case Term.PartTy par -> new Term.PartTy(term(par.ty()), term(par.restr()));
         case Term.PartEl par -> partEl(par);
         case Term.Sub sub -> new Term.Sub(term(sub.ty()), partEl(sub.par()));
+        case Term.InS inS -> new Term.InS(term(inS.e()), inS.restr().fmap(this::term));
+        case Term.OutS outS -> new Term.OutS(term(outS.e()), partEl(outS.par()));
       };
     }
 

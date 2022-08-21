@@ -63,7 +63,7 @@ public record Elaborator(
           Doc.english("Expects partial type for partial elements"), expr, Doc.plain("got"), type);
         var cof = cof(par.restr(), el.pos());
         var clauses = elaborateClauses(el, el.clauses(), par.ty());
-        var face = new Restr.Vary<>(clauses.map(Restr.Side::cof));
+        var face = restrOfClauses(clauses);
         if (!CofThy.conv(cof.restr(), Normalizer.create(), norm -> CofThy.satisfied(norm.restr(face))))
           throw new SPE(el.pos(), Doc.english("The faces in the partial element"), face,
             Doc.english("must cover the face(s) specified in type:"), cof);
@@ -80,11 +80,7 @@ public record Elaborator(
           Doc.english("Expects cubical subtype, got"), type);
         var arg = inherit(inS.e(), sub.ty());
         boundaries(inS.pos(), normalizer(), arg, sub.par().clauses());
-        // yield new Term.SubEl(arg, true);
-        throw new UnsupportedOperationException("TODO");
-      }
-      case Expr.SubEl outS /*&& !outS.isIntro()*/ -> {
-        throw new UnsupportedOperationException("TODO");
+        yield new Term.InS(arg, restrOfClauses(sub.par().clauses()));
       }
       case Expr.Hole hole -> {
         var docs = MutableList.<Doc>create();
@@ -124,6 +120,10 @@ public record Elaborator(
         };
       }
     };
+  }
+
+  public static @NotNull Restr<Term> restrOfClauses(ImmutableSeq<Restr.Side<Term>> clauses) {
+    return new Restr.Vary<>(clauses.map(Restr.Side::cof));
   }
 
   private Normalizer normalizer(Seq<LocalVar> from, Seq<LocalVar> to) {
@@ -246,6 +246,12 @@ public record Elaborator(
         var x = dt.param().x();
         var cod = hof(x, param.wellTyped, () -> synth(dt.cod()));
         yield new Synth(new Term.DT(dt.isPi(), new Param<>(x, param.wellTyped), cod.wellTyped), cod.type);
+      }
+      case Expr.SubEl outS && !outS.isIntro() -> {
+        var e = synth(outS.e());
+        if (!(e.type instanceof Term.Sub sub))
+          throw new SPE(outS.pos(), Doc.english("Expects a cubical subtype, got"), e.type);
+        yield new Synth(new Term.OutS(e.wellTyped, sub.par()), sub.ty());
       }
       case Expr.Sub sub -> {
         var ty = inherit(sub.ty(), Term.U);
