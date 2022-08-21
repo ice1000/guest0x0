@@ -56,6 +56,8 @@ public interface Distiller {
       case Expr.Sub sub -> Doc.sep(Doc.plain("Sub"),
         expr(sub.ty(), Free), partial(sub.par()));
       case Expr.SubEl subEl -> Doc.sep(Doc.plain(subEl.isIntro() ? "inS" : "outS"), expr(subEl.e(), AppSpine));
+      case Expr.HComp hComp -> Doc.sep(Doc.plain("hc"), Doc.plain(hComp.h().name()),
+        expr(hComp.walls(), Free), Doc.plain("on"), expr(hComp.bottom(), AppSpine));
     };
   }
   @NotNull private static Doc partial(Expr.PartEl par) {

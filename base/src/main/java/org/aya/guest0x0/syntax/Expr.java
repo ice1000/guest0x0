@@ -51,4 +51,5 @@ public sealed interface Expr extends Docile, Restr.TermLike<Expr> {
    * @param isIntro true if inS
    */
   record SubEl(@Override @NotNull SourcePos pos, @NotNull Expr e, boolean isIntro) implements Expr {}
+  record HComp(@Override @NotNull SourcePos pos, @NotNull LocalVar h, @NotNull Expr walls, @NotNull Expr bottom) implements Expr {}
 }

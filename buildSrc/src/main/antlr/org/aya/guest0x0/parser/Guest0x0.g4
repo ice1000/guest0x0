@@ -18,7 +18,6 @@ expr
  | <assoc=right> expr TIMES expr # simpTup
  | PI param ARROW expr # pi
  | SIG param TIMES expr # sig
-// | 'Sub' expr subSystem # sub
 
  // Introduction lures
  | LAM ID+ '.' expr # lam
@@ -36,6 +35,7 @@ expr
  | 'Sub' expr partial # sub
  | 'inS' expr # inS
  | 'outS' expr # outS
+ | 'hc' ID expr 'on' expr # hcomp
  | LAM partial # partEl
  | iPat # iLit
  | '~' expr # inv

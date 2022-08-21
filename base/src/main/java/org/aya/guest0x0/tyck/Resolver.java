@@ -91,6 +91,10 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
       case Expr.PartTy par -> new Expr.PartTy(par.pos(), expr(par.ty()), expr(par.restr()));
       case Expr.Sub sub -> new Expr.Sub(sub.pos(), expr(sub.ty()), par(sub.par()));
       case Expr.SubEl subEl -> new Expr.SubEl(subEl.pos(), expr(subEl.e()), subEl.isIntro());
+      case Expr.HComp hComp -> {
+        var walls = bodied(hComp.h(), hComp.walls());
+        yield new Expr.HComp(hComp.pos(), hComp.h(), walls, expr(hComp.bottom()));
+      }
     };
   }
 
