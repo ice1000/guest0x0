@@ -24,6 +24,7 @@ public record AltF7(@NotNull LocalVar var) {
       case Term.Cof cof -> cof.restr().instView().anyMatch(this::press);
       case Term.PartTy par -> press(par.ty()) || press(par.restr());
       case Term.PartEl par -> par.clauses().anyMatch(this::clause);
+      case Term.Sub sub -> press(sub.ty()) || press(sub.par());
     };
   }
 

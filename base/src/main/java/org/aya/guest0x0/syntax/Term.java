@@ -96,4 +96,5 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
   }
   record PartTy(@NotNull Term ty, @NotNull Term restr) implements Term {}
   record PartEl(@NotNull ImmutableSeq<Restr.Side<Term>> clauses) implements Term {}
+  record Sub(@NotNull Term ty, @NotNull PartEl par) implements Term {}
 }

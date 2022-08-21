@@ -128,9 +128,14 @@ public interface Distiller {
         yield envPrec.ordinal() > AppSpine.ordinal() ? Doc.parened(doc) : doc;
       }
       case Term.PartTy par -> fibred("Partial", par.ty(), par.restr());
-      case Term.PartEl par -> Doc.wrap("[|", "|]",
-        Doc.join(Doc.symbol("|"), clauses(par.clauses())));
+      case Term.PartEl par -> partial(par);
+      case Term.Sub sub -> Doc.sep(Doc.plain("Sub"),
+        term(sub.ty(), Free), partial(sub.par()));
     };
+  }
+  private static @NotNull Doc partial(Term.PartEl par) {
+    return Doc.wrap("[|", "|]",
+      Doc.join(Doc.symbol("|"), clauses(par.clauses())));
   }
   static <T extends Restr.TermLike<T>> SeqView<Doc> clauses(@NotNull Seq<Restr.Side<T>> clauses) {
     return clauses.view()

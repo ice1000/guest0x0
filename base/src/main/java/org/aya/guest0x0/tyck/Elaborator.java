@@ -235,7 +235,7 @@ public record Elaborator(
       case Expr.Sub sub -> {
         var ty = inherit(sub.ty(), Term.U);
         var clauses = elaborateClauses(sub, sub.par().clauses(), ty);
-        throw new UnsupportedOperationException(clauses.toString());
+        yield new Synth(new Term.Sub(ty, new Term.PartEl(clauses)), ty);
       }
       case Expr.Path path -> {
         var dims = path.data().dims();

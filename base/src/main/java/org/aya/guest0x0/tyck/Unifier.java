@@ -52,6 +52,8 @@ public class Unifier {
         untyped(lpart.ty(), rpart.ty()) && untyped(lpart.restr(), rpart.restr());
       case Term.PartEl par -> par.clauses().allMatch(clause -> clause(clause, r));
       case Term ll && r instanceof Term.PartEl par -> par.clauses().allMatch(clause -> clause(clause, ll));
+      case Term.Sub ll && r instanceof Term.Sub rr -> untyped(ll.ty(), rr.ty())
+        && untyped(ll.par(), rr.par());
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };

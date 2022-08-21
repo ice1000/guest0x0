@@ -111,9 +111,14 @@ public record Normalizer(
         yield transp(new LocalVar("i"), term(transp.cover()), new Term.Cof(parkerLiu));
       }
       case Term.PartTy par -> new Term.PartTy(term(par.ty()), term(par.restr()));
-      // TODO: do nothing for now, need a new term for 'to reduce' partials
-      case Term.PartEl par -> new Term.PartEl(clauses(par.clauses(), u -> {}));
+      case Term.PartEl par -> partial(par);
+      case Term.Sub sub -> new Term.Sub(term(sub.ty()), partial(sub.par()));
     };
+  }
+
+  private @NotNull Term.PartEl partial(Term.PartEl par) {
+    // TODO: do nothing for now, need a new term for 'to reduce' partials
+    return new Term.PartEl(clauses(par.clauses(), u -> {}));
   }
 
   private ImmutableSeq<Restr.Side<Term>> clauses(
@@ -213,6 +218,7 @@ public record Normalizer(
         case Term.Cof cof -> cof.fmap(this::term);
         case Term.PartTy par -> new Term.PartTy(term(par.ty()), term(par.restr()));
         case Term.PartEl par -> partEl(par);
+        case Term.Sub sub -> new Term.Sub(term(sub.ty()), partEl(sub.par()));
       };
     }
 
