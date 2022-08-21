@@ -11,4 +11,5 @@ module aya.guest.cli {
   requires transitive aya.util;
 
   exports org.aya.guest0x0.cli;
+  exports org.aya.guest0x0.parser;
 }

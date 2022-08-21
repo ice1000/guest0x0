@@ -33,7 +33,9 @@ expr
  | '[|' ID+ '|]' expr partial # cube
  | 'tr' expr '#{' expr '}' # trans
  | 'Partial' expr '#{' expr '}' # partTy
- | 'Sub' expr partial # partTy
+ | 'Sub' expr partial # sub
+ | 'inS' expr # inS
+ | 'outS' expr # outS
  | LAM partial # partEl
  | iPat # iLit
  | '~' expr # inv

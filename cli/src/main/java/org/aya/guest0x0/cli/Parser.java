@@ -52,15 +52,18 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.CubeContext cube -> new Expr.Path(sourcePosOf(cube), new BdryData<>(
         localVars(cube.ID()), expr(cube.expr()),
         Seq.wrapJava(cube.partial().subSystem()).map(this::clause)));
-      // case Guest0x0Parser.SubContext sub -> {
-      //   var sys = sub.subSystem();
-      //   yield new Expr.Sub(sourcePosOf(sub), expr(sub.expr()), expr(sys.expr(0)), expr(sys.expr(1)));
-      // }
+      case Guest0x0Parser.SubContext sub -> new Expr.Sub(sourcePosOf(sub), expr(sub.expr()), partial(sub.partial()));
+      case Guest0x0Parser.InSContext inS -> throw new UnsupportedOperationException("inS");
+      case Guest0x0Parser.OutSContext outS -> throw new UnsupportedOperationException("outS");
       case Guest0x0Parser.PartTyContext par -> new Expr.PartTy(sourcePosOf(par), expr(par.expr(0)), expr(par.expr(1)));
-      case Guest0x0Parser.PartElContext par -> new Expr.PartEl(sourcePosOf(par),
-        Seq.wrapJava(par.partial().subSystem()).map(this::clause));
+      case Guest0x0Parser.PartElContext par -> partial(par.partial());
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
+  }
+
+  private @NotNull Expr.PartEl partial(Guest0x0Parser.PartialContext partial) {
+    return new Expr.PartEl(sourcePosOf(partial),
+      Seq.wrapJava(partial.subSystem()).map(this::clause));
   }
 
   private @NotNull Restr.Side<Expr> clause(@NotNull Guest0x0Parser.SubSystemContext clause) {
