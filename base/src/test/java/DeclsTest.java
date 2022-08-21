@@ -152,14 +152,14 @@ public class DeclsTest {
   @Test public void partialTooRestricted() {
     assertThrowsExactly(SPE.class, () -> tyck("""
       def par (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 \\/ i = 1} =>
-        {| i = 0 |-> u | i = 1 /\\ j = 0 |-> v |}
+        \\ {| i = 0 |-> u | i = 1 /\\ j = 0 |-> v |}
       """));
   }
 
   @Test public void partialDisagree() {
     assertThrowsExactly(SPE.class, () -> tyck("""
       def par (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 /\\ j = 0} =>
-        {| i = 0 |-> u | i = 0 /\\ j = 0 |-> v |}
+        \\ {| i = 0 |-> u | i = 0 /\\ j = 0 |-> v |}
       """));
   }
 
