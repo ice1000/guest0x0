@@ -67,7 +67,7 @@ public record Elaborator(
         if (!CofThy.conv(cof.restr(), Normalizer.create(), norm -> CofThy.satisfied(norm.restr(face))))
           throw new SPE(el.pos(), Doc.english("The faces in the partial element"), face,
             Doc.english("must cover the face(s) specified in type:"), cof);
-        yield new Term.PartEl(clauses);
+        yield new Term.ReallyPartial(clauses);
       }
       case Expr.Two two && !two.isApp() -> {
         if (!(normalize(type) instanceof Term.DT dt) || dt.isPi()) throw new SPE(two.pos(),
@@ -79,8 +79,11 @@ public record Elaborator(
         if (!(normalize(type) instanceof Term.Sub sub)) throw new SPE(inS.pos(),
           Doc.english("Expects cubical subtype, got"), type);
         var arg = inherit(inS.e(), sub.ty());
-        boundaries(inS.pos(), normalizer(), arg, sub.par().clauses());
-        yield new Term.InS(arg, restrOfClauses(sub.par().clauses()));
+        switch (sub.par()) {
+          case Term.ReallyPartial partial -> boundaries(inS.pos(), normalizer(), arg, partial.clauses());
+          case Term.SomewhatPartial partial -> unify(arg, inS, partial.obvious(), inS.pos());
+        }
+        yield new Term.InS(arg, sub.par().restr());
       }
       case Expr.Hole hole -> {
         var docs = MutableList.<Doc>create();
@@ -123,7 +126,7 @@ public record Elaborator(
   }
 
   public static @NotNull Restr<Term> restrOfClauses(ImmutableSeq<Restr.Side<Term>> clauses) {
-    return new Restr.Vary<>(clauses.map(Restr.Side::cof));
+    return new Term.ReallyPartial(clauses).restr();
   }
 
   private Normalizer normalizer(Seq<LocalVar> from, Seq<LocalVar> to) {
@@ -256,7 +259,7 @@ public record Elaborator(
       case Expr.Sub sub -> {
         var ty = inherit(sub.ty(), Term.U);
         var clauses = elaborateClauses(sub, sub.par().clauses(), ty);
-        yield new Synth(new Term.Sub(ty, new Term.PartEl(clauses)), ty);
+        yield new Synth(new Term.Sub(ty, new Term.ReallyPartial(clauses)), ty);
       }
       case Expr.Path path -> {
         var dims = path.data().dims();
@@ -300,7 +303,7 @@ public record Elaborator(
     if (type instanceof Term.Path path) {
       var dims = path.data().dims();
       return new Synth(Normalizer.rename(Term.mkLam(dims.view(),
-        new Term.PCall(synth.wellTyped, dims.map(Term.Ref::new), new Term.PartEl(path.data().boundaries())))),
+        new Term.PCall(synth.wellTyped, dims.map(Term.Ref::new), new Term.ReallyPartial(path.data().boundaries())))),
         Term.mkPi(dims.map(x -> new Param<>(x, Term.I)), path.data().type()));
     } else return new Synth(synth.wellTyped, type);
   }

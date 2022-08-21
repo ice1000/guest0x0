@@ -244,7 +244,11 @@ public record Normalizer(
     }
 
     private @NotNull Term.PartEl partEl(Term.PartEl par) {
-      return new Term.PartEl(par.clauses().map(clause -> clause.rename(this::term)));
+      return switch (par) {
+        case Term.ReallyPartial partial ->
+          new Term.ReallyPartial(partial.clauses().map(clause -> clause.rename(this::term)));
+        case Term.SomewhatPartial partial -> new Term.SomewhatPartial(term(partial.obvious()));
+      };
     }
 
     private @NotNull BdryData<Term> boundaries(@NotNull BdryData<Term> data) {
