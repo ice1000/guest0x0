@@ -8,7 +8,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.parser.Guest0x0Parser;
-import org.aya.guest0x0.syntax.BdryData;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Keyword;

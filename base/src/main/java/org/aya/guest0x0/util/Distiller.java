@@ -1,10 +1,6 @@
 package org.aya.guest0x0.util;
 
 import kala.collection.Seq;
-import kala.collection.SeqView;
-import kala.collection.mutable.MutableList;
-import org.aya.guest0x0.cubical.Formula;
-import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.pretty.doc.Doc;
@@ -36,7 +32,6 @@ public interface Distiller {
         yield envPrec.ordinal() > Free.ordinal() ? Doc.parened(doc) : doc;
       }
       case Expr.Resolved resolved -> Doc.plain(resolved.ref().name());
-      case Expr.Path path -> path.data().toDoc();
       case Expr.Unresolved unresolved -> Doc.plain(unresolved.name());
       case Expr.Proj proj -> Doc.cat(expr(proj.t(), ProjHead), Doc.plain("." + (proj.isOne() ? 1 : 2)));
       case Expr.DT dt -> {
@@ -44,18 +39,6 @@ public interface Distiller {
         yield envPrec.ordinal() > Cod.ordinal() ? Doc.parened(doc) : doc;
       }
       case Expr.Hole ignored -> Doc.symbol("_");
-      case Expr.Mula e -> formulae(Distiller::expr, e.asFormula(), envPrec);
-      case Expr.Transp transp -> fibred("tr", transp.cover(), transp.restr());
-      case Expr.Cof cof -> {
-        var doc = cof.data().toDoc();
-        // Well, hopefully I guessed the precedence right.
-        yield envPrec.ordinal() > AppSpine.ordinal() ? Doc.parened(doc) : doc;
-      }
-      case Expr.PartEl par -> Doc.sep(Doc.symbol("\\"), partial(par));
-      case Expr.PartTy par -> fibred("Partial", par.ty(), par.restr());
-      case Expr.Sub sub -> Doc.sep(Doc.plain("Sub"),
-        expr(sub.ty(), Free), partial(sub.par()));
-      case Expr.SubEl subEl -> Doc.sep(Doc.plain(subEl.isIntro() ? "inS" : "outS"), expr(subEl.e(), Free));
     };
   }
   @NotNull private static Doc partial(Expr.PartEl par) {
@@ -70,18 +53,6 @@ public interface Distiller {
     return Doc.sep(Doc.plain(isPi ? "Pi" : "Sig"),
       param.toDoc(), Doc.symbol(isPi ? "->" : "**"), cod.toDoc());
   }
-  private static @NotNull <E> Doc formulae(PP<E> f, Formula<E> formula, Prec envPrec) {
-    var doc = switch (formula) {
-      case Formula.Conn<E> conn -> Doc.sep(f.apply(conn.l(), IOp),
-        Doc.symbol(conn.isAnd() ? "/\\" : "\\/"), f.apply(conn.r(), IOp));
-      case Formula.Inv<E> inv -> Doc.sep(Doc.plain("~"), f.apply(inv.i(), IOp));
-      case Formula.Lit<E> lit -> {
-        envPrec = Free; // A hack to force no paren
-        yield Doc.symbol(lit.isLeft() ? "0" : "1");
-      }
-    };
-    return envPrec.ordinal() >= IOp.ordinal() ? Doc.parened(doc) : doc;
-  }
 
   static @NotNull Doc term(@NotNull Term term, Prec envPrec) {
     return switch (term) {
@@ -91,7 +62,6 @@ public interface Distiller {
       }
       case Term.UI ui -> Doc.plain(ui.keyword().name());
       case Term.Ref ref -> Doc.plain(ref.var().name());
-      case Term.Path path -> path.data().toDoc();
       case Term.Lam lam -> {
         var doc = Doc.sep(Doc.cat(Doc.plain("\\"),
           Doc.symbol(lam.x().name()), Doc.plain(".")), term(lam.body(), Free));
@@ -109,40 +79,6 @@ public interface Distiller {
           .map(t -> term(t, AppSpine)).prepended(Doc.plain(call.fn().name())));
         yield envPrec.ordinal() > AppHead.ordinal() ? Doc.parened(doc) : doc;
       }
-      case Term.PCall call -> {
-        var doc = Doc.sep(call.i().view()
-          .map(t -> term(t, AppSpine)).prepended(term(call.p(), AppHead)));
-        yield envPrec.ordinal() > AppHead.ordinal() ? Doc.parened(doc) : doc;
-      }
-      case Term.PLam pLam -> {
-        var docs = MutableList.of(Doc.plain("\\"));
-        pLam.dims().forEach(d -> docs.append(Doc.symbol(d.name())));
-        docs.append(Doc.plain("."));
-        docs.append(term(pLam.fill(), Free));
-        var doc = Doc.sep(docs);
-        yield envPrec.ordinal() > Free.ordinal() ? Doc.parened(doc) : doc;
-      }
-      case Term.Mula f -> formulae(Distiller::term, f.asFormula(), envPrec);
-      case Term.Transp transp -> fibred("tr", transp.cover(), transp.restr());
-      case Term.Cof cof -> {
-        var doc = cof.restr().toDoc();
-        yield envPrec.ordinal() > AppSpine.ordinal() ? Doc.parened(doc) : doc;
-      }
-      case Term.PartTy par -> fibred("Partial", par.ty(), par.restr());
-      case Term.PartEl par -> partial(par);
-      case Term.Sub sub -> Doc.sep(Doc.plain("Sub"),
-        term(sub.ty(), Free), partial(sub.par()));
-      case Term.InS inS -> Doc.sep(Doc.plain("inS"), term(inS.e(), Free));
-      case Term.OutS outS -> Doc.sep(Doc.plain("outS"), term(outS.e(), Free));
     };
-  }
-  private static @NotNull Doc partial(Term.PartEl par) {
-    return Doc.wrap("[|", "|]",
-      Doc.join(Doc.symbol("|"), clauses(par.clauses())));
-  }
-  static <T extends Restr.TermLike<T>> SeqView<Doc> clauses(@NotNull Seq<Restr.Side<T>> clauses) {
-    return clauses.view()
-      .map(Restr.Side::toDoc)
-      .map(Doc::spaced);
   }
 }

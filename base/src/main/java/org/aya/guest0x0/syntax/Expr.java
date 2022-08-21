@@ -2,7 +2,6 @@ package org.aya.guest0x0.syntax;
 
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableList;
-import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.util.Distiller;
 import org.aya.guest0x0.util.LocalVar;
@@ -37,18 +36,4 @@ public sealed interface Expr extends Docile, Restr.TermLike<Expr> {
   record Hole(@Override @NotNull SourcePos pos, ImmutableSeq<LocalVar> accessible) implements Expr {}
   /** @param isPi it's a sigma if false */
   record DT(boolean isPi, @Override @NotNull SourcePos pos, Param<Expr> param, Expr cod) implements Expr {}
-  record Path(@Override @NotNull SourcePos pos, @NotNull BdryData<Expr> data) implements Expr {}
-  record Mula(@Override @NotNull SourcePos pos, @Override @NotNull Formula<Expr> asFormula) implements Expr {}
-  record Transp(@Override @NotNull SourcePos pos, @NotNull Expr cover, @NotNull Expr restr) implements Expr {}
-  record Cof(@Override @NotNull SourcePos pos, @NotNull Restr<Expr> data) implements Expr {}
-  record PartEl(@Override @NotNull SourcePos pos, @NotNull ImmutableSeq<Restr.Side<Expr>> clauses) implements Expr {}
-  record PartTy(@Override @NotNull SourcePos pos, @NotNull Expr ty, @NotNull Expr restr) implements Expr {}
-  /** "Proper" cubical subtypes */
-  record Sub(@Override @NotNull SourcePos pos, @NotNull Expr ty, @NotNull PartEl par) implements Expr {}
-  /**
-   * inS/outS, the introduction/elimination rules for the subtype relation
-   *
-   * @param isIntro true if inS
-   */
-  record SubEl(@Override @NotNull SourcePos pos, @NotNull Expr e, boolean isIntro) implements Expr {}
 }

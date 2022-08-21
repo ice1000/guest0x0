@@ -76,26 +76,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
         .getOrThrow(() -> new SPE(unresolved.pos(), Doc.english("Unresolved: " + unresolved.name())));
       case Expr.Resolved resolved -> resolved;
       case Expr.Proj proj -> new Expr.Proj(proj.pos(), expr(proj.t()), proj.isOne());
-      case Expr.Path path -> {
-        var dims = path.data().dims();
-        var state = mkCache(dims.size());
-        dims.forEach(state::add);
-        var data = path.data().fmap(this::expr);
-        state.purge();
-        yield new Expr.Path(path.pos(), data);
-      }
-      case Expr.Mula f -> new Expr.Mula(f.pos(), f.asFormula().fmap(this::expr));
-      case Expr.Transp transp -> new Expr.Transp(transp.pos(), expr(transp.cover()), expr(transp.restr()));
-      case Expr.Cof cof -> new Expr.Cof(cof.pos(), cof.data().fmap(this::expr));
-      case Expr.PartEl par -> par(par);
-      case Expr.PartTy par -> new Expr.PartTy(par.pos(), expr(par.ty()), expr(par.restr()));
-      case Expr.Sub sub -> new Expr.Sub(sub.pos(), expr(sub.ty()), par(sub.par()));
-      case Expr.SubEl subEl -> new Expr.SubEl(subEl.pos(), expr(subEl.e()), subEl.isIntro());
     };
-  }
-
-  private @NotNull Expr.PartEl par(Expr.PartEl par) {
-    return new Expr.PartEl(par.pos(), par.clauses().map(clause -> clause.rename(this::expr)));
   }
 
   private @NotNull Expr bodied(LocalVar x, Expr expr) {
