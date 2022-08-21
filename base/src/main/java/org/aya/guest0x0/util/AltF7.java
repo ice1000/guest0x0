@@ -23,7 +23,8 @@ public record AltF7(@NotNull LocalVar var) {
       case Term.Mula mula -> formula(mula.asFormula());
       case Term.Cof cof -> cof.restr().instView().anyMatch(this::press);
       case Term.PartTy par -> press(par.ty()) || press(par.restr());
-      case Term.PartEl par -> par.clauses().anyMatch(this::clause);
+      case Term.ReallyPartial par -> par.clauses().anyMatch(this::clause);
+      case Term.SomewhatPartial par -> press(par.obvious());
       case Term.Sub sub -> press(sub.ty()) || press(sub.par());
       case Term.InS inS -> press(inS.e()) || inS.restr().instView().anyMatch(this::press);
       case Term.OutS outS -> press(outS.e()) || press(outS.par());

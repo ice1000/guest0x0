@@ -42,8 +42,9 @@ public class Unifier {
       case Term.Cof lcof && r instanceof Term.Cof rcof -> Normalizer.create().propExt(lcof.restr(), rcof.restr());
       case Term.PartTy lpart && r instanceof Term.PartTy rpart ->
         untyped(lpart.ty(), rpart.ty()) && untyped(lpart.restr(), rpart.restr());
-      case Term.PartEl par -> par.clauses().allMatch(clause -> clause(clause, r));
-      case Term ll && r instanceof Term.PartEl par -> par.clauses().allMatch(clause -> clause(clause, ll));
+      case Term.ReallyPartial par -> par.clauses().allMatch(clause -> clause(clause, r));
+      case Term ll && r instanceof Term.ReallyPartial par -> par.clauses().allMatch(clause -> clause(clause, ll));
+      case Term.SomewhatPartial ll && r instanceof Term.SomewhatPartial rr -> untyped(ll.obvious(), rr.obvious());
       case Term.Sub ll && r instanceof Term.Sub rr -> untyped(ll.ty(), rr.ty())
         && untyped(ll.par(), rr.par());
       case Term.InS ll && r instanceof Term.InS rr -> untyped(ll.e(), rr.e());

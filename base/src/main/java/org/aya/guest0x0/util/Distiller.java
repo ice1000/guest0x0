@@ -137,8 +137,12 @@ public interface Distiller {
     };
   }
   private static @NotNull Doc partial(Term.PartEl par) {
-    return Doc.wrap("[|", "|]",
-      Doc.join(Doc.symbol("|"), clauses(par.clauses())));
+    return switch (par) {
+      case Term.ReallyPartial partial -> Doc.wrap("[|", "|]",
+        Doc.join(Doc.symbol("|"), clauses(partial.clauses())));
+      case Term.SomewhatPartial partial -> Doc.wrap("[|", "|]",
+        term(partial.obvious(), Free));
+    };
   }
   static <T extends Restr.TermLike<T>> SeqView<Doc> clauses(@NotNull Seq<Restr.Side<T>> clauses) {
     return clauses.view()
