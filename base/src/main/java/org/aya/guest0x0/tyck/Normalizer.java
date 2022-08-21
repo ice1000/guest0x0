@@ -113,9 +113,21 @@ public record Normalizer(
       case Term.PartTy par -> new Term.PartTy(term(par.ty()), term(par.restr()));
       case Term.PartEl par -> partial(par);
       case Term.Sub sub -> new Term.Sub(term(sub.ty()), partial(sub.par()));
-      // TODO: reductions
-      case Term.InS inS -> new Term.InS(term(inS.e()), restr(inS.restr()));
-      case Term.OutS outS -> new Term.OutS(term(outS.e()), partial(outS.par()));
+      case Term.InS inS -> {
+        var restr = restr(inS.restr());
+        var e = term(inS.e());
+        if (e instanceof Term.OutS outS && Unifier.restr(this, Elaborator.restrOfClauses(outS.par().clauses()), restr))
+          yield outS.e();
+        yield new Term.InS(e, restr);
+      }
+      case Term.OutS outS -> {
+        var ur = new Var<Term>();
+        var clauses = clauses(outS.par().clauses(), ur::set);
+        if (ur.value != null) yield ur.value;
+        var e = term(outS.e());
+        if (e instanceof Term.InS inS) yield inS.e();
+        yield new Term.OutS(e, new Term.PartEl(clauses));
+      }
     };
   }
 
