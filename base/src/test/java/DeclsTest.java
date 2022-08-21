@@ -98,7 +98,7 @@ public class DeclsTest {
 
   @Test public void transportTyping() {
     tyck("""
-      
+            
       def Eq (A : U) (a b : A) : U =>
         [| j |] A {| j = 0 |-> a | j = 1 |-> b |}
       def trans (A : I -> U) (a : A 0) : A 1 => tr A #{0=1} a
@@ -161,6 +161,24 @@ public class DeclsTest {
       def par (A : Type) (u : A) (v : A) (i : I) (j : I) : Partial A #{i = 0 /\\ j = 0} =>
         \\ {| i = 0 |-> u | i = 0 /\\ j = 0 |-> v |}
       """));
+  }
+
+  @Test public void transpInsufficientCondition() {
+    assertThrowsExactly(SPE.class, () -> tyck("""
+      def transSub (A' : U)
+          (r : I) (A : Pi (i : I) -> Sub U {| r = 1 |-> A' |})
+          (a : A')
+          : Sub outS (A 1) {| r = 1 |-> a |} => inS (tr (\\ i. outS (A i)) #{r = 1} a)
+      """));
+  }
+
+  @Test public void transportAsCubicalSubtypes() {
+    tyck("""
+      def transSub (A' : U)
+          (r : I) (A : Pi (i : I) -> Sub U {| r = 1 |-> A' | i = 0 |-> A' |})
+          (a : A')
+          : Sub outS (A 1) {| r = 1 |-> a |} => inS (tr (\\ i. outS (A i)) #{r = 1} a)
+      """);
   }
 
   private static @NotNull Elaborator tyck(@Language("TEXT") String s) {

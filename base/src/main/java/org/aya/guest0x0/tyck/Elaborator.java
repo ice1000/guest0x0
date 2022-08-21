@@ -166,7 +166,8 @@ public record Elaborator(
 
   private static void unify(Term ty, Term actual, SourcePos pos, Function<Unifier, Doc> message) {
     var unifier = new Unifier();
-    if (!unifier.untyped(actual, ty)) throw new SPE(pos, message.apply(unifier));
+    if (!unifier.untyped(actual, ty))
+      throw new SPE(pos, message.apply(unifier));
   }
 
   private static @NotNull Doc unifyDoc(Docile ty, Docile on, Docile actual, Unifier unifier) {
@@ -259,7 +260,7 @@ public record Elaborator(
       case Expr.Sub sub -> {
         var ty = inherit(sub.ty(), Term.U);
         var clauses = elaborateClauses(sub, sub.par().clauses(), ty);
-        yield new Synth(new Term.Sub(ty, new Term.ReallyPartial(clauses)), ty);
+        yield new Synth(new Term.Sub(ty, new Term.ReallyPartial(clauses)), Term.U);
       }
       case Expr.Path path -> {
         var dims = path.data().dims();
