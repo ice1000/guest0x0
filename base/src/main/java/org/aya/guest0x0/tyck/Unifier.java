@@ -39,7 +39,7 @@ public class Unifier {
       case Term.Mula lf && r instanceof Term.Mula rf -> formulae(lf.asFormula(), rf.asFormula());
       case Term.Transp ltp && r instanceof Term.Transp rtp ->
         untyped(ltp.cover(), rtp.cover()) && untyped(ltp.restr(), rtp.restr());
-      case Term.Cof lcof && r instanceof Term.Cof rcof -> restr(Normalizer.create(), lcof.restr(), rcof.restr());
+      case Term.Cof lcof && r instanceof Term.Cof rcof -> Normalizer.create().propExt(lcof.restr(), rcof.restr());
       case Term.PartTy lpart && r instanceof Term.PartTy rpart ->
         untyped(lpart.ty(), rpart.ty()) && untyped(lpart.restr(), rpart.restr());
       case Term.PartEl par -> par.clauses().allMatch(clause -> clause(clause, r));
@@ -54,11 +54,6 @@ public class Unifier {
     if (!happy && data == null)
       data = new FailureData(l, r);
     return happy;
-  }
-
-  public static boolean restr(Normalizer initial, Restr<Term> ll, Restr<Term> rr) {
-    return CofThy.conv(ll, initial, normalizer -> CofThy.satisfied(normalizer.restr(rr)))
-      && CofThy.conv(rr, initial, normalizer -> CofThy.satisfied(normalizer.restr(ll)));
   }
 
   /** Daniel Gratzer used <code>N</code> when explaining these to me */

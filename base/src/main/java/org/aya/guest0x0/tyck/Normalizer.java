@@ -31,6 +31,11 @@ public record Normalizer(
     return new Renamer(MutableMap.create()).term(term);
   }
 
+  public boolean propExt(Restr<Term> ll, Restr<Term> rr) {
+    return CofThy.conv(ll, this, normalizer -> CofThy.satisfied(normalizer.restr(rr)))
+      && CofThy.conv(rr, this, normalizer -> CofThy.satisfied(normalizer.restr(ll)));
+  }
+
   public Param<Term> param(Param<Term> param) {
     return new Param<>(param.x(), term(param.type()));
   }
@@ -116,7 +121,7 @@ public record Normalizer(
       case Term.InS inS -> {
         var restr = restr(inS.restr());
         var e = term(inS.e());
-        if (e instanceof Term.OutS outS && Unifier.restr(this, Elaborator.restrOfClauses(outS.par().clauses()), restr))
+        if (e instanceof Term.OutS outS && propExt(Elaborator.restrOfClauses(outS.par().clauses()), restr))
           yield outS.e();
         yield new Term.InS(e, restr);
       }
