@@ -9,6 +9,7 @@ import kala.control.Option;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -45,6 +46,17 @@ public interface CofThy {
     }
     combineRecursively(lateDropped, conds, combined);
     conds.pop();
+  }
+
+  @FunctionalInterface
+  interface RestrNormalizer<E extends Restr.TermLike<E>, V, Subst extends SubstObj<E, V, Subst>>
+    extends BiFunction<Subst, Restr<E>, Restr<E>> {
+  }
+
+  static <E extends Restr.TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
+  propExt(Subst subst, Restr<E> ll, Restr<E> rr, RestrNormalizer<E, V, Subst> normalize) {
+    return conv(ll, subst, sub -> satisfied(normalize.apply(sub, rr)))
+      && conv(rr, subst, sub -> satisfied(normalize.apply(sub, ll)));
   }
 
   /** @see CofThy#conv(Restr, SubstObj, Predicate) */
@@ -107,20 +119,20 @@ public interface CofThy {
     return Option.some(tyck.apply(derived));
   }
 
-/**
- * Representation of a generic <strong>interval</strong> substitution object.
- *
- * @param <E> "terms"
- * @param <V> "variables" -- assuming capture-avoiding substitution instead of indices
- */
-interface SubstObj<E, V, Subst extends SubstObj<E, V, Subst>> {
-  /** Put <code>i := I(isLeft)</code> into the substitution */
-  void put(V i, boolean isLeft);
-  /** @return true if there is <code>i := I(oldIsLeft)</code> while <code>oldIsLeft != newIsLeft</code> */
-  boolean contradicts(V i, boolean newIsLeft);
-  @Nullable V asRef(@NotNull E term);
-  @NotNull Subst derive();
-}
+  /**
+   * Representation of a generic <strong>interval</strong> substitution object.
+   *
+   * @param <E> "terms"
+   * @param <V> "variables" -- assuming capture-avoiding substitution instead of indices
+   */
+  interface SubstObj<E, V, Subst extends SubstObj<E, V, Subst>> {
+    /** Put <code>i := I(isLeft)</code> into the substitution */
+    void put(V i, boolean isLeft);
+    /** @return true if there is <code>i := I(oldIsLeft)</code> while <code>oldIsLeft != newIsLeft</code> */
+    boolean contradicts(V i, boolean newIsLeft);
+    @Nullable V asRef(@NotNull E term);
+    @NotNull Subst derive();
+  }
 
   /**
    * Normalizes a "restriction" which looks like "f1 \/ f2 \/ ..." where

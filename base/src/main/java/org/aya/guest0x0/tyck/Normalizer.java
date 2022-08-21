@@ -32,8 +32,7 @@ public record Normalizer(
   }
 
   public boolean propExt(Restr<Term> ll, Restr<Term> rr) {
-    return CofThy.conv(ll, this, normalizer -> CofThy.satisfied(normalizer.restr(rr)))
-      && CofThy.conv(rr, this, normalizer -> CofThy.satisfied(normalizer.restr(ll)));
+    return CofThy.propExt(this, ll, rr, Normalizer::restr);
   }
 
   public Param<Term> param(Param<Term> param) {
