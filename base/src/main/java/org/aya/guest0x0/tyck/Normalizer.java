@@ -1,9 +1,7 @@
 package org.aya.guest0x0.tyck;
 
-import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
-import kala.value.Var;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
@@ -16,8 +14,6 @@ import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.function.Consumer;
 
 public record Normalizer(
   @NotNull MutableMap<LocalVar, Def<Term>> sigma,
@@ -99,12 +95,11 @@ public record Normalizer(
           yield fill;
         }
         var b = pApp.b();
-        var ur = new Var<Term>();
         // b.dims().zipView(i).forEach(zip -> rho.put(zip._1, zip._2));
-        var clauses = clauses(b.clauses(), ur::set);
-        if (ur.value != null) yield ur.value;
+        var partial = partial(b);
+        if (partial instanceof Term.SomewhatPartial what) yield what.obvious();
         // b.dims().forEach(rho::remove);
-        yield new Term.PCall(p, i, new Term.PartEl(clauses));
+        yield new Term.PCall(p, i, partial);
       }
       case Term.Mula f -> formulae(f.asFormula().fmap(this::term));
       case Term.Cof cof -> new Term.Cof(restr(cof.restr()));
@@ -120,38 +115,34 @@ public record Normalizer(
       case Term.InS inS -> {
         var restr = restr(inS.restr());
         var e = term(inS.e());
-        if (e instanceof Term.OutS outS && propExt(Elaborator.restrOfClauses(outS.par().clauses()), restr))
+        if (e instanceof Term.OutS outS && propExt(outS.par().restr(), restr))
           yield outS.e();
         yield new Term.InS(e, restr);
       }
       case Term.OutS outS -> {
-        var ur = new Var<Term>();
-        var clauses = clauses(outS.par().clauses(), ur::set);
-        if (ur.value != null) yield ur.value;
+        var partial = partial(outS.par());
+        if (partial instanceof Term.SomewhatPartial what) yield what.obvious();
         var e = term(outS.e());
         if (e instanceof Term.InS inS) yield inS.e();
-        yield new Term.OutS(e, new Term.PartEl(clauses));
+        yield new Term.OutS(e, partial);
       }
     };
   }
 
-  private @NotNull Term.PartEl partial(Term.PartEl par) {
-    // TODO: do nothing for now, need a new term for 'to reduce' partials
-    return new Term.PartEl(clauses(par.clauses(), u -> {}));
-  }
-
-  private ImmutableSeq<Restr.Side<Term>> clauses(
-    @NotNull ImmutableSeq<Restr.Side<Term>> sides,
-    @NotNull Consumer<Term> truthHandler
-  ) {
-    var clauses = MutableArrayList.<Restr.Side<Term>>create();
-    for (var clause : sides) {
-      var u = term(clause.u());
-      if (CofThy.normalizeCof(clause.cof().fmap(this::term), clauses, cofib -> new Restr.Side<>(cofib, u))) {
-        truthHandler.accept(u);
+  public @NotNull Term.PartEl partial(@NotNull Term.PartEl partial) {
+    return switch (partial) {
+      case Term.SomewhatPartial par -> new Term.SomewhatPartial(term(par.obvious()));
+      case Term.ReallyPartial par -> {
+        var clauses = MutableArrayList.<Restr.Side<Term>>create();
+        for (var clause : par.clauses()) {
+          var u = term(clause.u());
+          if (CofThy.normalizeCof(clause.cof().fmap(this::term), clauses, cofib -> new Restr.Side<>(cofib, u))) {
+            yield new Term.SomewhatPartial(u);
+          }
+        }
+        yield new Term.ReallyPartial(clauses.toImmutableArray());
       }
-    }
-    return clauses.toImmutableArray();
+    };
   }
 
   public Restr<Term> restr(@NotNull Restr<Term> restr) {
