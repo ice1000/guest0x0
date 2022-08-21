@@ -5,8 +5,6 @@ import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.aya.guest0x0.cubical.Formula;
-import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Expr;
@@ -31,9 +29,7 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SndContext snd -> new Expr.Proj(sourcePosOf(snd), expr(snd.expr()), false);
       case Guest0x0Parser.KeywordContext trebor -> {
         var pos = sourcePosOf(trebor);
-        if (trebor.FACE_TY() != null) yield new Expr.PrimTy(pos, Keyword.F);
-        else if (trebor.UNIV() != null) yield new Expr.PrimTy(pos, Keyword.U);
-        else /*if (trebor.INTERVAL() != null)*/ yield new Expr.PrimTy(pos, Keyword.I);
+        yield new Expr.PrimTy(pos, Keyword.U);
       }
       case Guest0x0Parser.LamContext lam -> buildLam(sourcePosOf(lam), Seq.wrapJava(lam.ID()).view()
         .map(id -> new WithPos<>(AntlrUtil.sourcePosOf(id, source), new LocalVar(id.getText()))), expr(lam.expr()));
@@ -42,53 +38,12 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SigContext si -> buildDT(false, sourcePosOf(si), param(si.param()), expr(si.expr()));
       case Guest0x0Parser.SimpFunContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.expr(0)), expr(pi.expr(1)));
       case Guest0x0Parser.SimpTupContext si -> new Expr.DT(false, sourcePosOf(si), param(si.expr(0)), expr(si.expr(1)));
-      case Guest0x0Parser.ILitContext il -> iPat(il.iPat());
-      case Guest0x0Parser.TransContext tp -> new Expr.Transp(sourcePosOf(tp), expr(tp.expr(0)), expr(tp.expr(1)));
-      case Guest0x0Parser.RestrContext restr -> new Expr.Cof(sourcePosOf(restr), restr(restr));
-      case Guest0x0Parser.InvContext in -> new Expr.Mula(sourcePosOf(in), new Formula.Inv<>(expr(in.expr())));
-      case Guest0x0Parser.IConnContext ic -> new Expr.Mula(sourcePosOf(ic),
-        new Formula.Conn<>(ic.AND() != null, expr(ic.expr(0)), expr(ic.expr(1))));
-      case Guest0x0Parser.CubeContext cube -> new Expr.Path(sourcePosOf(cube), new BdryData<>(
-        localVars(cube.ID()), expr(cube.expr()),
-        Seq.wrapJava(cube.partial().subSystem()).map(this::clause)));
-      case Guest0x0Parser.SubContext sub -> new Expr.Sub(sourcePosOf(sub), expr(sub.expr()), partial(sub.partial()));
-      case Guest0x0Parser.InSContext inS -> new Expr.SubEl(sourcePosOf(inS), expr(inS.expr()), true);
-      case Guest0x0Parser.OutSContext outS -> new Expr.SubEl(sourcePosOf(outS), expr(outS.expr()), false);
-      case Guest0x0Parser.PartTyContext par -> new Expr.PartTy(sourcePosOf(par), expr(par.expr(0)), expr(par.expr(1)));
-      case Guest0x0Parser.PartElContext par -> partial(par.partial());
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
   }
 
-  private @NotNull Expr.PartEl partial(Guest0x0Parser.PartialContext partial) {
-    return new Expr.PartEl(sourcePosOf(partial),
-      Seq.wrapJava(partial.subSystem()).map(this::clause));
-  }
-
-  private @NotNull Restr.Side<Expr> clause(@NotNull Guest0x0Parser.SubSystemContext clause) {
-    return new Restr.Side<>(cofib(clause.cof()), expr(clause.expr()));
-  }
-
-  /*package*/ @NotNull Restr<Expr> restr(Guest0x0Parser.RestrContext psi) {
-    if (psi.ABSURD() != null) return new Restr.Const<>(false);
-    if (psi.TRUTH() != null) return new Restr.Const<>(true);
-    return new Restr.Vary<>(Seq.wrapJava(psi.cof()).map(this::cofib));
-  }
-
-  private @NotNull Restr.Cofib<Expr> cofib(Guest0x0Parser.CofContext cof) {
-    return new Restr.Cofib<>(Seq.wrapJava(cof.cond())
-      .map(c -> new Restr.Cond<>(new Expr.Unresolved(sourcePosOf(c), c.ID().getText()), c.LEFT() != null)));
-  }
-
   @NotNull private ImmutableSeq<LocalVar> localVars(List<TerminalNode> ids) {
     return Seq.wrapJava(ids).map(id -> new LocalVar(id.getText()));
-  }
-
-  private @NotNull Expr iPat(Guest0x0Parser.IPatContext iPat) {
-    var pos = sourcePosOf(iPat);
-    return iPat.LEFT() != null ? new Expr.Mula(pos, new Formula.Lit<>(true))
-      : iPat.RIGHT() != null ? new Expr.Mula(pos, new Formula.Lit<>(false))
-      : new Expr.Hole(pos, ImmutableSeq.empty());
   }
 
   /*package*/
