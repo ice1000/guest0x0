@@ -5,7 +5,7 @@
 
 ![image](https://user-images.githubusercontent.com/16398479/162600129-d59a0c0c-de5a-49e4-b0dd-dd3c4fd51938.png)
 
-[maven]: https://img.shields.io/maven-central/v/org.aya-prover/guest0x0/base
+[maven]: https://img.shields.io/maven-central/v/org.aya-prover.guest0x0/base
 
 Experimenting with some basic programming in Java 18 and see the following:
 
@@ -39,6 +39,7 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
   + [x] Extension type (generalized path type)
   + [x] Cofibration theory
   + [x] Partial elements (with a dedicated type like in Cubical Agda)
+  + [x] Cubical subtypes
   + [ ] Generalized transport
     + [x] Pi, Sigma, Universe
     + [ ] Higher inductive type
@@ -49,6 +50,8 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
     + [ ] Glue/V
 
 ### Untagged
+
+Refactored the internal representation of partial elements, introduced cubical subtypes.
 
 ### v0.14.1
 
