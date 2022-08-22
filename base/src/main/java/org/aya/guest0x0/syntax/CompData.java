@@ -1,17 +1,20 @@
 package org.aya.guest0x0.syntax;
 
-import org.aya.guest0x0.util.LocalVar;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Function;
+
 public record CompData<Expr extends Docile>(
-  @NotNull LocalVar h,
+  @NotNull Expr phi,
   @NotNull Expr walls,
   @NotNull Expr bottom
 ) implements Docile {
+  public <T extends Docile> @NotNull CompData<T> fmap(@NotNull Function<Expr, T> f) {
+    return new CompData<>(f.apply(phi), f.apply(walls), f.apply(bottom));
+  }
   @Override public @NotNull Doc toDoc() {
-    return Doc.sep(Doc.plain("hc"), Doc.plain(h.name()),
-      walls.toDoc(), Doc.plain("on"), bottom.toDoc());
+    return Doc.sep(Doc.plain("hc"), walls.toDoc(), Doc.plain("on"), bottom.toDoc());
   }
 }

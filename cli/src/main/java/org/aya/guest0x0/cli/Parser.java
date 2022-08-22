@@ -41,7 +41,7 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SimpFunContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.expr(0)), expr(pi.expr(1)));
       case Guest0x0Parser.SimpTupContext si -> new Expr.DT(false, sourcePosOf(si), param(si.expr(0)), expr(si.expr(1)));
       case Guest0x0Parser.ILitContext il -> iPat(il.iPat());
-      case Guest0x0Parser.TransContext tp -> new Expr.Transp(sourcePosOf(tp), expr(tp.expr(0)), expr(tp.expr(1)));
+      case Guest0x0Parser.TransContext tp -> new Expr.Transp(sourcePosOf(tp), expr(tp.expr()), expr(tp.wrappedExpr().expr()));
       case Guest0x0Parser.RestrContext restr -> new Expr.Cof(sourcePosOf(restr), restr(restr));
       case Guest0x0Parser.InvContext in -> new Expr.Mula(sourcePosOf(in), new Formula.Inv<>(expr(in.expr())));
       case Guest0x0Parser.IConnContext ic -> new Expr.Mula(sourcePosOf(ic),
@@ -52,10 +52,10 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SubContext sub -> new Expr.Sub(sourcePosOf(sub), expr(sub.expr()), partial(sub.partial()));
       case Guest0x0Parser.InSContext inS -> new Expr.SubEl(sourcePosOf(inS), expr(inS.expr()), true);
       case Guest0x0Parser.OutSContext outS -> new Expr.SubEl(sourcePosOf(outS), expr(outS.expr()), false);
-      case Guest0x0Parser.PartTyContext par -> new Expr.PartTy(sourcePosOf(par), expr(par.expr(0)), expr(par.expr(1)));
+      case Guest0x0Parser.PartTyContext par -> new Expr.PartTy(sourcePosOf(par), expr(par.expr()), expr(par.wrappedExpr().expr()));
       case Guest0x0Parser.PartElContext par -> partial(par.partial());
       case Guest0x0Parser.HcompContext hcomp -> new Expr.Hcomp(sourcePosOf(hcomp),
-        new CompData<>(new LocalVar(hcomp.ID().getText()), expr(hcomp.expr(0)), expr(hcomp.expr(1))));
+        new CompData<>(expr(hcomp.wrappedExpr().expr()), expr(hcomp.expr(0)), expr(hcomp.expr(1))));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
   }
@@ -69,7 +69,8 @@ public record Parser(@NotNull SourceFile source) {
     return new Restr.Side<>(cofib(clause.cof()), expr(clause.expr()));
   }
 
-  /*package*/ @NotNull Restr<Expr> restr(Guest0x0Parser.RestrContext psi) {
+  /*package*/
+  @NotNull Restr<Expr> restr(Guest0x0Parser.RestrContext psi) {
     if (psi.ABSURD() != null) return new Restr.Const<>(false);
     if (psi.TRUTH() != null) return new Restr.Const<>(true);
     return new Restr.Vary<>(Seq.wrapJava(psi.cof()).map(this::cofib));

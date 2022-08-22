@@ -30,18 +30,19 @@ expr
 
  // Cubical features
  | '[|' ID+ '|]' expr partial # cube
- | 'tr' expr '#{' expr '}' # trans
- | 'Partial' expr '#{' expr '}' # partTy
+ | 'tr' expr wrappedExpr # trans
+ | 'Partial' expr wrappedExpr # partTy
  | 'Sub' expr partial # sub
  | 'inS' expr # inS
  | 'outS' expr # outS
- | 'hc' ID expr 'on' expr # hcomp
+ | 'hc' wrappedExpr expr 'on' expr # hcomp
  | LAM partial # partEl
  | iPat # iLit
  | '~' expr # inv
  | expr (AND | OR) expr # iConn
  ;
 
+wrappedExpr : '#{' expr '}';
 partial : '{|' '|'? subSystem ('|' subSystem)* '|}';
 cond : ID '=' (LEFT | RIGHT);
 subSystem : cof '|->' expr;
