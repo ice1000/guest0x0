@@ -57,6 +57,8 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.OutSContext outS -> new Expr.SubEl(sourcePosOf(outS), expr(outS.expr()), false);
       case Guest0x0Parser.PartTyContext par -> new Expr.PartTy(sourcePosOf(par), expr(par.expr(0)), expr(par.expr(1)));
       case Guest0x0Parser.PartElContext par -> partial(par.partial());
+      case Guest0x0Parser.HcompContext hcomp -> new Expr.HComp(sourcePosOf(hcomp),
+        new LocalVar(hcomp.ID().getText()), expr(hcomp.expr(0)), expr(hcomp.expr(1)));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
   }
