@@ -8,10 +8,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.parser.Guest0x0Parser;
-import org.aya.guest0x0.syntax.BdryData;
-import org.aya.guest0x0.syntax.Def;
-import org.aya.guest0x0.syntax.Expr;
-import org.aya.guest0x0.syntax.Keyword;
+import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
 import org.aya.repl.antlr.AntlrUtil;
@@ -57,8 +54,8 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.OutSContext outS -> new Expr.SubEl(sourcePosOf(outS), expr(outS.expr()), false);
       case Guest0x0Parser.PartTyContext par -> new Expr.PartTy(sourcePosOf(par), expr(par.expr(0)), expr(par.expr(1)));
       case Guest0x0Parser.PartElContext par -> partial(par.partial());
-      case Guest0x0Parser.HcompContext hcomp -> new Expr.HComp(sourcePosOf(hcomp),
-        new LocalVar(hcomp.ID().getText()), expr(hcomp.expr(0)), expr(hcomp.expr(1)));
+      case Guest0x0Parser.HcompContext hcomp -> new Expr.Hcomp(sourcePosOf(hcomp),
+        new CompData<>(new LocalVar(hcomp.ID().getText()), expr(hcomp.expr(0)), expr(hcomp.expr(1))));
       default -> throw new IllegalArgumentException("Unknown expr: " + expr.getClass().getName());
     };
   }

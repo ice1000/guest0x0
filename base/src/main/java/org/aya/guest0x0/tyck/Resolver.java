@@ -6,6 +6,7 @@ import kala.collection.mutable.MutableMap;
 import kala.control.Option;
 import kala.tuple.Tuple;
 import kala.tuple.Tuple2;
+import org.aya.guest0x0.syntax.CompData;
 import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.util.LocalVar;
@@ -91,9 +92,10 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
       case Expr.PartTy par -> new Expr.PartTy(par.pos(), expr(par.ty()), expr(par.restr()));
       case Expr.Sub sub -> new Expr.Sub(sub.pos(), expr(sub.ty()), par(sub.par()));
       case Expr.SubEl subEl -> new Expr.SubEl(subEl.pos(), expr(subEl.e()), subEl.isIntro());
-      case Expr.HComp hComp -> {
-        var walls = bodied(hComp.h(), hComp.walls());
-        yield new Expr.HComp(hComp.pos(), hComp.h(), walls, expr(hComp.bottom()));
+      case Expr.Hcomp hc -> {
+        var hcomp = hc.data();
+        var walls = bodied(hcomp.h(), hcomp.walls());
+        yield new Expr.Hcomp(hc.pos(), new CompData<>(hcomp.h(), walls, expr(hcomp.bottom())));
       }
     };
   }
