@@ -76,10 +76,7 @@ public record Elaborator(
         if (!(normalize(type) instanceof Term.Sub sub)) throw new SPE(inS.pos(),
           Doc.english("Expects cubical subtype, got"), type);
         var arg = inherit(inS.e(), sub.ty());
-        switch (sub.par()) {
-          case Term.ReallyPartial partial -> boundaries(inS.pos(), normalizer(), arg, partial.clauses());
-          case Term.SomewhatPartial partial -> unify(arg, inS, partial.obvious(), inS.pos());
-        }
+        boundaries(inS, arg, sub.par());
         yield new Term.InS(arg, sub.par().restr());
       }
       case Expr.Hole hole -> {
@@ -120,6 +117,13 @@ public record Elaborator(
         };
       }
     };
+  }
+
+  private void boundaries(Expr on, Term arg, Term.PartEl par) {
+    switch (par) {
+      case Term.ReallyPartial partial -> boundaries(on.pos(), normalizer(), arg, partial.clauses());
+      case Term.SomewhatPartial partial -> unify(arg, on, partial.obvious(), on.pos());
+    }
   }
 
   public static @NotNull Restr<Term> restrOfClauses(ImmutableSeq<Restr.Side<Term>> clauses) {
@@ -300,7 +304,10 @@ public record Elaborator(
         var phi = inherit(hcomp.data().phi(), Term.F);
         // This already implies overlapping checks
         var walls = inherit(hcomp.data().walls(), Term.mkPi(Term.I, new Term.PartTy(ty, phi)));
+        var floor = walls.app(Term.end(true));
         var bottom = inherit(hcomp.data().bottom(), ty);
+        // Bottom must meet the floor, but how to check this? Do we require floor to be a partial?
+        // Do we use cubical subtype here?
         var data = new CompData<>(ty, phi, walls, bottom);
         throw new UnsupportedOperationException(data.toString());
       }
