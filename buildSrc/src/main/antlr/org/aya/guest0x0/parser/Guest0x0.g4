@@ -35,7 +35,7 @@ expr
  | 'Sub' expr partial # sub
  | 'inS' expr # inS
  | 'outS' expr # outS
- | 'hc' wrappedExpr expr 'on' expr # hcomp
+ | 'hc' expr wrappedExpr expr 'on' expr # hcomp
  | LAM partial # partEl
  | iPat # iLit
  | '~' expr # inv

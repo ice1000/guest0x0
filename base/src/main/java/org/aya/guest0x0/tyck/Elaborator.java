@@ -10,10 +10,7 @@ import kala.tuple.Tuple;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
-import org.aya.guest0x0.syntax.BdryData;
-import org.aya.guest0x0.syntax.Def;
-import org.aya.guest0x0.syntax.Expr;
-import org.aya.guest0x0.syntax.Term;
+import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.AltF7;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
@@ -298,6 +295,14 @@ public record Elaborator(
             Doc.english("which contains a reference to `?`, oh no"));
         yield new Synth(new Term.Transp(cover, cof), ty);
       }
+      case Expr.Hcomp hcomp -> {
+        var ty = inherit(hcomp.data().ty(), Term.U);
+        var phi = inherit(hcomp.data().phi(), Term.F);
+        var walls = inherit(hcomp.data().walls(), Term.mkPi(Term.I, new Term.PartTy(ty, phi)));
+        var bottom = inherit(hcomp.data().bottom(), ty);
+        var data = new CompData<>(ty, phi, walls, bottom);
+        throw new UnsupportedOperationException(data.toString());
+      }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };
     var type = normalize(synth.type);
@@ -318,9 +323,8 @@ public record Elaborator(
   }
 
   private static @NotNull Term.Cof cof(Term restr, @NotNull SourcePos pos) {
-    if (!(restr instanceof Term.Cof cof))
-      throw new SPE(pos, Doc.english("Expects a cofibration literal, got"), restr);
-    return cof;
+    if (restr instanceof Term.Cof cof) return cof;
+    throw new SPE(pos, Doc.english("Expects a cofibration literal, got"), restr);
   }
 
   private @NotNull Option<Restr.Side<Term>> clause(
