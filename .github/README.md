@@ -51,6 +51,10 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+![image](https://user-images.githubusercontent.com/16398479/186201230-b67d2edd-dc3b-4ea9-9457-da5c4e1655d7.png)
+
+### v0.15
+
 ![image](https://user-images.githubusercontent.com/16398479/186200104-902d00b0-9e3d-4218-86a6-cf2fdfd7fb42.png)
 
 Refactored the internal representation of partial elements, introduced cubical subtypes. We may now represent the reduction of `transp` using cubical subtypes now:
@@ -61,6 +65,8 @@ def transSub (A' : U) (r : I)
     (a : A') : Sub outS (A 1) {| r = 1 |-> a |}
       => inS (tr (\ i. outS (A i)) #{r = 1} a)
 ```
+
+Started working on `hcomp`. At this point, the total lines of code of Java in the base module is 1524, and the cubical infra is 307.
 
 ### v0.14.1
 

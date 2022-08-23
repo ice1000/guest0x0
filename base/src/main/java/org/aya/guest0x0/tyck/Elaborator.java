@@ -298,6 +298,7 @@ public record Elaborator(
       case Expr.Hcomp hcomp -> {
         var ty = inherit(hcomp.data().ty(), Term.U);
         var phi = inherit(hcomp.data().phi(), Term.F);
+        // This already implies overlapping checks
         var walls = inherit(hcomp.data().walls(), Term.mkPi(Term.I, new Term.PartTy(ty, phi)));
         var bottom = inherit(hcomp.data().bottom(), ty);
         var data = new CompData<>(ty, phi, walls, bottom);
