@@ -51,7 +51,16 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
-Refactored the internal representation of partial elements, introduced cubical subtypes.
+![image](https://user-images.githubusercontent.com/16398479/186200104-902d00b0-9e3d-4218-86a6-cf2fdfd7fb42.png)
+
+Refactored the internal representation of partial elements, introduced cubical subtypes. We may now represent the reduction of `transp` using cubical subtypes now:
+
+```
+def transSub (A' : U) (r : I)
+    (A : Pi (i : I) -> Sub U {| r = 1 |-> A' | i = 0 |-> A' |})
+    (a : A') : Sub outS (A 1) {| r = 1 |-> a |}
+      => inS (tr (\ i. outS (A i)) #{r = 1} a)
+```
 
 ### v0.14.1
 
