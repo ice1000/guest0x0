@@ -172,6 +172,16 @@ public class DeclsTest {
       """));
   }
 
+  @Test public void unifyPartial() {
+    tyck("""
+      def par1 (A : U) (a : A) (i : I) : Partial A #{i = 0} => \\ {| i = 0 |-> a |}
+      def par2 (A : U) (b : A) (j : I) : Partial A #{j = 0} => \\ {| j = 0 |-> b |}
+      def cmp (A : U) (x : A)
+        : [| i j |] (Partial A #{j = 0}) {| i = 0 |-> par1 A x j |}
+        => \\ i. \\ j. par2 A x j
+      """);
+  }
+
   @Test public void transportAsCubicalSubtypes() {
     tyck("""
       def transSub (A' : U)

@@ -49,7 +49,7 @@ public record Elaborator(
           var unlam = Expr.unlam(lamDims, tyDims.size(), lam);
           if (unlam == null) throw new SPE(lam.pos(), Doc.english("Expected path lambda"));
           yield boundaries(lamDims, () -> inherit(unlam,
-            normalizer(lamDims, tyDims).term(path.data().type())
+            normalizer(tyDims, lamDims).term(path.data().type())
           ), unlam.pos(), path.data(), normalizer(tyDims, lamDims));
         }
         default -> throw new SPE(lam.pos(),

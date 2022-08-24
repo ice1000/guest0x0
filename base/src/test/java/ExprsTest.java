@@ -3,6 +3,7 @@ import org.aya.guest0x0.cli.CliMain;
 import org.aya.guest0x0.cli.Parser;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Term;
+import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Resolver;
 import org.aya.util.error.SourceFile;
 import org.intellij.lang.annotations.Language;
@@ -53,7 +54,10 @@ public class ExprsTest {
   }
 
   private static @NotNull Term tyck(@Language("TEXT") String term, @Language("TEXT") String type) {
-    var akJr = CliMain.andrasKovacs();
+    return tyck(term, type, CliMain.andrasKovacs());
+  }
+
+  public static Term tyck(@Language("TEXT") String term, @Language("TEXT") String type, Elaborator akJr) {
     var Id = akJr.synth(resolve(type));
     return akJr.inherit(resolve(term), Id.wellTyped());
   }
