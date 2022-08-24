@@ -23,6 +23,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.aya.guest0x0.cubical.Restr.toDoc;
+
 public record Elaborator(
   @NotNull MutableMap<LocalVar, Def<Term>> sigma,
   @NotNull MutableMap<LocalVar, Term> gamma
@@ -62,7 +64,7 @@ public record Elaborator(
         var clauses = elaborateClauses(el, el.clauses(), par.ty());
         var face = restrOfClauses(clauses);
         if (!CofThy.conv(cof.restr(), Normalizer.create(), norm -> CofThy.satisfied(norm.restr(face))))
-          throw new SPE(el.pos(), Doc.english("The faces in the partial element"), face,
+          throw new SPE(el.pos(), Doc.english("The faces in the partial element"), toDoc(face),
             Doc.english("must cover the face(s) specified in type:"), cof);
         yield new Term.ReallyPartial(clauses);
       }
@@ -204,7 +206,7 @@ public record Elaborator(
     for (var boundary : boundaries) {
       // Based on the very assumption as in the function's javadoc
       CofThy.conv(boundary.cof().fmap(subst::term), subst, norm -> {
-        unify(norm.term(boundary.u()), boundary, norm.term(core), pos,
+        unify(norm.term(boundary.u()), toDoc(boundary), norm.term(core), pos,
           Doc.english("Boundary mismatch, oh no."));
         return true;
       });
@@ -342,7 +344,7 @@ public record Elaborator(
     var cofib = new Restr.Cofib<>(clause.cof().ands().map(this::condition));
     var u = CofThy.vdash(cofib, normalizer(), norm -> inherit(clause.u(), norm.term(ty)));
     if (u.isDefined() && u.get() == null)
-      throw new SPE(pos, Doc.english("The cofibration in"), cofib,
+      throw new SPE(pos, Doc.english("The cofibration in"), toDoc(cofib),
         Doc.english("is not well-defined"));
     return u.map(uu -> new Restr.Side<>(cofib, uu));
   }

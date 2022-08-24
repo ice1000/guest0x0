@@ -15,9 +15,9 @@ import java.util.function.Function;
  * @param <E> "terms"
  * @see CofThy for cofibration operations
  */
-public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
+public sealed interface Restr<E extends Restr.TermLike<E>> {
   @NotNull SeqView<E> instView();
-  interface TermLike<E extends TermLike<E>> extends Docile {
+  interface TermLike<E extends TermLike<E>> {
     default @Nullable Formula<E> asFormula() {return null;}
   }
   Restr<E> fmap(@NotNull Function<E, E> g);
@@ -39,12 +39,17 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
     @Override public <T extends TermLike<T>> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f) {
       return new Vary<>(orz.map(x -> new Cofib<>(x.ands.map(f))));
     }
-
-    @Override public @NotNull Doc toDoc() {
-      return Doc.join(Doc.spaced(Doc.symbol("\\/")), orz.view().map(or ->
-        or.ands.sizeGreaterThan(1) && orz.sizeGreaterThan(1)
-          ? Doc.parened(or.toDoc()) : or.toDoc()));
-    }
+  }
+  static <E extends TermLike<E> & Docile> @NotNull Doc toDoc(Restr<E> cof) {
+    return switch (cof) {
+      case Restr.Const<E> c -> Doc.symbol(c.isTrue ? "0=0" : "0=1");
+      case Restr.Vary<E> vary -> toDoc(vary);
+    };
+  }
+  static <E extends TermLike<E> & Docile> @NotNull Doc toDoc(Vary<E> cof) {
+    return Doc.join(Doc.spaced(Doc.symbol("\\/")), cof.orz.view().map(or ->
+      or.ands.sizeGreaterThan(1) && cof.orz.sizeGreaterThan(1)
+        ? Doc.parened(toDoc(or)) : toDoc(or)));
   }
   record Const<E extends TermLike<E>>(boolean isTrue) implements Restr<E> {
     @Override public @NotNull SeqView<E> instView() {
@@ -53,10 +58,6 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
 
     @Override public Const<E> fmap(@NotNull Function<E, E> g) {
       return this;
-    }
-
-    @Override public @NotNull Doc toDoc() {
-      return Doc.symbol(isTrue ? "0=0" : "0=1");
     }
 
     @Override public Restr<E> or(Cond<E> cond) {
@@ -72,11 +73,7 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
       return new Cond<>(g.apply(inst), isLeft);
     }
   }
-  record Cofib<E extends TermLike<E>>(@NotNull ImmutableSeq<Cond<E>> ands) implements Docile {
-    @Override public @NotNull Doc toDoc() {
-      return Doc.join(Doc.spaced(Doc.symbol("/\\")), ands.view().map(and ->
-        Doc.sep(and.inst.toDoc(), Doc.symbol("="), Doc.symbol(and.isLeft() ? "0" : "1"))));
-    }
+  record Cofib<E extends TermLike<E>>(@NotNull ImmutableSeq<Cond<E>> ands) {
 
     public Cofib<E> fmap(@NotNull Function<E, E> g) {
       return new Cofib<>(ands.map(c -> c.fmap(g)));
@@ -90,14 +87,18 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Docile {
       return new Cofib<>(ands.appendedAll(cof.ands));
     }
   }
+  static <E extends TermLike<E> & Docile> @NotNull Doc toDoc(Cofib<E> cof) {
+    return Doc.join(Doc.spaced(Doc.symbol("/\\")), cof.ands.view().map(and ->
+      Doc.sep(and.inst.toDoc(), Doc.symbol("="), Doc.symbol(and.isLeft() ? "0" : "1"))));
+  }
 
-  record Side<E extends TermLike<E>>(@NotNull Cofib<E> cof, @NotNull E u) implements Docile {
-    public @NotNull Doc toDoc() {
-      return Doc.sep(cof().toDoc(), Doc.symbol("|->"), u().toDoc());
-    }
+  record Side<E extends TermLike<E>>(@NotNull Cofib<E> cof, @NotNull E u) {
 
     public Side<E> rename(@NotNull Function<E, E> g) {
       return new Side<>(cof.fmap(g), g.apply(u));
     }
+  }
+  static <E extends TermLike<E> & Docile> @NotNull Doc toDoc(Side<E> side) {
+    return Doc.sep(toDoc(side.cof), Doc.symbol("|->"), side.u.toDoc());
   }
 }

@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiFunction;
 
+import static org.aya.guest0x0.cubical.Restr.toDoc;
 import static org.aya.guest0x0.util.Distiller.Prec.*;
 
 public interface Distiller {
@@ -44,7 +45,7 @@ public interface Distiller {
       case Expr.Mula e -> formulae(Distiller::expr, e.asFormula(), envPrec);
       case Expr.Transp transp -> fibred("tr", expr(transp.cover(), AppSpine), transp.restr());
       // Well, hopefully I guessed the precedence right.
-      case Expr.Cof cof -> appPrec(envPrec, cof.data().toDoc());
+      case Expr.Cof cof -> appPrec(envPrec, toDoc(cof.data()));
       case Expr.PartEl par -> Doc.sep(Doc.symbol("\\"), partial(par));
       case Expr.PartTy par -> fibred("Partial", expr(par.ty(), AppSpine), par.restr());
       case Expr.Sub sub -> Doc.sep(Doc.plain("Sub"),
@@ -114,7 +115,7 @@ public interface Distiller {
       }
       case Term.Mula f -> formulae(Distiller::term, f.asFormula(), envPrec);
       case Term.Transp transp -> fibred("tr", term(transp.cover(), AppSpine), transp.restr());
-      case Term.Cof cof -> appPrec(envPrec, cof.restr().toDoc());
+      case Term.Cof cof -> appPrec(envPrec, toDoc(cof.restr()));
       case Term.PartTy par -> fibred("Partial", term(par.ty(), AppSpine), par.restr());
       case Term.PartEl par -> partial(par);
       case Term.Sub sub -> Doc.sep(Doc.plain("Sub"), term(sub.ty(), Free), partial(sub.par()));
@@ -130,9 +131,9 @@ public interface Distiller {
         term(partial.obvious(), Free));
     };
   }
-  static <T extends Restr.TermLike<T>> SeqView<Doc> clauses(@NotNull Seq<Restr.Side<T>> clauses) {
+  static <T extends Restr.TermLike<T> & Docile> SeqView<Doc> clauses(@NotNull Seq<Restr.Side<T>> clauses) {
     return clauses.view()
-      .map(Restr.Side::toDoc)
+      .map(Restr::toDoc)
       .map(Doc::spaced);
   }
 }

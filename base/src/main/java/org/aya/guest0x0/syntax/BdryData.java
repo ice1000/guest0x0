@@ -27,6 +27,6 @@ public record BdryData<E extends Docile & Restr.TermLike<E>>(
     var head = MutableList.of(Doc.symbol("[|"));
     dims.forEach(d -> head.append(Doc.plain(d.name())));
     head.appendAll(new Doc[]{Doc.symbol("|]"), type.toDoc()});
-    return Doc.cblock(Doc.sep(head), 2, Doc.vcat(boundaries.map(Restr.Side::toDoc)));
+    return Doc.cblock(Doc.sep(head), 2, Doc.vcat(boundaries.map(Restr::toDoc)));
   }
 }
