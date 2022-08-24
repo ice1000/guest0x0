@@ -51,7 +51,21 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+![image](https://user-images.githubusercontent.com/16398479/186529376-342c6451-b922-4ba5-9578-fa4c6704ebac.png)
+
+## v0.15.1
+
 ![image](https://user-images.githubusercontent.com/16398479/186201230-b67d2edd-dc3b-4ea9-9457-da5c4e1655d7.png)
+
+Fixed another bug conjectured by @imkiva on conversion of partial elements. In the past, the code below would fail to type check (there is another bug related to substitution, which is also fixed):
+
+```
+def par1 (A : U) (a : A) (i : I) : Partial A #{i = 0} => \ {| i = 0 |-> a |}
+def par2 (A : U) (b : A) (j : I) : Partial A #{j = 0} => \ {| j = 0 |-> b |}
+def cmp (A : U) (x : A)
+  : [| i j |] (Partial A #{j = 0}) {| i = 0 |-> par1 A x j |}
+  => \ i. \ j. par2 A x j
+```
 
 ### v0.15
 
