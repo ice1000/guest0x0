@@ -60,7 +60,7 @@ public class Unifier {
   /** Daniel Gratzer used <code>N</code> when explaining these to me */
   private boolean clause(@NotNull Restr.Side<Term> clause, @NotNull Term n) {
     return CofThy.conv(new Restr.Vary<>(ImmutableSeq.of(clause.cof())),
-      Normalizer.create(), subst -> untyped(clause.u(), subst.term(n)));
+      Normalizer.create(), subst -> untyped(new Term.SomewhatPartial(clause.u()), subst.term(n)));
   }
 
   private boolean unifySeq(@NotNull ImmutableSeq<Term> l, @NotNull ImmutableSeq<Term> r) {
