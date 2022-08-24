@@ -307,9 +307,11 @@ public record Elaborator(
         // This already implies overlapping checks
         var walls = inherit(hcomp.data().walls(), Term.mkPi(Term.I, new Term.PartTy(ty, phi)));
         var floor = walls.app(Term.end(true));
-        var bottom = inherit(hcomp.data().bottom(), ty);
-        // Bottom must meet the floor, but how to check this? Do we require floor to be a partial?
-        // Do we use cubical subtype here?
+        if (!(normalize(floor) instanceof Term.PartEl par))
+          throw new SPE(hcomp.data().walls().pos(),
+            Doc.english("Only support floors that are normalized as partials for now, got"), floor);
+        // Agda has a way to avoid using `inS` here :/
+        var bottom = inherit(hcomp.data().bottom(), new Term.Sub(ty, par));
         var data = new CompData<>(ty, phi, walls, bottom);
         throw new UnsupportedOperationException(data.toString());
       }
