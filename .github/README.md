@@ -53,6 +53,18 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ![image](https://user-images.githubusercontent.com/16398479/186529376-342c6451-b922-4ba5-9578-fa4c6704ebac.png)
 
+Implement the typing and basic reduction of `hcomp`:
+
+```
+def =-trans-hcomp (A : Type) (p : I -> A)
+  (q : [| i |] A {| i = 0 |-> p 1 |})
+  : [| i |] A {| i = 0 |-> p 0 | i = 1 |-> q 1 |}
+    => \i. hc A #{i = 0 /\ i = 1} (\j.
+      \{| i = 0 |-> p 0
+        | i = 1 |-> q j
+        |}) on (inS p i)
+```
+
 ## v0.15.1
 
 ![image](https://user-images.githubusercontent.com/16398479/186201230-b67d2edd-dc3b-4ea9-9457-da5c4e1655d7.png)

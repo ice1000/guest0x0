@@ -191,6 +191,17 @@ public class DeclsTest {
       """);
   }
 
+  @Test public void transUsingHcomp() {
+    tyck("""
+      def =-trans-hcomp (A : Type) (p : I -> A) (q : [| i |] A {| i = 0 |-> p 1 |})
+          : [| i |] A {| i = 0 |-> p 0 | i = 1 |-> q 1 |}
+            => \\i. hc A #{i = 0 /\\ i = 1} (\\j.
+              \\{| i = 0 |-> p 0
+                | i = 1 |-> q j
+                |}) on (inS p i)
+      """);
+  }
+
   private static @NotNull Elaborator tyck(@Language("TEXT") String s) {
     return CliMain.tyck(s, false);
   }
