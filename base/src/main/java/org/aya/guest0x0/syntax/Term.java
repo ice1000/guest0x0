@@ -111,4 +111,5 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
   record Sub(@NotNull Term ty, @NotNull PartEl par) implements Term {}
   record InS(@NotNull Term e, @NotNull Restr<Term> restr) implements Term {}
   record OutS(@NotNull Term e, @NotNull PartEl par) implements Term {}
+  record Hcomp(@NotNull CompData<Term> data) implements Term {}
 }

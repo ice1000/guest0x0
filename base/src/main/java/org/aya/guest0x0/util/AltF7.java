@@ -28,6 +28,7 @@ public record AltF7(@NotNull LocalVar var) {
       case Term.Sub sub -> press(sub.ty()) || press(sub.par());
       case Term.InS inS -> press(inS.e()) || inS.restr().instView().anyMatch(this::press);
       case Term.OutS outS -> press(outS.e()) || press(outS.par());
+      case Term.Hcomp hcomp -> press(hcomp.data().bottom()) || press(hcomp.data().walls());
     };
   }
 

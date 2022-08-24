@@ -121,6 +121,7 @@ public interface Distiller {
       case Term.Sub sub -> Doc.sep(Doc.plain("Sub"), term(sub.ty(), Free), partial(sub.par()));
       case Term.InS inS -> Doc.sep(Doc.plain("inS"), term(inS.e(), Free));
       case Term.OutS outS -> Doc.sep(Doc.plain("outS"), term(outS.e(), AppSpine));
+      case Term.Hcomp hcomp -> hcomp.data().toDoc();
     };
   }
   private static @NotNull Doc partial(Term.PartEl par) {

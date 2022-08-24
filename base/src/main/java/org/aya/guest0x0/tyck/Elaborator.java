@@ -306,14 +306,14 @@ public record Elaborator(
         var phi = inherit(hcomp.data().phi(), Term.F);
         // This already implies overlapping checks
         var walls = inherit(hcomp.data().walls(), Term.mkPi(Term.I, new Term.PartTy(ty, phi)));
-        var floor = walls.app(Term.end(true));
-        if (!(normalize(floor) instanceof Term.PartEl par))
+        var walls0 = walls.app(Term.end(true));
+        if (!(normalize(walls0) instanceof Term.PartEl par))
           throw new SPE(hcomp.data().walls().pos(),
-            Doc.english("Only support floors that are normalized as partials for now, got"), floor);
+            Doc.english("Only support walls normalized as partials for now, got"), walls0, Doc.english("at floor"));
         // Agda has a way to avoid using `inS` here :/
-        var bottom = inherit(hcomp.data().bottom(), new Term.Sub(ty, par));
-        var data = new CompData<>(ty, phi, walls, bottom);
-        throw new UnsupportedOperationException(data.toString());
+        var floor = inherit(hcomp.data().bottom(), new Term.Sub(ty, par));
+        var data = new CompData<>(ty, phi, walls, floor);
+        yield new Synth(new Term.Hcomp(data), ty);
       }
       default -> throw new SPE(expr.pos(), Doc.english("Synthesis failed for"), expr);
     };

@@ -49,6 +49,8 @@ public class Unifier {
         && untyped(ll.par(), rr.par());
       case Term.InS ll && r instanceof Term.InS rr -> untyped(ll.e(), rr.e());
       case Term.OutS ll && r instanceof Term.OutS rr -> untyped(ll.e(), rr.e());
+      case Term.Hcomp ll && r instanceof Term.Hcomp rr ->
+        untyped(ll.data().walls(), rr.data().walls()) && untyped(ll.data().bottom(), rr.data().bottom());
       // Cubical subtyping?? Are we ever gonna unify cubes?
       default -> false;
     };

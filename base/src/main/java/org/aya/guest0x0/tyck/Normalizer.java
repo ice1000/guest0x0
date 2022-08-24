@@ -126,6 +126,7 @@ public record Normalizer(
         if (e instanceof Term.InS inS) yield inS.e();
         yield new Term.OutS(e, partial);
       }
+      case Term.Hcomp hcomp -> new Term.Hcomp(hcomp.data().fmap(this::term));
     };
   }
 
@@ -231,6 +232,7 @@ public record Normalizer(
         case Term.Sub sub -> new Term.Sub(term(sub.ty()), partEl(sub.par()));
         case Term.InS inS -> new Term.InS(term(inS.e()), inS.restr().fmap(this::term));
         case Term.OutS outS -> new Term.OutS(term(outS.e()), partEl(outS.par()));
+        case Term.Hcomp hcomp -> new Term.Hcomp(hcomp.data().fmap(this::term));
       };
     }
 
