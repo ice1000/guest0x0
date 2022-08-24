@@ -5,10 +5,7 @@ import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
-import org.aya.guest0x0.syntax.BdryData;
-import org.aya.guest0x0.syntax.Def;
-import org.aya.guest0x0.syntax.Keyword;
-import org.aya.guest0x0.syntax.Term;
+import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.tyck.HCompPDF.Transps;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
@@ -126,7 +123,11 @@ public record Normalizer(
         if (e instanceof Term.InS inS) yield inS.e();
         yield new Term.OutS(e, partial);
       }
-      case Term.Hcomp hcomp -> new Term.Hcomp(hcomp.data().fmap(this::term));
+      case Term.Hcomp hcomp -> {
+        var data = hcomp.data().fmap(this::term);
+        if (data.walls().app(Term.end(false)) instanceof Term.SomewhatPartial p) yield p.obvious();
+        yield new Term.Hcomp(data);
+      }
     };
   }
 
