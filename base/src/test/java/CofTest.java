@@ -11,7 +11,6 @@ import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Normalizer;
 import org.aya.guest0x0.tyck.Resolver;
 import org.aya.guest0x0.util.LocalVar;
-import org.aya.pretty.doc.Docile;
 import org.aya.util.error.SourceFile;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
@@ -38,8 +37,8 @@ public class CofTest {
     return Tuple.of(resolver, akJr);
   }
 
-  private static void assertDoc(@Language("TEXT") String expected, Docile actual) {
-    assertEquals(expected, actual.toDoc().commonRender());
+  private static void assertDoc(@Language("TEXT") String expected, Restr<Term> actual) {
+    assertEquals(expected, Restr.toDoc(actual).commonRender());
   }
 
   @Test public void simpleSubst() {
