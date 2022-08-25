@@ -18,12 +18,7 @@ and combine them into an algorithm.
 \item Basic understanding of De Morgan cubical type theory~\cite{CCHM,CHM}
 (hereafter as \CTT{}), including the interval type $\II$, the path type,
 the idea of representing $n$-dimensional cubes using terms with interval variables in it,
-and the De Morgan operators on $\II$, including:
-\begin{align*}
-	\neg & \text{involution/reversal} & \land & \text{minimum/squeezeLeft}\\
-	 &  & \lor & \text{maximum/squeezeRight}
-\end{align*}
-where $\land$ and $\lor$ are also together known as ``connections''.
+and the De Morgan operators on $\II$.
 \end{itemize}
 This tutorial will not treat substitution formally --
 variable names are assumed to respect capture-avoiding substitution.
@@ -599,6 +594,23 @@ v[\overline{u_i/x_i}] : A[\overline{u_i/x_i}]}
 \caption{Typing rules of generalized paths}\label{fig:tyck-path}
 \end{figure}
 
+\begin{remark}
+With named bindings, the following criterion from~\cref{fig:tyck-path}:
+\[\Phi\overline{,x_i:\II};\Gamma,\conj_j[\overline{x_i/y_i}]\vdash v\equiv u_j[\overline{x_i/y_i}]:A[\overline{x_i/y_i}]\]
+has an alternatively implementation:
+\[\Phi\overline{,y_i:\II};\Gamma,\conj_j\vdash v[\overline{y_i/x_i}]\equiv u_j:A\]
+The idea is that we may substitute the term to use the bindings in the type and do the conversion checks,
+instead of substituting the type to the use the bindings in the term.
+Note that this difference does not exist with index-based bindings.
+
+The alternative implementation is shorter, but the philosophy behind it is very bad:
+it is usually preferred to adapt the type during the type checking of a term,
+not the other way around. We may want to store a proof of the fact that the term is well-typed,
+and it's better if the proof is about the term itself, not a substituted version of it.
+During the development of \GuestName, the alternative way was first used and then replaced by the
+philosophically more faithful way.
+\end{remark}
+
 \begin{example}\label{ex:gconcat}
 The path concatenation operation can have a simpler type signature.
 With the path type, its type is:
@@ -745,38 +757,42 @@ The rules of $\lor$ and $\land$ are very simple, but listed in~\cref{fig:minmax-
 \begin{figure}[h!]
 \begin{mathpar}
 \inferrule{\PGvdash u:\II \\\\ \PGvdash v:\II}{\PGvdash u\land v:\II}\and
-\inferrule{\PGvdash u:\II}{\PGvdash u\land 0\equiv 0:\II}\and
-\inferrule{\PGvdash u:\II}{\PGvdash u\land 1\equiv u:\II}\and
+\inferrule{\PGvdash u:\II}{\PGvdash u\land \lcon\equiv \lcon:\II}\and
+\inferrule{\PGvdash u:\II}{\PGvdash u\land \rcon\equiv u:\II}\and
 \inferrule{\PGvdash u:\II \\\\ \PGvdash v:\II}{\PGvdash u\lor v:\II}\and
-\inferrule{\PGvdash u:\II}{\PGvdash u\lor 0\equiv u:\II}\and
-\inferrule{\PGvdash u:\II}{\PGvdash u\lor 1\equiv 1:\II}
+\inferrule{\PGvdash u:\II}{\PGvdash u\lor \lcon\equiv u:\II}\and
+\inferrule{\PGvdash u:\II}{\PGvdash u\lor \rcon\equiv \rcon:\II}\and
+\inferrule{\PGvdash u:\II}{\PGvdash u\lor u\equiv u:\II}\and
+\inferrule{\PGvdash u:\II}{\PGvdash u\land u\equiv u:\II}
 \end{mathpar}
 \caption{Typing and computation rules of $\land$ and $\lor$}
 \label{fig:minmax-rules}
 \end{figure}
 
 With these operators we may construct the following squares:
-\newcommand{\minmaxPoints}[1]{
+\newcommand{\minmaxPoints}[3]{
 \node (00) at (0, 0) {a};
 \node (11) at (1.2, 1.2) {b};
 \node (10) at (1.2, 0) {#1};
 \node (01) at (0, 1.2) {#1};
-\fill [fill=black, fill opacity=0.2, draw=white, draw opacity=0, line width=2.5pt]
-  (0,0) rectangle (1.2,1.2) ;
+\fill[pattern color=lightgray,pattern=horizontal lines]
+  (00.center) -- (11.center) -- (#2.center) -- cycle ;
+\fill[pattern color=lightgray,pattern=vertical lines]
+  (00.center) -- (11.center) -- (#3.center) -- cycle ;
 }
 \newcommand{\minmaxCenter}[2]{
 \node[rotate=-45] (center) at (0.6, 0.6) {$\papp p{(#1)}$} ;
 \node (text) at (0.6, 1.6) {A ``#2'' square} ;
 }
 \carloCTikZ{\carloXy
-\minmaxPoints{b}
+\minmaxPoints{b}{01}{10}
 \draw[->] (00) -- (01) node [midway,left] {$\papp p y$} ;
 \draw[->] (10) -- (11) node [midway,right] {$b$} ;
 \draw[->] (00) -- (10) node [midway,above] {$\papp p x$} ;
 \draw[->] (01) -- (11) node [midway,below] {$b$} ;
 \minmaxCenter{x\lor y}{maximum}
 \shiftTikZ{2.5, 0}{
-\minmaxPoints{a}
+\minmaxPoints{a}{10}{01}
 \draw[->] (00) -- (01) node [midway,left] {$a$} ;
 \draw[->] (10) -- (11) node [midway,right] {$\papp p y$} ;
 \draw[->] (00) -- (10) node [midway,above] {$a$} ;
@@ -786,17 +802,54 @@ With these operators we may construct the following squares:
 
 We also introduce the $\neg$ operator, which is a unary operator that returns
 the point of symmetry on $\II$, hence the De Morgan laws are applicable to $\neg$,
-$\lor$, and $\land$. The rules are like $\neg(u\land v)\equiv \neg u \lor \neg v$
-and the rest is very easy to infer, hence left to the readers.
-Some other obvious rules on $\neg$ include $\neg(\neg u)\equiv u$, $\neg0\equiv1$, and $\neg1\equiv0$.
+$\lor$, and $\land$. The rules are like:
+\begin{align*}
+	\neg(u\land v)&\equiv \neg u \lor \neg v\\
+	\neg(u\lor v)&\equiv \neg u \land \neg v\\
+\end{align*}
+Some other obvious rules on $\neg$ include $\neg(\neg u)\equiv u$,
+$\neg\lcon\equiv\rcon$, and $\neg\rcon\equiv\lcon$.
+
+\begin{exercise}
+Think about the squares we can construct with a path
+$p:\PathTy{\lam\_A}a b$ and the De Morgan structures on $\II$,
+like in~\cref{rem:sq-ori}.
+\end{exercise}
+
+\begin{exercise}\label{ex:norm-i}
+Show that terms of type $\II$ (generated by variables, $\neg$, $\land$, and $\lor$)
+strongly normalizes to unique normal forms.
+This implies that expressions of type $\II$ in open contexts has a
+decidable conversion check algorithm.
+\end{exercise}
+
+Note that there are established facts that support~\cref{ex:norm-i},
+so it is not recommended to do it in a brute-force way.
+
+\begin{lem}
+There exists an isomorphism between expressions of type $\II$ in open contexts
+and cofibrations in the same context.
+\end{lem}
+\begin{proof}
+By constructing the following bijective function.
+\[\begin{array}{rl}
+\phi(x)&:=x\equiv\rcon\\
+\phi(\neg x)&:=x\equiv\lcon\\
+\phi(x\land y)&:=\phi(x)\land\phi(y)\\
+\phi(x\lor y)&:=\phi(x)\lor\phi(y)
+\end{array}\]
+It is left to the reader to construct its inverse.
+\end{proof}
 
 \subsection{Transportation rules}\label{sub:transp}
 In \CTT, for every line on types \fbox{$\Phi,x:\II,\Gamma\vdash\isType{A}$},
-we add a function $\transpLong:A[\lcon/x]\to A[\rcon/x]$ to the type theory,
+we add a function $\transpLong_A:A[\lcon/x]\to A[\rcon/x]$ to the type theory,
 satisfying the following properties:
 \begin{itemize}
 \item It is an isomorphism -- so we want
-an inverse $\transpLong^{-1}:A[\rcon/x]\to A[\lcon/x]$.
+an inverse $\transpLong_A^{-1}:A[\rcon/x]\to A[\lcon/x]$.
+One may easily guess that this is achieved by defining
+\[\transpLong_A^{-1}:=\transpLong_{A[\neg x/x]}\]
 \item There exists a cofibration $\disj$ such that $A$ does not reference $x$ under $\disj$.
 We may apply the following check:
 \[\Phi,\Gamma,\disj\vdash \isTypeBox{A[\lcon/x]\equiv A[\rcon/x]}\]
@@ -820,4 +873,6 @@ The behavior of $\transpLong$ is considered an extra set of \textit{rules}
 called \textit{transportation rules} on each type former,
 just like introduction rules, elimination rules,
 and computation rules.
+
+To achieve all the properties we have asked for,
 \TODO
