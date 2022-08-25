@@ -41,7 +41,8 @@ public interface HCompPDF {
       new Cof(Restr.fromCond(new Restr.Cond<>(r, false))));
   }
   /**
-   * CCHM comp
+   * CCHM comp, similar to the analogous comp as in
+   * <a href="https://github.com/molikto/mlang/blob/5110e18d20484a3f4ee57ee68e2793e5cf0e28e6/src-main/src/main/scala/mlang/compiler/semantic/10_value_fibrant.scala#L319-L324">mlang</a>
    *
    * @param x   the wall dimension
    * @param par has access to <code>x</code>
