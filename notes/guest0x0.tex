@@ -843,13 +843,13 @@ It is left to the reader to construct its inverse.
 
 \subsection{Transportation rules}\label{sub:transp}
 In \CTT, for every line on types \fbox{$\Psi,x:\II,\Gamma\vdash\isType{A}$},
-we add a function $\transpLong_A:A[\lcon/x]\to A[\rcon/x]$ to the type theory,
+we add a function $\transpLong:A[\lcon/x]\to A[\rcon/x]$ to the type theory,
 satisfying the following properties:
 \begin{itemize}
 \item It is an isomorphism -- so we want
 an inverse $\transpLong_A^{-1}:A[\rcon/x]\to A[\lcon/x]$.
-One may easily guess that this is achieved by defining
-\[\transpLong_A^{-1}:=\transpLong_{A[\neg x/x]}\]
+One may easily guess that this is achieved by the
+$\transpLong$ function on type $A[\neg x/x]$.
 \item There exists a cofibration $\disj$ such that $A$ does not reference $x$ under $\disj$.
 We may apply the following check:
 \[\Psi,\Gamma,\disj\vdash \isTypeBox{A[\lcon/x]\equiv A[\rcon/x]}\]
@@ -875,4 +875,26 @@ just like introduction rules, elimination rules,
 and computation rules.
 
 To achieve all the properties we have asked for,
+we add the following ``function'' to \CTT:
+\begin{figure}[h!]
+\[u,A::= \transp{A}{\disj} \mid \cdots~\text{(see~\cref{fig:subtype})}\]
+\caption{Syntax of transport}
+\label{fig:syntax-transp}
+\end{figure}
+It is actually not the normal sense of function,
+because the function body can't be expressed internally in the type theory.
+It is more like an operator whose behavior is induced by the type $A$.
+
+The implementation is basically a rewrite of~\cite[\S 3]{HCompPDF}.
+\TODO
+
+\begin{remark}
+The work~\cite{CubicalAgda} has implemented it as a built-in function
+with the following type signature:
+\[\transpLong:(A:\II\to\mathbb{U})~(\psi:\II)~(A~\lcon)\to(A~\rcon)\]
+However, invocations to this function is valid only when $A$ is constant under $\psi$,
+and this criterion is not expressed in the type signature.
+\end{remark}
+
+\subsection{Homogeneous composition}
 \TODO
