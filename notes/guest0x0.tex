@@ -145,9 +145,9 @@ From~\cref{ex:interval-in-ctx} we motivate the following notational
 convention for contexts in \CTT, as in~\cref{not:ctx}.
 \begin{notation}\label{not:ctx}
 Typing judgments are written as \fbox{$\PGvdash \isType{A}$} and \fbox{$\PGvdash u:A$},
-where \fbox{$\Phi;\Gamma$} is the usual \textit{context} in type theories,
+where \fbox{$\Psi;\Gamma$} is the usual \textit{context} in type theories,
 with variables classified into two groups: if a variable has type $\II$,
-it goes to $\Phi$, otherwise it goes to $\Gamma$.
+it goes to $\Psi$, otherwise it goes to $\Gamma$.
 This convention is borrowed from~\cite{ABCFHL}.
 \end{notation}
 Note that~\cref{not:ctx} does not imply that contexts has to be classified
@@ -273,31 +273,31 @@ like \fbox{$x=\lcon$} or \fbox{$x=\rcon$}, as in~\cref{fig:cofib} (recall~\cref{
 The typing rules for cofibrations is also straightforward, as in~\cref{fig:tyck-cofib}.
 \begin{figure}[h!]
 \begin{mathpar}
-\inferrule{(x:\II) \in \Phi}{\Phi\vdash \isCond{x=\lcon}} \and
-\inferrule{(x:\II) \in \Phi}{\Phi\vdash \isCond{x=\rcon}}\and
-\inferrule{\forall i. (\Phi\vdash \isCond{\cond_i})}{\Phi\vdash \bigwedge\nolimits_{i} \cond_i}\and
-\inferrule{\forall i. (\Phi\vdash \conj_i)}{\Phi\vdash \bigvee\nolimits_{i} \conj_i}\and
-\inferrule{}{\Phi\vdash \top} \and
-\inferrule{}{\Phi\vdash \bot}
+\inferrule{(x:\II) \in \Psi}{\Psi\vdash \isCond{x=\lcon}} \and
+\inferrule{(x:\II) \in \Psi}{\Psi\vdash \isCond{x=\rcon}}\and
+\inferrule{\forall i. (\Psi\vdash \isCond{\cond_i})}{\Psi\vdash \bigwedge\nolimits_{i} \cond_i}\and
+\inferrule{\forall i. (\Psi\vdash \conj_i)}{\Psi\vdash \bigvee\nolimits_{i} \conj_i}\and
+\inferrule{}{\Psi\vdash \top} \and
+\inferrule{}{\Psi\vdash \bot}
 \end{mathpar}
 \caption{Typing rules of cofibrations}\label{fig:tyck-cofib}
 \end{figure}
 
 The meaning of cofibrations is simple. Suppose we are in a $3$-dimensional context,
-which means there are $3$ intervals in the context, i.e. \fbox{$\Phi:=x:\II,y:\II,z:\II$}.
+which means there are $3$ intervals in the context, i.e. \fbox{$\Psi:=x:\II,y:\II,z:\II$}.
 Then:
 \begin{itemize}
-\item As mentioned before, the term \fbox{$\Phi\vdash u:A$} corresponds to
+\item As mentioned before, the term \fbox{$\Psi\vdash u:A$} corresponds to
 (the \textit{filling} of) a $3$-dimensional cube:
 \carloCTikZ{\carloXyz \refcube{Empty}}
-\item A $\cond$ specifies a $2$-dimensional cube (a square) face in $\Phi$, e.g. \fbox{$x=\lcon$}
+\item A $\cond$ specifies a $2$-dimensional cube (a square) face in $\Psi$, e.g. \fbox{$x=\lcon$}
 corresponds to the following square:
 \carloCTikZ{\carloXyz \refcube{XEquivL}}
-\item A $\conj$ specifies any $n$-cube (for $n\leq 2$) in $\Phi$, e.g.
+\item A $\conj$ specifies any $n$-cube (for $n\leq 2$) in $\Psi$, e.g.
 \fbox{$x=\lcon\land y=\rcon$} specifies a line $v$,
 and \fbox{$x=\lcon\land y=\rcon\land z=\lcon$} specifies a point $\star$:
 \carloCTikZ{\carloXyz \refcube{XYLR}}
-\item A $\disj$ talks about several $n$-cubes (for $n\leq 2$) in $\Phi$ at the same time, e.g.
+\item A $\disj$ talks about several $n$-cubes (for $n\leq 2$) in $\Psi$ at the same time, e.g.
 \fbox{$x=\lcon\lor x=\rcon$} corresponds to the following two squares:
 \carloCTikZ{\carloXyz \refcube{LRFaces}}
 \item A $\bot$ cofibration is called the \textit{absurd} cofibration,
@@ -390,7 +390,7 @@ the partial type into the annotated type $A$.
 \subsection{Type checking under cofibrations}\label{sub:tyck-cofib}
 We start from an example of type checking a partial element.
 \begin{example}\label{ex:parTyck}
-Consider $\Phi:=x:\II, y:\II,z:\II$ and the following:
+Consider $\Psi:=x:\II, y:\II,z:\II$ and the following:
 \begin{mathpar}
 \inferrule{}{\Gvdash\isType{A}} \and
 \inferrule{}{\Gvdash u:\II\to\II\to A}\and
@@ -440,7 +440,7 @@ from~\cref{ex:parTyck} we know that they overlap at $\conj_i\land\conj_j$
 The rule becomes something like:
 \begin{mathpar}
 \inferrule{\Hint{\Gvdash\isType{A}}\\
-\forall i\in I.(\Phi\vdash \conj_i)\\
+\forall i\in I.(\Psi\vdash \conj_i)\\
 \forall i\in I.(\PGvdash u_i:A)\\\\
 \forall i,j\in I.(\PGvdash[\text{overlap-check}])}
 {\PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
@@ -450,18 +450,18 @@ In~\cref{ex:parTyck}, the overlap-check step is a conversion check
 between a \textit{substituted version} of the two faces $u_i$ and $u_j$.
 For convenience, we introduce the typing judgment as in~\cref{fig:conv-cofib}.
 \begin{figure}[h!]
-\[\Phi;\Gamma,\conj\vdash u\equiv v:A\]
+\[\Psi;\Gamma,\conj\vdash u\equiv v:A\]
 \caption{Conversion check under a conjunction cofibration}\label{fig:conv-cofib}
 \end{figure}
 
 To implement this judgment, we convert $\conj$ into a substitution
 (this is possible due to~\cref{prop:unique}),
 apply to the three terms on the right-hand side of $\vdash$,
-and then apply the normal conversion check under $\Phi;\Gamma$.
+and then apply the normal conversion check under $\Psi;\Gamma$.
 The idea in~\cref{fig:conv-cofib} can be extended in the following ways:
 \begin{itemize}
 \item To do a normal type-check under conjunctions,
-e.g. \fbox{$\Phi;\Gamma,\conj\vdash u:A$}, we apply the substitution to $A$
+e.g. \fbox{$\Psi;\Gamma,\conj\vdash u:A$}, we apply the substitution to $A$
 and run the normal type-check.
 \item To check anything that results in a \textit{yes} or \textit{no},
 we may check them under a disjunction cofibration $\disj$
@@ -475,26 +475,26 @@ is equivalent to $\disj_0\vdash \disj_1\equiv\top$ and $\disj_1\vdash \disj_0\eq
 These ideas give rise to the judgments in~\cref{fig:tyck-w-cofib}.
 \begin{figure}[h!]
 \begin{align*}
-\Phi;\Gamma,\disj&\vdash u\equiv v:A\\
-\Phi;\Gamma,\conj&\vdash u:A\\
-\Phi;\Gamma,\disj&\vdash \isType{A\equiv B}\\
-\Phi;\Gamma,\conj&\vdash \isType{A}\\
-\Phi;\Gamma,\disj&\vdash \disj_0\equiv \disj_1
+\Psi;\Gamma,\disj&\vdash u\equiv v:A\\
+\Psi;\Gamma,\conj&\vdash u:A\\
+\Psi;\Gamma,\disj&\vdash \isType{A\equiv B}\\
+\Psi;\Gamma,\conj&\vdash \isType{A}\\
+\Psi;\Gamma,\disj&\vdash \disj_0\equiv \disj_1
 \end{align*}
 \caption{Judgments under cofibrations}\label{fig:tyck-w-cofib}
 \end{figure}
 
 With all these preparations we can get the typing rule
 for partial elements (note that we also add support for $A$ to
-reference variables in $\Phi$), as in~\cref{fig:tyck-par}.
+reference variables in $\Psi$), as in~\cref{fig:tyck-par}.
 \begin{figure}[h!]
 \begin{mathpar}
-\inferrule{\Phi\vdash \disj\\ \PGvdash\isType{A}}{\PGvdash \isTypeBox{\Partial{\disj}A}}\and
+\inferrule{\Psi\vdash \disj\\ \PGvdash\isType{A}}{\PGvdash \isTypeBox{\Partial{\disj}A}}\and
 \inferrule{\PGvdash u:A}{\PGvdash \lrbbar u : \Partial\top A}\and
 \inferrule{
-\forall i\in I.(\Phi\vdash \conj_i)\\
-\forall i\in I.(\Phi;\Gamma,\conj_i\vdash u_i:A)\\\\
-\forall i,j\in I.(\Phi;\Gamma,\conj_i\land\conj_j\vdash u_i\equiv u_j:A)}
+\forall i\in I.(\Psi\vdash \conj_i)\\
+\forall i\in I.(\Psi;\Gamma,\conj_i\vdash u_i:A)\\\\
+\forall i,j\in I.(\Psi;\Gamma,\conj_i\land\conj_j\vdash u_i\equiv u_j:A)}
 {\PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
 :\Partial{\left(\bigvee\nolimits_{i\in I} \conj_i\right)}A}
 \end{mathpar}
@@ -507,13 +507,13 @@ reference variables in $\Phi$), as in~\cref{fig:tyck-par}.
 In~\cite{CCHM}, the path type is defined using the following rules
 (slightly paraphrased for notational consistency):
 \begin{mathpar}
-\inferrule{\Phi,x:\II;\isType A\\ \PGvdash a:A[\lcon/x]\\ \PGvdash b:A[\rcon/x]}
+\inferrule{\Psi,x:\II;\isType A\\ \PGvdash a:A[\lcon/x]\\ \PGvdash b:A[\rcon/x]}
 {\PGvdash\isTypeBox{\PathTy{\lam x A} a b}}\and
-\inferrule{\Phi,x:\II;\Gvdash u:A}
+\inferrule{\Psi,x:\II;\Gvdash u:A}
 {\PGvdash \plam x u : \PathTy{\lam x A}{(u[\lcon/x])}{(u[\rcon/x])}}\and
-\inferrule{\Hint{\Phi,x:\II;\isType A}\\\Phi,x:\II;\Gvdash u:A\\\PGvdash v:\II}{
+\inferrule{\Hint{\Psi,x:\II;\isType A}\\\Psi,x:\II;\Gvdash u:A\\\PGvdash v:\II}{
 \PGvdash \papp{(\plam x u)}v \equiv u[v/x]:A[v/x]}\and
-\inferrule{\Hint{\Phi,x:\II;\isType A}\\\PGvdash u:\PathTy{\lam x A} a b}{
+\inferrule{\Hint{\Psi,x:\II;\isType A}\\\PGvdash u:\PathTy{\lam x A} a b}{
 \PGvdash \papp u\lcon \equiv a:A[\lcon/x] \\ \text{and} \\ \PGvdash \papp u\rcon \equiv b:A[\rcon/x]}
 \end{mathpar}
 We may rephrase these rules using the idea of cofibrations and partial elements:
@@ -527,8 +527,8 @@ x&=\rcon&\mapsto b}\]
 \item The introduction rule takes a type
 \fbox{$\extTy{x}{A}{\overline{\conj_i\mapsto v_i}}$} and checks the following:
 \begin{itemize}
-\item \fbox{$\Phi,x:\II;\Gvdash u:A$}, just like checking \fbox{$\lam x u:(x:\II)\to A$}.
-\item \fbox{$\forall i. (\Phi,x:\II;\Gamma,\conj_i\vdash u\equiv v_i:A)$},
+\item \fbox{$\Psi,x:\II;\Gvdash u:A$}, just like checking \fbox{$\lam x u:(x:\II)\to A$}.
+\item \fbox{$\forall i. (\Psi,x:\II;\Gamma,\conj_i\vdash u\equiv v_i:A)$},
 like saying ``$u$ \textit{matches} every given face''.
 \end{itemize}
 \item The elimination rule is the same as $\Pi$-types.
@@ -564,15 +564,15 @@ Note that we make use of reduction on partial elements (\cref{sub:red-cofib}).
 \begin{figure}[h!]
 \begin{mathpar}
 % Formation
-\inferrule{\Phi\overline{,x:\II};\Gvdash \isType{A}\\
+\inferrule{\Psi\overline{,x:\II};\Gvdash \isType{A}\\
 \forall i.(\overline{x:\II}\vdash\conj_i) \\\\
 \PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
 :\Partial{\left(\bigvee\nolimits_{i} \conj_i\right)}A}
 {\PGvdash\isTypeBox{\extTy{\overline{x}}{A}{\overline{\conj_i\mapsto u_i}}}}
 \and
 % Introduction
-\inferrule{\Phi\overline{,x_i:\II};\Gamma\vdash v:A[\overline{x_i/y_i}]\\\\
-\forall j. (\Phi\overline{,x_i:\II};\Gamma,\conj_j[\overline{x_i/y_i}]\vdash v\equiv u_j[\overline{x_i/y_i}]:A[\overline{x_i/y_i}])}
+\inferrule{\Psi\overline{,x_i:\II};\Gamma\vdash v:A[\overline{x_i/y_i}]\\\\
+\forall j. (\Psi\overline{,x_i:\II};\Gamma,\conj_j[\overline{x_i/y_i}]\vdash v\equiv u_j[\overline{x_i/y_i}]:A[\overline{x_i/y_i}])}
 {\PGvdash \plam{\overline{x_i}}{v}:\extTy{\overline{y_i}}{A}{\overline{\conj_j\mapsto u_j}}}
 \and
 % Elimination
@@ -582,7 +582,7 @@ Note that we make use of reduction on partial elements (\cref{sub:red-cofib}).
 \and
 % Computation
 \inferrule{\PGvdash \overline {u_i:\II}\\
-\Phi\overline{,x_i:\II};\Gamma,\vdash v:A}
+\Psi\overline{,x_i:\II};\Gamma,\vdash v:A}
 {\PGvdash \papp{(\plam{\overline{x_i}}v)}{\overline{u_i}}\equiv
 v[\overline{u_i/x_i}] : A[\overline{u_i/x_i}]}
 \and
@@ -596,9 +596,9 @@ v[\overline{u_i/x_i}] : A[\overline{u_i/x_i}]}
 
 \begin{remark}
 With named bindings, the following criterion from~\cref{fig:tyck-path}:
-\[\Phi\overline{,x_i:\II};\Gamma,\conj_j[\overline{x_i/y_i}]\vdash v\equiv u_j[\overline{x_i/y_i}]:A[\overline{x_i/y_i}]\]
+\[\Psi\overline{,x_i:\II};\Gamma,\conj_j[\overline{x_i/y_i}]\vdash v\equiv u_j[\overline{x_i/y_i}]:A[\overline{x_i/y_i}]\]
 has an alternatively implementation:
-\[\Phi\overline{,y_i:\II};\Gamma,\conj_j\vdash v[\overline{y_i/x_i}]\equiv u_j:A\]
+\[\Psi\overline{,y_i:\II};\Gamma,\conj_j\vdash v[\overline{y_i/x_i}]\equiv u_j:A\]
 The idea is that we may substitute the term to use the bindings in the type and do the conversion checks,
 instead of substituting the type to the use the bindings in the term.
 Note that this difference does not exist with index-based bindings.
@@ -681,7 +681,7 @@ Hence the typing rules as in~\cref{fig:typing-subtype}.
 \inferrule{\Hint{\PGvdash \isType A} \\
 \PGvdash \lrbbar{\overline\face}:\Partial{\disj}A}
 {\PGvdash\isTypeBox{\subTy{A}{\disj}{\overline\face}}}\and
-\inferrule{\forall i.(\Phi;\Gamma,\conj_i\vdash u\equiv v_i)}
+\inferrule{\forall i.(\Psi;\Gamma,\conj_i\vdash u\equiv v_i)}
 {\PGvdash\inS\disj u:\subTy{A}{\disj}{\overline{\conj_i\mapsto v_i}}}\and
 \inferrule{\PGvdash u:\subTy{A}{\disj}{\overline\face}}
 {\PGvdash\outS\disj u:A}
@@ -704,7 +704,7 @@ Hence the computation rules as in~\cref{fig:compute-subtype}.
 \inferrule{\PGvdash u:\subTy{A}{\disj}{\overline\face}}
 {\PGvdash \inS{\disj}{\outS{\disj} u}\equiv u:\subTy{A}{\disj}{\overline\face}}\and
 \inferrule{\PGvdash u:\subTy{A}{\disj}{\overline{\conj_i\mapsto v_i}}}
-{\forall i.(\Phi;\Gamma\conj_i\vdash \outS{\disj}u\equiv v_i:A)}
+{\forall i.(\Psi;\Gamma,\conj_i\vdash \outS{\disj}u\equiv v_i:A)}
 \end{mathpar}
 \caption{Typing rules of cubical subtypes, computation part}\label{fig:compute-subtype}
 \end{figure}
@@ -842,7 +842,7 @@ It is left to the reader to construct its inverse.
 \end{proof}
 
 \subsection{Transportation rules}\label{sub:transp}
-In \CTT, for every line on types \fbox{$\Phi,x:\II,\Gamma\vdash\isType{A}$},
+In \CTT, for every line on types \fbox{$\Psi,x:\II,\Gamma\vdash\isType{A}$},
 we add a function $\transpLong_A:A[\lcon/x]\to A[\rcon/x]$ to the type theory,
 satisfying the following properties:
 \begin{itemize}
@@ -852,11 +852,11 @@ One may easily guess that this is achieved by defining
 \[\transpLong_A^{-1}:=\transpLong_{A[\neg x/x]}\]
 \item There exists a cofibration $\disj$ such that $A$ does not reference $x$ under $\disj$.
 We may apply the following check:
-\[\Phi,\Gamma,\disj\vdash \isTypeBox{A[\lcon/x]\equiv A[\rcon/x]}\]
+\[\Psi,\Gamma,\disj\vdash \isTypeBox{A[\lcon/x]\equiv A[\rcon/x]}\]
 As in~\cite[\S 2.1]{HCompPDF}, we may also check:
-\[\Phi,x:\II,\Gamma,\disj\vdash \isTypeBox{A\equiv A[\lcon/x]}\]
+\[\Psi,x:\II,\Gamma,\disj\vdash \isTypeBox{A\equiv A[\lcon/x]}\]
 Furthermore, we want that for every $\PGvdash u:A[\lcon/x]$:
-\[\Phi,x:\II,\Gamma,\disj\vdash \transpLong(u)\equiv u:A[\lcon/x]\]
+\[\Psi,x:\II,\Gamma,\disj\vdash \transpLong(u)\equiv u:A[\lcon/x]\]
 \item It computes on type formers, e.g. for the type line $\lam x{A~x\to B~x}$, we have:
 \[\transpLong:(A~\lcon\to B~\lcon)\to(A~\rcon\to B~\rcon)\]
 And we expect this function to behave like:
