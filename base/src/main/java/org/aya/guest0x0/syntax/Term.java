@@ -97,15 +97,24 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
   record PartTy(@NotNull Term ty, @NotNull Term restr) implements Term {}
   sealed interface PartEl extends Term {
     @NotNull Restr<Term> restr();
+    @NotNull PartEl fmap(@NotNull Function<Term, Term> f);
   }
   record ReallyPartial(@NotNull ImmutableSeq<Restr.Side<Term>> clauses) implements PartEl {
     @Override public @NotNull Restr.Vary<Term> restr() {
       return new Restr.Vary<>(clauses.map(Restr.Side::cof));
     }
+
+    @Override public @NotNull ReallyPartial fmap(@NotNull Function<Term, Term> f) {
+      return new ReallyPartial(clauses.map(c -> c.rename(f)));
+    }
   }
   record SomewhatPartial(@NotNull Term obvious) implements PartEl {
     @Override public @NotNull Restr<Term> restr() {
       return new Restr.Const<>(true);
+    }
+
+    @Override public @NotNull PartEl fmap(@NotNull Function<Term, Term> f) {
+      return new SomewhatPartial(f.apply(obvious));
     }
   }
   record Sub(@NotNull Term ty, @NotNull PartEl par) implements Term {}

@@ -1,6 +1,7 @@
 package org.aya.guest0x0.tyck;
 
 import org.aya.guest0x0.cubical.Restr;
+import org.aya.guest0x0.syntax.CompData;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.LocalVar;
 import org.jetbrains.annotations.NotNull;
@@ -34,5 +35,20 @@ public interface HCompPDF {
       return new Transp(mkLam("j", j -> cover.app(neg(and(neg(ri), j)))),
         new Cof(restr.restr().or(new Restr.Cond<>(ri, false))));
     }
+  }
+  static @NotNull Term forward(@NotNull Term cover, @NotNull Term r) {
+    return new Transp(mkLam("i", i -> cover.app(or(i, r))),
+      new Cof(Restr.fromCond(new Restr.Cond<>(r, false))));
+  }
+  /**
+   * CCHM comp
+   *
+   * @param x   the wall dimension
+   * @param par has access to <code>x</code>
+   */
+  static @NotNull Term comp(@NotNull Term cover, @NotNull LocalVar x, @NotNull PartEl par, @NotNull Term u0) {
+    assert !(par instanceof SomewhatPartial);
+    return new Hcomp(new CompData<>(new Cof(par.restr()),
+      cover.app(end(false)), new Lam(x, par.fmap(u -> forward(cover, new Ref(x)).app(u))), u0));
   }
 }

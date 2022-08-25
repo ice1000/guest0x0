@@ -61,12 +61,15 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
     }
 
     @Override public Restr<E> or(Cond<E> cond) {
-      return isTrue ? this : new Vary<>(ImmutableSeq.of(new Cofib<>(ImmutableSeq.of(cond))));
+      return isTrue ? this : fromCond(cond);
     }
 
     @Override public <T extends TermLike<T>> Const<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f) {
       return new Const<>(isTrue);
     }
+  }
+  static <E extends TermLike<E>> @NotNull Vary<E> fromCond(Cond<E> cond) {
+    return new Vary<>(ImmutableSeq.of(new Cofib<>(ImmutableSeq.of(cond))));
   }
   record Cond<E>(@NotNull E inst, boolean isLeft) {
     public Cond<E> fmap(@NotNull Function<E, E> g) {
