@@ -180,7 +180,7 @@ public record Normalizer(
   }
 
   private Term formulae(Formula<Term> formula) {
-    return CofThy.formulae(formula, Term.Mula::new);
+    return Restr.formulae(formula, Term.Mula::new);
   }
 
   record Renamer(MutableMap<LocalVar, LocalVar> map) {
