@@ -5,7 +5,10 @@ import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
-import org.aya.guest0x0.syntax.*;
+import org.aya.guest0x0.syntax.BdryData;
+import org.aya.guest0x0.syntax.Def;
+import org.aya.guest0x0.syntax.Keyword;
+import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.tyck.HCompPDF.Transps;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
@@ -176,30 +179,8 @@ public record Normalizer(
     };
   }
 
-  // https://github.com/mortberg/cubicaltt/blob/a5c6f94bfc0da84e214641e0b87aa9649ea114ea/Connections.hs#L178-L197
   private Term formulae(Formula<Term> formula) {
-    return switch (formula) { // de Morgan laws
-      // ~ 1 = 0, ~ 0 = 1
-      case Formula.Inv<Term> inv && inv.i().asFormula() instanceof Formula.Lit<Term> lit -> Term.end(!lit.isLeft());
-      // ~ (~ a) = a
-      case Formula.Inv<Term> inv && inv.i().asFormula() instanceof Formula.Inv<Term> ii -> ii.i(); // DNE!! :fear:
-      // ~ (a /\ b) = (~ a \/ ~ b), ~ (a \/ b) = (~ a /\ ~ b)
-      case Formula.Inv<Term> inv && inv.i().asFormula() instanceof Formula.Conn<Term> conn ->
-        new Term.Mula(new Formula.Conn<>(!conn.isAnd(),
-          formulae(new Formula.Inv<>(conn.l())),
-          formulae(new Formula.Inv<>(conn.r()))));
-      // 0 /\ a = 0, 1 /\ a = a, 0 \/ a = a, 1 \/ a = 1
-      case Formula.Conn<Term> conn && conn.l() instanceof Term.Mula lf
-        && lf.asFormula() instanceof Formula.Lit<Term> l -> l.isLeft()
-        ? (conn.isAnd() ? lf : conn.r())
-        : (conn.isAnd() ? conn.r() : lf);
-      // a /\ 0 = 0, a /\ 1 = a, a \/ 0 = a, a \/ 1 = 1
-      case Formula.Conn<Term> conn && conn.r() instanceof Term.Mula rf
-        && rf.asFormula() instanceof Formula.Lit<Term> r -> r.isLeft()
-        ? (conn.isAnd() ? rf : conn.l())
-        : (conn.isAnd() ? conn.l() : rf);
-      default -> new Term.Mula(formula);
-    };
+    return CofThy.formulae(formula, Term.Mula::new);
   }
 
   record Renamer(MutableMap<LocalVar, LocalVar> map) {

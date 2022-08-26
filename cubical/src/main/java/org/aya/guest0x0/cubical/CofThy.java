@@ -47,6 +47,30 @@ public interface CofThy {
     combineRecursively(lateDropped, conds, combined);
     conds.pop();
   }
+  // https://github.com/mortberg/cubicaltt/blob/a5c6f94bfc0da84e214641e0b87aa9649ea114ea/Connections.hs#L178-L197
+  static <T extends Restr.TermLike<T>> T formulae(Formula<T> formula, Restr.TermLike.Factory<T> factory) {
+    return switch (formula) { // de Morgan laws
+      // ~ 1 = 0, ~ 0 = 1
+      case Formula.Inv<T> inv && inv.i().asFormula() instanceof Formula.Lit<T> lit ->
+        factory.apply(new Formula.Lit<>(!lit.isLeft()));
+      // ~ (~ a) = a
+      case Formula.Inv<T> inv && inv.i().asFormula() instanceof Formula.Inv<T> ii -> ii.i(); // DNE!! :fear:
+      // ~ (a /\ b) = (~ a \/ ~ b), ~ (a \/ b) = (~ a /\ ~ b)
+      case Formula.Inv<T> inv && inv.i().asFormula() instanceof Formula.Conn<T> conn ->
+        factory.apply(new Formula.Conn<>(!conn.isAnd(),
+          formulae(new Formula.Inv<>(conn.l()), factory),
+          formulae(new Formula.Inv<>(conn.r()), factory)));
+      // 0 /\ a = 0, 1 /\ a = a, 0 \/ a = a, 1 \/ a = 1
+      case Formula.Conn<T> conn && conn.l().asFormula() instanceof Formula.Lit<T> l -> l.isLeft()
+        ? (conn.isAnd() ? conn.l() : conn.r())
+        : (conn.isAnd() ? conn.r() : conn.l());
+      // a /\ 0 = 0, a /\ 1 = a, a \/ 0 = a, a \/ 1 = 1
+      case Formula.Conn<T> conn && conn.r().asFormula() instanceof Formula.Lit<T> r -> r.isLeft()
+        ? (conn.isAnd() ? conn.r() : conn.l())
+        : (conn.isAnd() ? conn.l() : conn.r());
+      default -> factory.apply(formula);
+    };
+  }
 
   @FunctionalInterface
   interface RestrNormalizer<E extends Restr.TermLike<E>, V, Subst extends SubstObj<E, V, Subst>>

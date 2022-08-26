@@ -4,6 +4,7 @@ import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import org.aya.pretty.doc.Doc;
 import org.aya.pretty.doc.Docile;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +20,12 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
   @NotNull SeqView<E> instView();
   interface TermLike<E extends TermLike<E>> {
     default @Nullable Formula<E> asFormula() {return null;}
+
+    @FunctionalInterface
+    interface Factory<T> extends Function<@NotNull Formula<T>, T> {
+      @Override @Contract(value = "_->new", pure = true)
+      T apply(@NotNull Formula<T> formula);
+    }
   }
   Restr<E> fmap(@NotNull Function<E, E> g);
   Restr<E> or(Cond<E> cond);
