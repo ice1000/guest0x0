@@ -51,6 +51,8 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+## v0.16
+
 ![image](https://user-images.githubusercontent.com/16398479/186529376-342c6451-b922-4ba5-9578-fa4c6704ebac.png)
 
 Implement the typing and basic reduction of `hcomp`:
@@ -64,6 +66,8 @@ def =-trans-hcomp (A : Type) (p : I -> A)
         | i = 1 |-> q j
         |}) on (inS p i)
 ```
+
+Moved some code from base to cubical.
 
 ## v0.15.1
 
