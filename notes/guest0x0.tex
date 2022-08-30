@@ -60,7 +60,7 @@ Translate the following typing rules into an algorithmic description:
 \inferrule{\Gamma,x:A\vdash b:B[x/y]}{\Gvdash \fbox{$\lam x b$} : (y:A)\to B} \and
 \inferrule{\Gvdash u : (x:A)\to B \\ \Gvdash v:A}{\Gvdash u~v:B[v/x]}
 \end{mathpar}
-Which of them is an introduction rule, and which is an elimination rule?
+Which of these is an introduction rule, and which is an elimination rule?
 \end{exercise}
 \begin{exercise}\label{ex:concat-sym}
 Consider path concatenation and symmetry in \CTT{}:
@@ -85,14 +85,14 @@ preferably in a cubical programming language:
 \end{tikzcd}\]
 \end{exercise}
 \subsection{Motivation}
-This tutorial is intended to help readers get more familiar with how
-\CTT{} works, what difficulties it is having in implementations,
+This tutorial is intended to help readers to get more familiar with how
+\CTT{} works under the hood, what difficulties it is having in implementations,
 what it can already do, and what it cannot do yet.
 
 \CTT{} is a type theory evolved from a model using Kan cubical sets~\cite{CubicalSets},
-which uses sophisticated mathematics. Computer scientists, on the other hand,
+which uses sophisticated homotopy theory. Computer scientists, on the other hand,
 usually do not have relevant courses taught in their undergraduate program.
-However, it is also the computer scientists who are suppose to implement \CTT{} as
+However, it is also the computer scientists who are supposed to implement \CTT{} as
 programming languages. This tutorial tries to help those who did not study homotopy
 theory, but have learned about the informal concepts of \CTT{}
 (like what is written in~\cite{NCTT}) and wish to learn the implementation details of \CTT.
