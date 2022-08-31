@@ -18,6 +18,7 @@ import java.util.function.Function;
  */
 public sealed interface Restr<E extends Restr.TermLike<E>> {
   @NotNull SeqView<E> instView();
+  @NotNull Restr<E> normalize();
   interface TermLike<E extends TermLike<E>> {
     default @Nullable Formula<E> asFormula() {return null;}
 
@@ -27,19 +28,23 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
       T apply(@NotNull Formula<T> formula);
     }
   }
-  Restr<E> fmap(@NotNull Function<E, E> g);
-  Restr<E> or(Cond<E> cond);
+  @NotNull Restr<E> fmap(@NotNull Function<E, E> g);
+  @NotNull Restr<E> or(@NotNull Cond<E> cond);
   <T extends TermLike<T>> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f);
   record Vary<E extends TermLike<E>>(@NotNull ImmutableSeq<Cofib<E>> orz) implements Restr<E> {
     @Override public @NotNull SeqView<E> instView() {
       return orz.view().flatMap(Cofib::view);
     }
 
-    @Override public Vary<E> fmap(@NotNull Function<E, E> g) {
+    @Override public @NotNull Restr<E> normalize() {
+      return CofThy.normalizeRestr(this);
+    }
+
+    @Override public @NotNull Vary<E> fmap(@NotNull Function<E, E> g) {
       return new Vary<>(orz.map(x -> x.fmap(g)));
     }
 
-    @Override public Vary<E> or(Cond<E> cond) {
+    @Override public @NotNull Vary<E> or(@NotNull Cond<E> cond) {
       return new Vary<>(orz.appended(new Cofib<>(ImmutableSeq.of(cond))));
     }
 
@@ -63,11 +68,15 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
       return SeqView.empty();
     }
 
-    @Override public Const<E> fmap(@NotNull Function<E, E> g) {
+    @Override public @NotNull Const<E> normalize() {
       return this;
     }
 
-    @Override public Restr<E> or(Cond<E> cond) {
+    @Override public @NotNull Const<E> fmap(@NotNull Function<E, E> g) {
+      return this;
+    }
+
+    @Override public @NotNull Restr<E> or(@NotNull Cond<E> cond) {
       return isTrue ? this : fromCond(cond);
     }
 

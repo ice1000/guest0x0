@@ -140,10 +140,7 @@ public record Normalizer(
   }
 
   public Restr<Term> restr(@NotNull Restr<Term> restr) {
-    return switch (restr.fmap(this::term)) {
-      case Restr.Vary<Term> vary -> CofThy.normalizeRestr(vary);
-      case Restr.Const<Term> c -> c;
-    };
+    return restr.fmap(this::term).normalize();
   }
 
   private Term transp(LocalVar i, Term cover, Term.Cof cof) {
