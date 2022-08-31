@@ -40,16 +40,22 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
   + [x] Cofibration theory
   + [x] Partial elements (with a dedicated type like in Cubical Agda)
   + [x] Cubical subtypes
-  + [ ] Generalized transport
+  + [x] Generalized transport
     + [x] Pi, Sigma, Universe
     + [ ] Higher inductive type
     + [ ] Glue/V
-  + [ ] Homogenous composition
+  + [x] Homogenous composition
     + [ ] Pi, Sigma, Universe
     + [ ] Higher inductive type
     + [ ] Glue/V
 
 ### Untagged
+
+## v0.16.1
+
+![image](https://user-images.githubusercontent.com/16398479/187781343-a3a0ba96-938c-49dd-ad28-e68d116bded6.png)
+
+Added a generalized `Partial` type to the cubical infra.
 
 ## v0.16
 
