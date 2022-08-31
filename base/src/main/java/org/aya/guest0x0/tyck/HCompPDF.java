@@ -1,5 +1,6 @@
 package org.aya.guest0x0.tyck;
 
+import org.aya.guest0x0.cubical.Partial;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.CompData;
 import org.aya.guest0x0.syntax.Term;
@@ -47,9 +48,10 @@ public interface HCompPDF {
    * @param x   the wall dimension
    * @param par has access to <code>x</code>
    */
-  static @NotNull Term comp(@NotNull Term cover, @NotNull LocalVar x, @NotNull PartEl par, @NotNull Term u0) {
-    assert !(par instanceof SomewhatPartial);
+  static @NotNull Term comp(@NotNull Term cover, @NotNull LocalVar x, @NotNull Partial<Term> par, @NotNull Term u0) {
+    assert !(par instanceof Partial.Const<Term>);
     return new Hcomp(new CompData<>(new Cof(par.restr()),
-      cover.app(end(false)), new Lam(x, par.fmap(u -> forward(cover, new Ref(x)).app(u))), u0));
+      cover.app(end(false)), new Lam(x,
+      new PartEl(par.map(u -> forward(cover, new Ref(x)).app(u)))), u0));
   }
 }

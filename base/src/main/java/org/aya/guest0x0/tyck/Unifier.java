@@ -5,6 +5,7 @@ import kala.collection.mutable.MutableMap;
 import kala.tuple.Tuple;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Partial;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.util.LocalVar;
@@ -42,9 +43,7 @@ public class Unifier {
       case Term.Cof lcof && r instanceof Term.Cof rcof -> Normalizer.create().propExt(lcof.restr(), rcof.restr());
       case Term.PartTy lpart && r instanceof Term.PartTy rpart ->
         untyped(lpart.ty(), rpart.ty()) && untyped(lpart.restr(), rpart.restr());
-      case Term.ReallyPartial par -> par.clauses().allMatch(clause -> clause(clause, r));
-      case Term ll && r instanceof Term.ReallyPartial par -> par.clauses().allMatch(clause -> clause(clause, ll));
-      case Term.SomewhatPartial ll && r instanceof Term.SomewhatPartial rr -> untyped(ll.obvious(), rr.obvious());
+      case Term.PartEl ll && r instanceof Term.PartEl rr -> untyped(ll.inner(), rr.inner());
       case Term.Sub ll && r instanceof Term.Sub rr -> untyped(ll.ty(), rr.ty())
         && untyped(ll.par(), rr.par());
       case Term.InS ll && r instanceof Term.InS rr -> untyped(ll.e(), rr.e());
@@ -59,10 +58,20 @@ public class Unifier {
     return happy;
   }
 
+  private boolean untyped(Partial<Term> l, Partial<Term> r) {
+    return switch (l) {
+      case Partial.Const<Term> ll -> switch (r) {
+        case Partial.Const<Term> rr -> untyped(ll.u(), rr.u());
+        case Partial.Split<Term> rr -> untyped(r, l);
+      };
+      case Partial.Split<Term> ll -> ll.clauses().allMatch(clause -> clause(clause, new Term.PartEl(r)));
+    };
+  }
+
   /** Daniel Gratzer used <code>N</code> when explaining these to me */
   private boolean clause(@NotNull Restr.Side<Term> clause, @NotNull Term n) {
     return CofThy.conv(new Restr.Vary<>(ImmutableSeq.of(clause.cof())),
-      Normalizer.create(), subst -> untyped(new Term.SomewhatPartial(clause.u()), subst.term(n)));
+      Normalizer.create(), subst -> untyped(new Term.PartEl(new Partial.Const<>(clause.u())), subst.term(n)));
   }
 
   private boolean unifySeq(@NotNull ImmutableSeq<Term> l, @NotNull ImmutableSeq<Term> r) {

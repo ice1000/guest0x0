@@ -5,6 +5,7 @@ import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Partial;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.tyck.Normalizer;
 import org.aya.guest0x0.util.Distiller;
@@ -81,7 +82,7 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
   record UI(@NotNull Keyword keyword) implements Term {}
   record Path(@NotNull BdryData<Term> data) implements Term {}
   record PLam(@NotNull ImmutableSeq<LocalVar> dims, @NotNull Term fill) implements Term {}
-  record PCall(@NotNull Term p, @NotNull ImmutableSeq<Term> i, @NotNull PartEl b) implements Term {}
+  record PCall(@NotNull Term p, @NotNull ImmutableSeq<Term> i, @NotNull Partial<Term> b) implements Term {}
   record Mula(@Override @NotNull Formula<Term> asFormula) implements Term {}
   static @NotNull Term end(boolean isLeft) {return new Mula(new Formula.Lit<>(isLeft));}
   static @NotNull Term neg(@NotNull Term term) {return new Mula(new Formula.Inv<>(term));}
@@ -95,30 +96,9 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
     }
   }
   record PartTy(@NotNull Term ty, @NotNull Term restr) implements Term {}
-  sealed interface PartEl extends Term {
-    @NotNull Restr<Term> restr();
-    @NotNull PartEl fmap(@NotNull Function<Term, Term> f);
-  }
-  record ReallyPartial(@NotNull ImmutableSeq<Restr.Side<Term>> clauses) implements PartEl {
-    @Override public @NotNull Restr.Vary<Term> restr() {
-      return new Restr.Vary<>(clauses.map(Restr.Side::cof));
-    }
-
-    @Override public @NotNull ReallyPartial fmap(@NotNull Function<Term, Term> f) {
-      return new ReallyPartial(clauses.map(c -> c.rename(f)));
-    }
-  }
-  record SomewhatPartial(@NotNull Term obvious) implements PartEl {
-    @Override public @NotNull Restr<Term> restr() {
-      return new Restr.Const<>(true);
-    }
-
-    @Override public @NotNull PartEl fmap(@NotNull Function<Term, Term> f) {
-      return new SomewhatPartial(f.apply(obvious));
-    }
-  }
-  record Sub(@NotNull Term ty, @NotNull PartEl par) implements Term {}
+  record PartEl(@NotNull Partial<Term> inner) implements Term {}
+  record Sub(@NotNull Term ty, @NotNull Partial<Term> par) implements Term {}
   record InS(@NotNull Term e, @NotNull Restr<Term> restr) implements Term {}
-  record OutS(@NotNull Term e, @NotNull PartEl par) implements Term {}
+  record OutS(@NotNull Term e, @NotNull Partial<Term> par) implements Term {}
   record Hcomp(@NotNull CompData<Term> data) implements Term {}
 }

@@ -9,6 +9,7 @@ import kala.control.Option;
 import kala.tuple.Tuple;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Partial;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.AltF7;
@@ -66,7 +67,7 @@ public record Elaborator(
         if (!CofThy.conv(cof.restr(), Normalizer.create(), norm -> CofThy.satisfied(norm.restr(face))))
           throw new SPE(el.pos(), Doc.english("The faces in the partial element"), toDoc(face),
             Doc.english("must cover the face(s) specified in type:"), cof);
-        yield new Term.ReallyPartial(clauses);
+        yield new Term.PartEl(new Partial.Split<>(clauses));
       }
       case Expr.Two two && !two.isApp() -> {
         if (!(normalize(type) instanceof Term.DT dt) || dt.isPi()) throw new SPE(two.pos(),
@@ -121,15 +122,15 @@ public record Elaborator(
     };
   }
 
-  private void boundaries(Expr on, Term arg, Term.PartEl par) {
+  private void boundaries(Expr on, Term arg, Partial<Term> par) {
     switch (par) {
-      case Term.ReallyPartial partial -> boundaries(on.pos(), normalizer(), arg, partial.clauses());
-      case Term.SomewhatPartial partial -> unify(arg, on, partial.obvious(), on.pos());
+      case Partial.Split<Term> partial -> boundaries(on.pos(), normalizer(), arg, partial.clauses());
+      case Partial.Const<Term> partial -> unify(arg, on, partial.u(), on.pos());
     }
   }
 
   public static @NotNull Restr<Term> restrOfClauses(ImmutableSeq<Restr.Side<Term>> clauses) {
-    return new Term.ReallyPartial(clauses).restr();
+    return new Partial.Split<>(clauses).restr();
   }
 
   private Normalizer normalizer(Seq<LocalVar> from, Seq<LocalVar> to) {
@@ -263,7 +264,7 @@ public record Elaborator(
       case Expr.Sub sub -> {
         var ty = inherit(sub.ty(), Term.U);
         var clauses = elaborateClauses(sub, sub.par().clauses(), ty);
-        yield new Synth(new Term.Sub(ty, new Term.ReallyPartial(clauses)), Term.U);
+        yield new Synth(new Term.Sub(ty, new Partial.Split<>(clauses)), Term.U);
       }
       case Expr.Path path -> {
         var dims = path.data().dims();
@@ -311,7 +312,7 @@ public record Elaborator(
           throw new SPE(hcomp.data().walls().pos(),
             Doc.english("Only support walls normalized as partials for now, got"), walls0, Doc.english("at floor"));
         // Agda has a way to avoid using `inS` here :/
-        var floor = inherit(hcomp.data().bottom(), new Term.Sub(ty, par));
+        var floor = inherit(hcomp.data().bottom(), new Term.Sub(ty, par.inner()));
         var data = new CompData<>(ty, phi, walls, floor);
         yield new Synth(new Term.Hcomp(data), ty);
       }
@@ -321,7 +322,7 @@ public record Elaborator(
     if (type instanceof Term.Path path) {
       var dims = path.data().dims();
       return new Synth(Normalizer.rename(Term.mkLam(dims.view(),
-        new Term.PCall(synth.wellTyped, dims.map(Term.Ref::new), new Term.ReallyPartial(path.data().boundaries())))),
+        new Term.PCall(synth.wellTyped, dims.map(Term.Ref::new), new Partial.Split<>(path.data().boundaries())))),
         Term.mkPi(dims.map(x -> new Param<>(x, Term.I)), path.data().type()));
     } else return new Synth(synth.wellTyped, type);
   }

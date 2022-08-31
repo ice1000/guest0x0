@@ -4,6 +4,7 @@ import kala.collection.Seq;
 import kala.collection.SeqView;
 import kala.collection.mutable.MutableList;
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Partial;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.Expr;
 import org.aya.guest0x0.syntax.Term;
@@ -117,19 +118,19 @@ public interface Distiller {
       case Term.Transp transp -> fibred("tr", term(transp.cover(), AppSpine), transp.restr());
       case Term.Cof cof -> appPrec(envPrec, toDoc(cof.restr()));
       case Term.PartTy par -> fibred("Partial", term(par.ty(), AppSpine), par.restr());
-      case Term.PartEl par -> partial(par);
+      case Term.PartEl par -> partial(par.inner());
       case Term.Sub sub -> Doc.sep(Doc.plain("Sub"), term(sub.ty(), Free), partial(sub.par()));
       case Term.InS inS -> Doc.sep(Doc.plain("inS"), term(inS.e(), Free));
       case Term.OutS outS -> Doc.sep(Doc.plain("outS"), term(outS.e(), AppSpine));
       case Term.Hcomp hcomp -> hcomp.data().toDoc();
     };
   }
-  private static @NotNull Doc partial(Term.PartEl par) {
+  private static @NotNull Doc partial(Partial<Term> par) {
     return switch (par) {
-      case Term.ReallyPartial partial -> Doc.wrap("[|", "|]",
+      case Partial.Split<Term> partial -> Doc.wrap("[|", "|]",
         Doc.join(Doc.symbol("|"), clauses(partial.clauses())));
-      case Term.SomewhatPartial partial -> Doc.wrap("[|", "|]",
-        term(partial.obvious(), Free));
+      case Partial.Const<Term> partial -> Doc.wrap("[|", "|]",
+        term(partial.u(), Free));
     };
   }
   static <T extends Restr.TermLike<T> & Docile> SeqView<Doc> clauses(@NotNull Seq<Restr.Side<T>> clauses) {

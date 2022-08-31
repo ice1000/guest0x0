@@ -1,9 +1,9 @@
 package org.aya.guest0x0.tyck;
 
-import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableMap;
 import org.aya.guest0x0.cubical.CofThy;
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Partial;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.BdryData;
 import org.aya.guest0x0.syntax.Def;
@@ -97,7 +97,7 @@ public record Normalizer(
         var b = pApp.b();
         // b.dims().zipView(i).forEach(zip -> rho.put(zip._1, zip._2));
         var partial = partial(b);
-        if (partial instanceof Term.SomewhatPartial what) yield what.obvious();
+        if (partial instanceof Partial.Const<Term> what) yield what.u();
         // b.dims().forEach(rho::remove);
         yield new Term.PCall(p, i, partial);
       }
@@ -110,7 +110,7 @@ public record Normalizer(
         yield transp(new LocalVar("i"), term(transp.cover()), new Term.Cof(parkerLiu));
       }
       case Term.PartTy par -> new Term.PartTy(term(par.ty()), term(par.restr()));
-      case Term.PartEl par -> partial(par);
+      case Term.PartEl par -> new Term.PartEl(partial(par.inner()));
       case Term.Sub sub -> new Term.Sub(term(sub.ty()), partial(sub.par()));
       case Term.InS inS -> {
         var restr = restr(inS.restr());
@@ -121,33 +121,22 @@ public record Normalizer(
       }
       case Term.OutS outS -> {
         var partial = partial(outS.par());
-        if (partial instanceof Term.SomewhatPartial what) yield what.obvious();
+        if (partial instanceof Partial.Const<Term> what) yield what.u();
         var e = term(outS.e());
         if (e instanceof Term.InS inS) yield inS.e();
         yield new Term.OutS(e, partial);
       }
       case Term.Hcomp hcomp -> {
         var data = hcomp.data().fmap(this::term);
-        if (data.walls().app(Term.end(false)) instanceof Term.SomewhatPartial p) yield p.obvious();
+        if (data.walls().app(Term.end(false)) instanceof Term.PartEl p
+          && p.inner() instanceof Partial.Const<Term> c) yield c.u();
         yield new Term.Hcomp(data);
       }
     };
   }
 
-  public @NotNull Term.PartEl partial(@NotNull Term.PartEl partial) {
-    return switch (partial) {
-      case Term.SomewhatPartial par -> new Term.SomewhatPartial(term(par.obvious()));
-      case Term.ReallyPartial par -> {
-        var clauses = MutableArrayList.<Restr.Side<Term>>create();
-        for (var clause : par.clauses()) {
-          var u = term(clause.u());
-          if (CofThy.normalizeCof(clause.cof().fmap(this::term), clauses, cofib -> new Restr.Side<>(cofib, u))) {
-            yield new Term.SomewhatPartial(u);
-          }
-        }
-        yield new Term.ReallyPartial(clauses.toImmutableArray());
-      }
-    };
+  public @NotNull Partial<Term> partial(@NotNull Partial<Term> partial) {
+    return partial.flatMap(this::term);
   }
 
   public Restr<Term> restr(@NotNull Restr<Term> restr) {
@@ -210,7 +199,7 @@ public record Normalizer(
         case Term.Transp tr -> new Term.Transp(term(tr.cover()), tr.restr().fmap(this::term));
         case Term.Cof cof -> cof.fmap(this::term);
         case Term.PartTy par -> new Term.PartTy(term(par.ty()), term(par.restr()));
-        case Term.PartEl par -> partEl(par);
+        case Term.PartEl par -> new Term.PartEl(partEl(par.inner()));
         case Term.Sub sub -> new Term.Sub(term(sub.ty()), partEl(sub.par()));
         case Term.InS inS -> new Term.InS(term(inS.e()), inS.restr().fmap(this::term));
         case Term.OutS outS -> new Term.OutS(term(outS.e()), partEl(outS.par()));
@@ -218,12 +207,8 @@ public record Normalizer(
       };
     }
 
-    private @NotNull Term.PartEl partEl(Term.PartEl par) {
-      return switch (par) {
-        case Term.ReallyPartial partial ->
-          new Term.ReallyPartial(partial.clauses().map(clause -> clause.rename(this::term)));
-        case Term.SomewhatPartial partial -> new Term.SomewhatPartial(term(partial.obvious()));
-      };
+    private @NotNull Partial<Term> partEl(Partial<Term> par) {
+      return par.map(this::term);
     }
 
     private @NotNull BdryData<Term> boundaries(@NotNull BdryData<Term> data) {

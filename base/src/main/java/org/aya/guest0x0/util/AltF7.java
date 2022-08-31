@@ -1,6 +1,7 @@
 package org.aya.guest0x0.util;
 
 import org.aya.guest0x0.cubical.Formula;
+import org.aya.guest0x0.cubical.Partial;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.BdryData;
 import org.aya.guest0x0.syntax.Term;
@@ -12,7 +13,7 @@ public record AltF7(@NotNull LocalVar var) {
       case Term.Ref r -> r.var() == var;
       case Term.Lam lam -> press(lam.body());
       case Term.Transp transp -> press(transp.cover()) || press(transp.restr());
-      case Term.PCall pCall -> press(pCall.p()) || pCall.i().anyMatch(this::press) || press(pCall.b());
+      case Term.PCall pCall -> press(pCall.p()) || pCall.i().anyMatch(this::press) || par(pCall.b());
       case Term.PLam pLam -> press(pLam.fill());
       case Term.Call call -> call.fn() == var || call.args().anyMatch(this::press);
       case Term.Two two -> press(two.f()) || press(two.a());
@@ -23,13 +24,16 @@ public record AltF7(@NotNull LocalVar var) {
       case Term.Mula mula -> formula(mula.asFormula());
       case Term.Cof cof -> cof.restr().instView().anyMatch(this::press);
       case Term.PartTy par -> press(par.ty()) || press(par.restr());
-      case Term.ReallyPartial par -> par.clauses().anyMatch(this::clause);
-      case Term.SomewhatPartial par -> press(par.obvious());
-      case Term.Sub sub -> press(sub.ty()) || press(sub.par());
+      case Term.PartEl par -> par(par.inner());
+      case Term.Sub sub -> press(sub.ty()) || par(sub.par());
       case Term.InS inS -> press(inS.e()) || inS.restr().instView().anyMatch(this::press);
-      case Term.OutS outS -> press(outS.e()) || press(outS.par());
+      case Term.OutS outS -> press(outS.e()) || par(outS.par());
       case Term.Hcomp hcomp -> press(hcomp.data().bottom()) || press(hcomp.data().walls());
     };
+  }
+
+  private boolean par(@NotNull Partial<Term> partial) {
+    return partial.termsView().anyMatch(this::press);
   }
 
   private boolean boundaries(BdryData<Term> data) {
