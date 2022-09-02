@@ -843,33 +843,33 @@ It is left to the reader to construct its inverse.
 
 \subsection{Transportation rules}\label{sub:transp}
 In \CTT, for every line on types \fbox{$\Psi,x:\II,\Gamma\vdash\isType{A}$},
-we add a function $\transpLong:A[\lcon/x]\to A[\rcon/x]$ to the type theory,
+we add a function $\coeLong:A[\lcon/x]\to A[\rcon/x]$ to the type theory,
 satisfying the following properties:
 \begin{itemize}
 \item It is an isomorphism -- so we want
-an inverse $\transpLong_A^{-1}:A[\rcon/x]\to A[\lcon/x]$.
+an inverse $\coeLong_A^{-1}:A[\rcon/x]\to A[\lcon/x]$.
 One may easily guess that this is achieved by the
-$\transpLong$ function on type $A[\neg x/x]$.
+$\coeLong$ function on type $A[\neg x/x]$.
 \item There exists a cofibration $\disj$ such that $A$ does not reference $x$ under $\disj$.
 We may apply the following check:
 \[\Psi,\Gamma,\disj\vdash \isTypeBox{A[\lcon/x]\equiv A[\rcon/x]}\]
 As in~\cite[\S 2.1]{HCompPDF}, we may also check:
 \[\Psi,x:\II,\Gamma,\disj\vdash \isTypeBox{A\equiv A[\lcon/x]}\]
 Furthermore, we want that for every $\PGvdash u:A[\lcon/x]$:
-\[\Psi,x:\II,\Gamma,\disj\vdash \transpLong(u)\equiv u:A[\lcon/x]\]
+\[\Psi,x:\II,\Gamma,\disj\vdash \coeLong(u)\equiv u:A[\lcon/x]\]
 \item It computes on type formers, e.g. for the type line $\lam x{A~x\to B~x}$, we have:
-\[\transpLong:(A~\lcon\to B~\lcon)\to(A~\rcon\to B~\rcon)\]
+\[\coeLong:(A~\lcon\to B~\lcon)\to(A~\rcon\to B~\rcon)\]
 And we expect this function to behave like:
 \begin{align*}
 &\text{take}~f:A~\lcon\to B~\lcon~\text{and}~a:A~\rcon&&\text{from input}\\
-\implies &\transpLong^{-1}(a):A~\lcon&&\text{by type line}~\lam x{A~x}\\
-\implies &f(\transpLong^{-1}(a)):B~\lcon&&\text{by function application}\\
-\implies &\transpLong(f(\transpLong^{-1}(a))):B~\rcon&&\text{by type line}~\lam x{B~x}\\
+\implies &\coeLong^{-1}(a):A~\lcon&&\text{by type line}~\lam x{A~x}\\
+\implies &f(\coeLong^{-1}(a)):B~\lcon&&\text{by function application}\\
+\implies &\coeLong(f(\coeLong^{-1}(a))):B~\rcon&&\text{by type line}~\lam x{B~x}\\
 \end{align*}
 Hence the well-typed result: an instance of type $B~\rcon$.
 This means the function does not obviously break canonicity.
 \end{itemize}
-The behavior of $\transpLong$ is considered an extra set of \textit{rules}
+The behavior of $\coeLong$ is considered an extra set of \textit{rules}
 called \textit{transportation rules} on each type former,
 just like introduction rules, elimination rules,
 and computation rules.
@@ -877,7 +877,7 @@ and computation rules.
 To achieve all the properties we have asked for,
 we add the following ``function'' to \CTT:
 \begin{figure}[h!]
-\[u,A::= \transp{A}{\disj} \mid \cdots~\text{(see~\cref{fig:subtype})}\]
+\[u,A::= \coe{A}{\disj} \mid \cdots~\text{(see~\cref{fig:subtype})}\]
 \caption{Syntax of transport}
 \label{fig:syntax-transp}
 \end{figure}
@@ -899,7 +899,7 @@ as in~\cref{fig:typing-transp}.
 \begin{remark}
 The work~\cite{CubicalAgda} has implemented it as a built-in function
 with the following type signature:
-\[\transpLong:(A:\II\to\mathbb{U})~(\psi:\II)~(A~\lcon)\to(A~\rcon)\]
+\[\coeLong:(A:\II\to\mathbb{U})~(\psi:\II)~(A~\lcon)\to(A~\rcon)\]
 However, invocations to this function is valid only when $A$ is constant under $\psi$,
 and this criterion is not expressed in the type signature.
 \end{remark}
