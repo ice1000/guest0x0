@@ -507,13 +507,13 @@ reference variables in $\Psi$), as in~\cref{fig:tyck-par}.
 In~\cite{CCHM}, the path type is defined using the following rules
 (slightly paraphrased for notational consistency):
 \begin{mathpar}
-\inferrule{\Psi,x:\II;\isType A\\ \PGvdash a:A[\lcon/x]\\ \PGvdash b:A[\rcon/x]}
+\inferrule{\PiGvdash x\isType A\\ \PGvdash a:A[\lcon/x]\\ \PGvdash b:A[\rcon/x]}
 {\PGvdash\isTypeBox{\PathTy{\lam x A} a b}}\and
-\inferrule{\Psi,x:\II;\Gvdash u:A}
+\inferrule{\PiGvdash x u:A}
 {\PGvdash \plam x u : \PathTy{\lam x A}{(u[\lcon/x])}{(u[\rcon/x])}}\and
-\inferrule{\Hint{\Psi,x:\II;\isType A}\\\Psi,x:\II;\Gvdash u:A\\\PGvdash v:\II}{
+\inferrule{\Hint{\PiGvdash x\isType A}\\\PiGvdash x u:A\\\PGvdash v:\II}{
 \PGvdash \papp{(\plam x u)}v \equiv u[v/x]:A[v/x]}\and
-\inferrule{\Hint{\Psi,x:\II;\isType A}\\\PGvdash u:\PathTy{\lam x A} a b}{
+\inferrule{\Hint{\PiGvdash x\isType A}\\\PGvdash u:\PathTy{\lam x A} a b}{
 \PGvdash \papp u\lcon \equiv a:A[\lcon/x] \\ \text{and} \\ \PGvdash \papp u\rcon \equiv b:A[\rcon/x]}
 \end{mathpar}
 We may rephrase these rules using the idea of cofibrations and partial elements:
@@ -527,7 +527,7 @@ x&=\rcon&\mapsto b}\]
 \item The introduction rule takes a type
 \fbox{$\extTy{x}{A}{\overline{\conj_i\mapsto v_i}}$} and checks the following:
 \begin{itemize}
-\item \fbox{$\Psi,x:\II;\Gvdash u:A$}, just like checking \fbox{$\lam x u:(x:\II)\to A$}.
+\item \fbox{$\PiGvdash x u:A$}, just like checking \fbox{$\lam x u:(x:\II)\to A$}.
 \item \fbox{$\forall i. (\Psi,x:\II;\Gamma,\conj_i\vdash u\equiv v_i:A)$},
 like saying ``$u$ \textit{matches} every given face''.
 \end{itemize}
@@ -842,7 +842,7 @@ It is left to the reader to construct its inverse.
 \end{proof}
 
 \subsection{Transportation rules}\label{sub:transp}
-In \CTT, for every line on types \fbox{$\Psi,x:\II,\Gamma\vdash\isType{A}$},
+In \CTT, for every line on types \fbox{$\PiGvdash x\isType{A}$},
 we add a function $\coeLong:A[\lcon/x]\to A[\rcon/x]$ to the type theory,
 satisfying the following properties:
 \begin{itemize}
@@ -887,14 +887,33 @@ It is more like an operator whose behavior is induced by the type $A$.
 
 The implementation is basically a rewrite of~\cite[\S 3]{HCompPDF},
 as in~\cref{fig:typing-transp}.
+
 \begin{figure}[h!]
 \begin{mathpar}
-\inferrule{1}{1}
+\inferrule{\PiGvdash{x}\isType A \\
+\Psi\vdash\overline{\conj_i} \\ \PiGvdash{x}\isType{A\equiv A[\lcon/x]}}{
+\coe{\lam x A}{\overline{\conj_i}}:(u:A[\lcon/x]) \to
+ \subTy{A[\rcon/x]}{\overline{\conj_i}}{\overline{\conj_i\mapsto u}}}
 \end{mathpar}
 \caption{Typing of the transportation rule}
 \label{fig:typing-transp}
 \end{figure}
-\TODO
+
+The type signature is a bit complicated because of the cubical subtype
+used to express the redution of $\coeLong$. We may simplify by separating the
+computation behavior from the typing:
+
+\begin{figure}[h!]
+\begin{mathpar}
+\inferrule{\PiGvdash{x}\isType A \\
+\Psi\vdash\overline{\conj_i} \\ \PiGvdash{x}\isTypeBox{A\equiv A[\lcon/x]}}{
+\PGvdash\coe{\lam x A}{\overline{\conj_i}}:A[\lcon/x] \to A[\rcon/x]}\and
+\inferrule{\PiGvdash{x}\isType A \\ \Psi\vdash\disj}{
+\Psi;\Gamma,\disj\vdash\coe{\lam x A}{\disj}\equiv \lam x x:A[\lcon/x] \to A[\lcon/x]}
+\end{mathpar}
+\caption{Alternative way to type the transportation rule}
+\label{fig:typing-transp-2}
+\end{figure}
 
 \begin{remark}
 The work~\cite{CubicalAgda} has implemented it as a built-in function
