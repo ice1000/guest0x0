@@ -887,7 +887,7 @@ It is actually not the normal sense of function,
 because the function body can't be expressed internally in the type theory.
 It is more like an operator whose behavior is induced by the type $A$.
 
-The implementation is basically a rewrite of~\cite[\S 2, \S 3]{HCompPDF},
+The implementation is basically a rewrite of~\cite[\S 2.1, \S 3]{HCompPDF},
 as in~\cref{fig:typing-transp}.
 
 \begin{figure}[h!]
@@ -930,7 +930,7 @@ It is said to be a design flaw\footnote{\url{https://github.com/agda/agda/issues
 in the Agda bug tracker.
 \end{remark}
 
-\begin{lem}[Fill]
+\begin{lem}[Fill]\label{lem:transpFill}
 Given a well-typed term: \[\coe A{\disj}{(u)}\]
 There exists the following path: \[p:\ExtTy x {A~x}{ccl}{
 	x&=\rcon&\mapsto \coe A{\disj}{(u)} \\
@@ -943,10 +943,16 @@ Let
 \[p:=\plam x{\coe{\lam y{A~(x\land y)}}
  {\disj\land x=\lcon}(u)}\]
 It is left to the reader to check the well-typedness of these constructions.
+In some sense, this construction motivates the De Morgan structure on $\II$.
 \end{proof}
 
 The transportation rules for type formers are omitted as they are
-very long and are already written in~\cite[\S 3]{HCompPDF}.
+very long and are already written in~\cite[\S 3]{HCompPDF}. By comparing~\cref{lem:transpFill}
+and~\cite[\S 2.1]{HCompPDF}, one should be able to translate the rest.
 
 \subsection{Homogeneous composition}
+There is another primitive construction which is needed to define the
+transportation rules for the (generalized) path type:
+the \textit{homogeneous composition} operation.
+
 \TODO
