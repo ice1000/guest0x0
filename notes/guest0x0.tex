@@ -892,10 +892,10 @@ as in~\cref{fig:typing-transp}.
 
 \begin{figure}[h!]
 \begin{mathpar}
-\inferrule{\PiGvdash{x}\isType A \\
-\Psi\vdash\overline{\conj_i} \\ \PiGvdash{x}\isTypeBox{A\equiv A[\lcon/x]}}{
-\coe{\lam x A}{\overline{\conj_i}}:(u:A[\lcon/x]) \to
- \subTy{A[\rcon/x]}{\overline{\conj_i}}{\overline{\conj_i\mapsto u}}}
+\inferrule{\PGvdash A:\II\to\UU \\
+\Psi\vdash\overline{\conj_i} \\ \PiGvdash{x}\isTypeBox{A~x\equiv A~\lcon}}{
+\coe{A}{\overline{\conj_i}}:(u:A~\lcon) \to
+ \subTy{(A~\rcon)}{\overline{\conj_i}}{\overline{\conj_i\mapsto u}}}
 \end{mathpar}
 \caption{Typing of the transportation rule}
 \label{fig:typing-transp}
@@ -908,11 +908,11 @@ This approach does not have the cubical subtype boilerplate, which leads to clea
 
 \begin{figure}[h!]
 \begin{mathpar}
-\inferrule{\PiGvdash{x}\isType A \\
-\Psi\vdash\disj \\ \PiGvdash{x}\isTypeBox{A\equiv A[\lcon/x]}}{
-\PGvdash\coe{\lam x A}{\disj}:A[\lcon/x] \to A[\rcon/x]}\and
-\inferrule{\PiGvdash{x}\isType A \\ \Psi\vdash\disj}{
-\Psi;\Gamma,\disj\vdash\coe{\lam x A}{\disj}\equiv \lam x x:A[\lcon/x] \to A[\lcon/x]}
+\inferrule{\PGvdash A:\II\to\UU \\
+\Psi\vdash\disj \\ \PiGvdash{x}\isTypeBox{A~x\equiv A~\lcon}}{
+\PGvdash\coe{A}{\disj}:A~\lcon \to A~\rcon}\and
+\inferrule{\PGvdash A:\II\to\UU \\ \Psi\vdash\disj}{
+\Psi;\Gamma,\disj\vdash\coe{A}{\disj}\equiv \lam x x:A~\lcon \to A~\lcon}
 \end{mathpar}
 \caption{Alternative way to type the transportation rule}
 \label{fig:typing-transp-2}
@@ -929,14 +929,14 @@ in the Agda bug tracker.
 \end{remark}
 
 \begin{lem}[Fill]
-Given a well-typed term \[\coe{\lam x A}{\disj}{(u)}\]
-There exists \[p:\ExtTy y {A[y/x]}{ccl}{
-	x&=\rcon&\mapsto \coe{\lam x A}{\disj}{(u)} \\
+Given a well-typed term \[\coe A{\disj}{(u)}\]
+There exists \[p:\ExtTy x {A~x}{ccl}{
+	x&=\rcon&\mapsto \coe A{\disj}{(u)} \\
 	x&=\lcon&\mapsto u}\]
 \end{lem}
 \begin{proof}
 Let
-\[p:=\plam x{\coe{\lam y{A[x\land y/x]}}
+\[p:=\plam x{\coe{\lam y{A~(x\land y)}}
  {\conj\land x=\lcon}(u)}\]
 It is left to the reader to check the well-typedness of these constructions.
 \end{proof}
