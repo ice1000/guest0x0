@@ -912,11 +912,13 @@ This approach does not have the cubical subtype boilerplate, which leads to clea
 \Psi\vdash\disj \\ \PiGvdash{x}\isTypeBox{A~x\equiv A~\lcon}}{
 \PGvdash\coe{A}{\disj}:A~\lcon \to A~\rcon}\and
 \inferrule{\PGvdash A:\II\to\UU \\ \Psi\vdash\disj}{
-\Psi;\Gamma,\disj\vdash\coe{A}{\disj}\equiv \lam x x:A~\lcon \to A~\lcon}
+\Psi;\Gamma,\disj\vdash\fbox{$\coe{A}{\disj}\equiv \lam x x$}:
+A~\lcon \to A~\lcon\footnotemark}
 \end{mathpar}
 \caption{Alternative way to type the transportation rule}
 \label{fig:typing-transp-2}
 \end{figure}
+\footnotetext{Note that the conversion rule is well-typed because under $\disj$, $A~\lcon\equiv A~\rcon$}
 
 \begin{remark}
 The work~\cite{CubicalAgda} has implemented it as a built-in function
@@ -929,15 +931,17 @@ in the Agda bug tracker.
 \end{remark}
 
 \begin{lem}[Fill]
-Given a well-typed term \[\coe A{\disj}{(u)}\]
-There exists \[p:\ExtTy x {A~x}{ccl}{
+Given a well-typed term: \[\coe A{\disj}{(u)}\]
+There exists the following path: \[p:\ExtTy x {A~x}{ccl}{
 	x&=\rcon&\mapsto \coe A{\disj}{(u)} \\
 	x&=\lcon&\mapsto u}\]
+In more traditional notations:
+\[p:\PathTy{A} u {(\coe A{\disj}{(u)})}\]
 \end{lem}
 \begin{proof}
 Let
 \[p:=\plam x{\coe{\lam y{A~(x\land y)}}
- {\conj\land x=\lcon}(u)}\]
+ {\disj\land x=\lcon}(u)}\]
 It is left to the reader to check the well-typedness of these constructions.
 \end{proof}
 
