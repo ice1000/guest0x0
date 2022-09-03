@@ -833,8 +833,8 @@ and cofibrations in the same context.
 \begin{proof}
 By constructing the following bijective function.
 \[\begin{array}{rl}
-\phi(x)&:=x\equiv\rcon\\
-\phi(\neg x)&:=x\equiv\lcon\\
+\phi(x)&:=x=\rcon\\
+\phi(\neg x)&:=x=\lcon\\
 \phi(x\land y)&:=\phi(x)\land\phi(y)\\
 \phi(x\lor y)&:=\phi(x)\lor\phi(y)
 \end{array}\]
@@ -876,22 +876,24 @@ and computation rules.
 
 To achieve all the properties we have asked for,
 we add the following ``function'' to \CTT:
+
 \begin{figure}[h!]
 \[u,A::= \coe{A}{\disj} \mid \cdots~\text{(see~\cref{fig:subtype})}\]
 \caption{Syntax of transport}
 \label{fig:syntax-transp}
 \end{figure}
+
 It is actually not the normal sense of function,
 because the function body can't be expressed internally in the type theory.
 It is more like an operator whose behavior is induced by the type $A$.
 
-The implementation is basically a rewrite of~\cite[\S 3]{HCompPDF},
+The implementation is basically a rewrite of~\cite[\S 2, \S 3]{HCompPDF},
 as in~\cref{fig:typing-transp}.
 
 \begin{figure}[h!]
 \begin{mathpar}
 \inferrule{\PiGvdash{x}\isType A \\
-\Psi\vdash\overline{\conj_i} \\ \PiGvdash{x}\isType{A\equiv A[\lcon/x]}}{
+\Psi\vdash\overline{\conj_i} \\ \PiGvdash{x}\isTypeBox{A\equiv A[\lcon/x]}}{
 \coe{\lam x A}{\overline{\conj_i}}:(u:A[\lcon/x]) \to
  \subTy{A[\rcon/x]}{\overline{\conj_i}}{\overline{\conj_i\mapsto u}}}
 \end{mathpar}
@@ -901,13 +903,14 @@ as in~\cref{fig:typing-transp}.
 
 The type signature is a bit complicated because of the cubical subtype
 used to express the redution of $\coeLong$. We may simplify by separating the
-computation behavior from the typing:
+computation behavior from the typing, as in~\cref{fig:typing-transp-2}.
+This approach does not have the cubical subtype boilerplate, which leads to cleaner code.
 
 \begin{figure}[h!]
 \begin{mathpar}
 \inferrule{\PiGvdash{x}\isType A \\
-\Psi\vdash\overline{\conj_i} \\ \PiGvdash{x}\isTypeBox{A\equiv A[\lcon/x]}}{
-\PGvdash\coe{\lam x A}{\overline{\conj_i}}:A[\lcon/x] \to A[\rcon/x]}\and
+\Psi\vdash\disj \\ \PiGvdash{x}\isTypeBox{A\equiv A[\lcon/x]}}{
+\PGvdash\coe{\lam x A}{\disj}:A[\lcon/x] \to A[\rcon/x]}\and
 \inferrule{\PiGvdash{x}\isType A \\ \Psi\vdash\disj}{
 \Psi;\Gamma,\disj\vdash\coe{\lam x A}{\disj}\equiv \lam x x:A[\lcon/x] \to A[\lcon/x]}
 \end{mathpar}
@@ -921,7 +924,25 @@ with the following type signature:
 \[\coeLong:(A:\II\to\mathbb{U})~(\psi:\II)~(A~\lcon)\to(A~\rcon)\]
 However, invocations to this function is valid only when $A$ is constant under $\psi$,
 and this criterion is not expressed in the type signature.
+It is said to be a design flaw\footnote{\url{https://github.com/agda/agda/issues/3509\#issuecomment-456201777}}
+in the Agda bug tracker.
 \end{remark}
+
+\begin{lem}[Fill]
+Given a well-typed term \[\coe{\lam x A}{\disj}{(u)}\]
+There exists \[p:\ExtTy y {A[y/x]}{ccl}{
+	x&=\rcon&\mapsto \coe{\lam x A}{\disj}{(u)} \\
+	x&=\lcon&\mapsto u}\]
+\end{lem}
+\begin{proof}
+Let
+\[p:=\plam x{\coe{\lam y{A[x\land y/x]}}
+ {\conj\land x=\lcon}(u)}\]
+It is left to the reader to check the well-typedness of these constructions.
+\end{proof}
+
+The transportation rules for type formers are omitted as they are
+very long and are already written in~\cite[\S 3]{HCompPDF}.
 
 \subsection{Homogeneous composition}
 \TODO
