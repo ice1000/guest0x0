@@ -849,15 +849,17 @@ it is \textit{constant} under $\disj$. In terms of typing judgment:
 The judgment is from~\cite[\S 2.1]{HCompPDF}.
 \end{defn}
 Here is an illustration of~\cref{defn:freeze} inspired from an online cubical tutorial
-by Favonia. Consider the type-line $A:\II\to\UU$, how can it be frozen under a cofibration?
+by Favonia\footnote{\url{https://youtu.be/uE6g4Oyom68?t=710}}.
+Consider the type-line $A:\II\to\UU$, how can it be frozen under a cofibration?
 \begin{enumerate}
 \item If $A$ is already constant,
 then it is frozen under all cofibrations, which is not interesting.
 \item Consider a non-constant $A$ which is constant under $\disj$.
 For convenience, let $A:=\plam x{A_0}$. Apparently,
 there are subexpressions in $A_0$ involving the interval variable $x$.
-\item Recall~\cref{sub:tyck-cofib}, this means under some interval substitution,
-these subexpressions will reduce and will no longer refer to $x$.
+\item Recall~\cref{sub:tyck-cofib}, this means under the interval substitution
+that corresponds to $\disj$, these subexpressions will reduce
+and the result does not refer to $x$.
 \item So, these subexpressions have to refer to interval variables other than $x$
 which are substituted away under $\disj$!
 \end{enumerate}
