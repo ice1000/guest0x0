@@ -861,7 +861,9 @@ these subexpressions will reduce and will no longer refer to $x$.
 \item So, these subexpressions have to refer to interval variables other than $x$
 which are substituted away under $\disj$!
 \end{enumerate}
-So, suppose $A_0$ also refers to $y:\II$. This makes $A$ a square:
+Hence the following example.
+\begin{example}
+Suppose $A_0$ also refers to $y:\II$. This makes $A$ a square:
 \carloCTikZ{\carloXy
 \carloSqBullets
 \draw[->] (00) -- (01) node [midway,left] {$A~\lcon$} ;
@@ -884,6 +886,7 @@ the corresponding face must be constant, resulting in a triangle:
 \draw[->] (10) -- (11) node [midway,right] {$A~\rcon$} ;
 \draw[->] (01) -- (11) node [midway,below] {$A_0[\rcon/y]$} ;
 }}
+\end{example}
 \begin{remark}
 Note that the judgment in~\cref{defn:freeze} is not equivalent to:
 \[\Psi;\Gamma,\disj\vdash \isTypeBox{A~\lcon\equiv A~\rcon}\]
