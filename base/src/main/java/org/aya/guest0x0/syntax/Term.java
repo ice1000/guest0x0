@@ -26,11 +26,11 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
     return subst(MutableMap.of(x, t));
   }
   default @NotNull Term subst(@NotNull MutableMap<LocalVar, Term> map) {
-    return new Normalizer(MutableMap.create(), map).term(this);
+    return new Normalizer(map).term(this);
   }
 
   record Ref(@NotNull LocalVar var) implements Term {}
-  record Call(@NotNull LocalVar fn, @NotNull ImmutableSeq<Term> args) implements Term {}
+  record Call(@NotNull DefVar<Def.Fn> fn, @NotNull ImmutableSeq<Term> args) implements Term {}
   record Two(boolean isApp, @NotNull Term f, @NotNull Term a) implements Term {
     @Override public @NotNull Term proj(boolean isOne) {return isOne ? f : a;}
   }

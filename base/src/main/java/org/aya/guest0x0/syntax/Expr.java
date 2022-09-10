@@ -4,6 +4,7 @@ import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableList;
 import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Restr;
+import org.aya.guest0x0.util.AnyVar;
 import org.aya.guest0x0.util.Distiller;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
@@ -19,7 +20,7 @@ public sealed interface Expr extends Docile, Restr.TermLike<Expr> {
     return Distiller.expr(this, Distiller.Prec.Free);
   }
   record Unresolved(@Override @NotNull SourcePos pos, String name) implements Expr {}
-  record Resolved(@Override @NotNull SourcePos pos, LocalVar ref) implements Expr {}
+  record Resolved(@Override @NotNull SourcePos pos, AnyVar ref) implements Expr {}
   /** @param isApp it's a tuple if false */
   record Two(boolean isApp, @Override @NotNull SourcePos pos, Expr f, Expr a) implements Expr {}
   record Lam(@Override @NotNull SourcePos pos, LocalVar x, Expr a) implements Expr {}

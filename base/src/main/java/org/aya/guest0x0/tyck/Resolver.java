@@ -6,21 +6,22 @@ import kala.collection.mutable.MutableMap;
 import kala.control.Option;
 import kala.tuple.Tuple;
 import kala.tuple.Tuple2;
-import org.aya.guest0x0.syntax.Def;
+import org.aya.guest0x0.syntax.Decl;
 import org.aya.guest0x0.syntax.Expr;
+import org.aya.guest0x0.util.AnyVar;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
 import org.aya.guest0x0.util.SPE;
 import org.aya.pretty.doc.Doc;
 import org.jetbrains.annotations.NotNull;
 
-public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
+public record Resolver(@NotNull MutableMap<String, AnyVar> env) {
   private @NotNull TeleCache mkCache(int initialCapacity) {
     return new TeleCache(this, MutableArrayList.create(initialCapacity), MutableArrayList.create(initialCapacity));
   }
 
-  private record TeleCache(Resolver ctx, MutableArrayList<LocalVar> recover, MutableArrayList<LocalVar> remove) {
-    private void add(@NotNull LocalVar var) {
+  private record TeleCache(Resolver ctx, MutableArrayList<AnyVar> recover, MutableArrayList<AnyVar> remove) {
+    private void add(@NotNull AnyVar var) {
       var put = ctx.put(var);
       if (put.isDefined()) recover.append(put.get());
       else remove.append(var);
@@ -36,28 +37,31 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
     return new Param<>(param.x(), expr(param.type()));
   }
 
-  public @NotNull Def<Expr> def(@NotNull Def<Expr> def) {
+  public @NotNull Decl def(@NotNull Decl def) {
     var tele = tele(def);
-    var result = expr(def.result());
+    var newTele = new Decl.Tele(tele._1);
     return switch (def) {
-      case Def.Fn<Expr> fn -> {
+      case Decl.Fn fn -> {
+        var result = expr(fn.result());
         put(fn.name());
         var body = expr(fn.body());
         tele._2.purge();
-        yield new Def.Fn<>(fn.name(), tele._1, result, body);
+        yield new Decl.Fn(fn.name(), newTele, result, body);
       }
-      case Def.Print<Expr> print -> {
+      case Decl.Print print -> {
+        var result = expr(print.result());
         var body = expr(print.body());
         tele._2.purge();
-        yield new Def.Print<>(tele._1, result, body);
+        yield new Decl.Print(newTele, result, body);
       }
     };
   }
 
-  @NotNull private Tuple2<ImmutableSeq<Param<Expr>>, TeleCache> tele(Def<Expr> def) {
-    var telescope = MutableArrayList.<Param<Expr>>create(def.telescope().size());
-    var cache = mkCache(def.telescope().size());
-    for (var param : def.telescope()) {
+  @NotNull private Tuple2<ImmutableSeq<Param<Expr>>, TeleCache> tele(Decl def) {
+    var size = def.tele().scope().size();
+    var telescope = MutableArrayList.<Param<Expr>>create(size);
+    var cache = mkCache(size);
+    for (var param : def.tele().scope()) {
       telescope.append(new Param<>(param.x(), expr(param.type())));
       cache.add(param.x());
     }
@@ -70,7 +74,8 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
       case Expr.Two two -> new Expr.Two(two.isApp(), two.pos(), expr(two.f()), expr(two.a()));
       case Expr.Lam lam -> new Expr.Lam(lam.pos(), lam.x(), bodied(lam.x(), lam.a()));
       case Expr.PrimTy primTy -> primTy;
-      case Expr.Hole hole -> new Expr.Hole(hole.pos(), env.valuesView().toImmutableSeq());
+      case Expr.Hole hole -> new Expr.Hole(hole.pos(),
+        env.valuesView().filterIsInstance(LocalVar.class).toImmutableSeq());
       case Expr.Unresolved unresolved -> env.getOption(unresolved.name())
         .map(x -> new Expr.Resolved(unresolved.pos(), x))
         .getOrThrow(() -> new SPE(unresolved.pos(), Doc.english("Unresolved: " + unresolved.name())));
@@ -106,7 +111,7 @@ public record Resolver(@NotNull MutableMap<String, LocalVar> env) {
     return e;
   }
 
-  private @NotNull Option<LocalVar> put(LocalVar x) {
+  private @NotNull Option<AnyVar> put(AnyVar x) {
     return env.put(x.name(), x);
   }
 }

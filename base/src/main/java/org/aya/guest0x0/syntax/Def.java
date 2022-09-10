@@ -1,30 +1,42 @@
 package org.aya.guest0x0.syntax;
 
 import kala.collection.immutable.ImmutableSeq;
-import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
-import org.aya.pretty.doc.Docile;
 import org.jetbrains.annotations.NotNull;
 
-public sealed interface Def<Term extends Docile> {
-  @NotNull ImmutableSeq<Param<Term>> telescope();
-  @NotNull LocalVar name();
-  @NotNull Term result();
+public sealed interface Def extends FnLike {
+  @NotNull DefVar<? extends Def> name();
 
-  record Fn<Term extends Docile>(
-    @Override @NotNull LocalVar name,
+  record Fn(
+    @Override @NotNull DefVar<Fn> name,
     @Override @NotNull ImmutableSeq<Param<Term>> telescope,
     @NotNull Term result,
     @NotNull Term body
-  ) implements Def<Term> {}
+  ) implements Def {
+    public Fn {
+      name.core = this;
+    }
+  }
 
-  record Print<Term extends Docile>(
+  /**
+   * For (maybe mutually) recursive definitions, like types and functions
+   *
+   * @param isData it will be a function if false
+   */
+  record Signature(
+    boolean isData,
+    @Override @NotNull ImmutableSeq<Param<Term>> telescope,
+    @NotNull Term result
+  ) implements FnLike {
+  }
+
+  record Print(
     @Override @NotNull ImmutableSeq<Param<Term>> telescope,
     @NotNull Term result,
     @NotNull Term body
-  ) implements Def<Term> {
-    public static final @NotNull LocalVar UNUSED = new LocalVar("_");
-
-    @Override public @NotNull LocalVar name() {return UNUSED;}
+  ) implements Def {
+    @Override public @NotNull DefVar<? extends Print> name() {
+      throw new UnsupportedOperationException();
+    }
   }
 }

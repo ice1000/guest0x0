@@ -18,7 +18,7 @@ public class DeclsTest {
       def uncurry' (A : U) (t : A ** A) (f : A -> A -> A) : A => uncurry A A A t f
       """);
     akJr.sigma().valuesView().forEach(tycked -> {
-      var body = ((Def.Fn<Term>) tycked).body();
+      var body = ((Def.Fn) tycked).body();
       assertTrue(akJr.normalize(body) instanceof Term.Two two && two.isApp());
     });
   }

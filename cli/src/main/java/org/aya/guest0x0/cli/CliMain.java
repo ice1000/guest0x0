@@ -7,9 +7,8 @@ import org.antlr.v4.runtime.*;
 import org.aya.guest0x0.parser.Guest0x0Lexer;
 import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.prelude.GeneratedVersion;
+import org.aya.guest0x0.syntax.Decl;
 import org.aya.guest0x0.syntax.Def;
-import org.aya.guest0x0.syntax.Expr;
-import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.tyck.Elaborator;
 import org.aya.guest0x0.tyck.Resolver;
 import org.aya.util.error.SourceFile;
@@ -71,7 +70,7 @@ public class CliMain implements Callable<Integer> {
     }
   }
 
-  public static @NotNull ImmutableSeq<Def<Expr>> def(String s) {
+  public static @NotNull ImmutableSeq<Decl> def(String s) {
     var decls = ImmutableSeq.from(parser(s).program().decl());
     var edj = new Resolver(MutableMap.create());
     return decls.map(d -> edj.def(new Parser(new SourceFile("<input>", Option.none(), s)).def(d)));
@@ -82,11 +81,11 @@ public class CliMain implements Callable<Integer> {
     var akJr = andrasKovacs();
     for (var def : artifact) {
       var tycked = akJr.def(def);
-      if (tycked instanceof Def.Print<Term> print) {
+      if (tycked instanceof Def.Print print) {
         System.out.println(print.body().toDoc().commonRender());
       } else {
         akJr.sigma().put(tycked.name(), tycked);
-        if (verbose) System.out.println(tycked.name());
+        if (verbose) System.out.println(tycked.name().name);
       }
     }
     return akJr;

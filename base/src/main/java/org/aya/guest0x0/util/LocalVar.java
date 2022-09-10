@@ -2,7 +2,7 @@ package org.aya.guest0x0.util;
 
 import org.jetbrains.annotations.NotNull;
 
-public record LocalVar(@NotNull String name) {
+public record LocalVar(@NotNull String name) implements AnyVar {
   public @NotNull String toString() {
     return name;
   }

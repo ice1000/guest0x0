@@ -6,7 +6,6 @@ import org.aya.guest0x0.cubical.Formula;
 import org.aya.guest0x0.cubical.Partial;
 import org.aya.guest0x0.cubical.Restr;
 import org.aya.guest0x0.syntax.BdryData;
-import org.aya.guest0x0.syntax.Def;
 import org.aya.guest0x0.syntax.Keyword;
 import org.aya.guest0x0.syntax.Term;
 import org.aya.guest0x0.tyck.HCompPDF.Transps;
@@ -16,11 +15,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public record Normalizer(
-  @NotNull MutableMap<LocalVar, Def<Term>> sigma,
   @NotNull MutableMap<LocalVar, Term> rho
 ) implements CofThy.SubstObj<Term, LocalVar, Normalizer> {
   public static @NotNull Normalizer create() {
-    return new Normalizer(MutableMap.create(), MutableMap.create());
+    return new Normalizer(MutableMap.create());
   }
 
   public static @NotNull Term rename(@NotNull Term term) {
@@ -50,7 +48,7 @@ public record Normalizer(
   }
 
   @Override public @NotNull Normalizer derive() {
-    return new Normalizer(sigma, MutableMap.from(rho));
+    return new Normalizer(MutableMap.from(rho));
   }
 
   public Term term(Term term) {
@@ -78,8 +76,7 @@ public record Normalizer(
         yield proj.isOne() ? tup.f() : tup.a();
       }
       case Term.Call call -> {
-        var prefn = sigma.getOption(call.fn());
-        if (!(prefn.getOrNull() instanceof Def.Fn<Term> fn)) yield call;
+        var fn = call.fn().core;
         fn.telescope().zip(call.args()).forEach(zip -> rho.put(zip._1.x(), term(zip._2)));
         yield term(fn.body());
       }

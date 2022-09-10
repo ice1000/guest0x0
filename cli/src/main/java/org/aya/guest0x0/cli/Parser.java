@@ -93,19 +93,23 @@ public record Parser(@NotNull SourceFile source) {
   }
 
   /*package*/
-  @NotNull Def<Expr> def(@NotNull Guest0x0Parser.DeclContext decl) {
+  @NotNull Decl def(@NotNull Guest0x0Parser.DeclContext decl) {
     return switch (decl) {
-      case Guest0x0Parser.PrintDeclContext def -> new Def.Print<>(
-        Seq.wrapJava(def.param()).flatMap(this::param),
+      case Guest0x0Parser.PrintDeclContext def -> new Decl.Print(
+        params(def.param()),
         expr(def.expr(0)),
         expr(def.expr(1)));
-      case Guest0x0Parser.FnDeclContext def -> new Def.Fn<>(
-        new LocalVar(def.ID().getText()),
-        Seq.wrapJava(def.param()).flatMap(this::param),
+      case Guest0x0Parser.FnDeclContext def -> new Decl.Fn(
+        new DefVar<>(def.ID().getText()),
+        params(def.param()),
         expr(def.expr(0)),
         expr(def.expr(1)));
       default -> throw new IllegalArgumentException("Unknown def: " + decl.getClass().getName());
     };
+  }
+
+  private @NotNull Decl.Tele params(List<Guest0x0Parser.ParamContext> def) {
+    return new Decl.Tele(Seq.wrapJava(def).flatMap(this::param));
   }
 
   private Expr buildDT(boolean isPi, SourcePos pos, SeqView<Param<Expr>> params, Expr body) {
