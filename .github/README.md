@@ -51,6 +51,16 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+## v0.16.2
+
+![image](https://user-images.githubusercontent.com/16398479/189467603-a1c598c3-86d9-457d-a845-e4724e90b7e1.png)
+
+Ported some code from [Anqur] to here. This should not affect any implemented functions, but should be helpful for future development on (higher) inductive types.
+
+At this point, Guest0x0 has 1308 lines of Java code 
+
+[Anqur]: https://github.com/ice1000/anqur
+
 ## v0.16.1
 
 ![image](https://user-images.githubusercontent.com/16398479/187781343-a3a0ba96-938c-49dd-ad28-e68d116bded6.png)
