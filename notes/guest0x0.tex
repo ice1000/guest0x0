@@ -873,7 +873,8 @@ Suppose $A_0$ also refers to $y:\II$. This makes $A$ a square:
 \draw[->] (00) -- (10) node [midway,above] {$A_0[\lcon/y]$} ;
 \draw[->] (01) -- (11) node [midway,below] {$A_0[\rcon/y]$} ;}
 Since $\disj$ substitutes $y$ away, either $y=\lcon\in\disj$ or $y=\rcon\in\disj$.
-We may choose either, say, $y=\lcon$. We may also forget about the other conditions,
+We may choose either for demonstration purpose, say,
+$y=\lcon$. We may also forget about the other conditions,
 as they are unrelated to the square. Then, since $A$ \textit{freezes} under $y=\lcon$,
 the corresponding face must be constant, resulting in a triangle:
 \carloCTikZ{\carloXy
@@ -888,6 +889,8 @@ the corresponding face must be constant, resulting in a triangle:
 \draw[->] (10) -- (11) node [midway,right] {$A~\rcon$} ;
 \draw[->] (01) -- (11) node [midway,below] {$A_0[\rcon/y]$} ;
 }}
+In short, $A$ freezes under $\disj$ if the faces on $A$
+specified by $\disj$ are constant.
 \end{example}
 \begin{remark}
 Note that the judgment in~\cref{defn:freeze} is not equivalent to:
