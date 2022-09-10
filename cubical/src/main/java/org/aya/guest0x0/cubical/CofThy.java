@@ -6,6 +6,8 @@ import kala.collection.mutable.MutableArrayList;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableStack;
 import kala.control.Option;
+import org.aya.guest0x0.cubical.Restr.TermLike;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +24,7 @@ public interface CofThy {
    * I'm sorry, I'm just too bad at writing while loops.
    * Add <code>localOrz</code> into <code>conds</code>, and push the results into <code>combined</code>.
    */
-  static <T extends Restr.TermLike<T>> void combineRecursively(
+  static <T extends TermLike<T>> void combineRecursively(
     @NotNull SeqView<Formula.Conn<T>> localOrz,
     MutableStack<Restr.Cond<T>> conds,
     MutableList<Restr.Cofib<T>> combined
@@ -49,18 +51,28 @@ public interface CofThy {
   }
 
   @FunctionalInterface
-  interface RestrNormalizer<E extends Restr.TermLike<E>, V, Subst extends SubstObj<E, V, Subst>>
+  interface RestrNormalizer<E extends TermLike<E>, V, Subst extends SubstObj<E, V, Subst>>
     extends BiFunction<Subst, Restr<E>, Restr<E>> {
   }
 
-  static <E extends Restr.TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
+  static <E extends TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
   propExt(Subst subst, Restr<E> ll, Restr<E> rr, RestrNormalizer<E, V, Subst> normalize) {
     return conv(ll, subst, sub -> satisfied(normalize.apply(sub, rr)))
       && conv(rr, subst, sub -> satisfied(normalize.apply(sub, ll)));
   }
 
+  /** @see CofThy#isOne(TermLike) */
+  @ApiStatus.Internal static <E extends TermLike<E>> Restr.Vary<E> embed(E e) {
+    var conds = ImmutableSeq.of(new Restr.Cond<>(e, false));
+    return new Restr.Vary<>(ImmutableSeq.of(new Restr.Cofib<>(conds)));
+  }
+
+  static <E extends TermLike<E>> Restr<E> isOne(E e) {
+    return normalizeRestr(embed(e));
+  }
+
   /** @see CofThy#conv(Restr, SubstObj, Predicate) */
-  static <E extends Restr.TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
+  static <E extends TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
   conv(@NotNull Restr.Cofib<E> r, @NotNull Subst initial, @NotNull Predicate<Subst> sat) {
     return conv(new Restr.Vary<>(ImmutableSeq.of(r)), initial, sat);
   }
@@ -71,7 +83,7 @@ public interface CofThy {
    * @return true if the cofibration is false, <code>sat.test(subst)</code> otherwise
    * @see SubstObj
    */
-  static <E extends Restr.TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
+  static <E extends TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
   conv(@NotNull Restr<E> r, @NotNull Subst initial, @NotNull Predicate<Subst> sat) {
     return switch (r) {
       case Restr.Const<E> c -> !c.isTrue() || sat.test(initial);
@@ -98,7 +110,7 @@ public interface CofThy {
    * </ul>
    * @see SubstObj
    */
-  static <V, T extends Restr.TermLike<T>, Subst extends SubstObj<T, V, Subst>, E> Option<E>
+  static <V, T extends TermLike<T>, Subst extends SubstObj<T, V, Subst>, E> Option<E>
   vdash(@NotNull Restr.Cofib<T> or, @NotNull Subst initial, @NotNull Function<Subst, E> tyck) {
     var derived = initial.derive();
     var unsat = false;
@@ -138,7 +150,7 @@ public interface CofThy {
    * Normalizes a "restriction" which looks like "f1 \/ f2 \/ ..." where
    * f1, f2 are like "a /\ b /\ ...".
    */
-  static <E extends Restr.TermLike<E>> @NotNull Restr<E> normalizeRestr(Restr.Vary<E> vary) {
+  static <E extends TermLike<E>> @NotNull Restr<E> normalizeRestr(Restr.Vary<E> vary) {
     var orz = MutableArrayList.<Restr.Cofib<E>>create(vary.orz().size());
     // This is a sequence of "or"s, so if any cof is true, the whole thing is true
     for (var cof : vary.orz())
@@ -155,7 +167,7 @@ public interface CofThy {
    *
    * @return true if this is constant false
    */
-  static <E extends Restr.TermLike<E>> boolean collectAnds(
+  static <E extends TermLike<E>> boolean collectAnds(
     Restr.Cofib<E> cof,
     MutableList<Restr.Cond<E>> ands,
     MutableList<Formula.Conn<E>> orz
@@ -197,7 +209,7 @@ public interface CofThy {
    *
    * @return true if this is constantly true
    */
-  static <E extends Restr.TermLike<E>, Clause> boolean normalizeCof(
+  static <E extends TermLike<E>, Clause> boolean normalizeCof(
     Restr.Cofib<E> cof, MutableList<Clause> orz,
     Function<Restr.Cofib<E>, Clause> clause
   ) {
