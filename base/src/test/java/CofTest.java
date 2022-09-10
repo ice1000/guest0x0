@@ -26,14 +26,14 @@ public class CofTest {
     var raw = ((Expr.Cof) parsed).data().fmap(context._1::expr);
     var cof = raw.mapCond(c -> new Restr.Cond<>(context._2.inherit(c.inst(), Term.I), c.isLeft()));
     var tot = context._2.inherit(context._1.expr(parser.expr(CliMain.parser(to).expr())), Term.I);
-    var subst = new Normalizer(context._2.sigma(), MutableMap.of(context._1.env().get(i), tot));
+    var subst = new Normalizer(MutableMap.of((LocalVar) context._1.env().get(i), tot));
     return subst.restr(cof);
   }
 
   public @NotNull Tuple2<Resolver, Elaborator> context(String[] vars) {
     var resolver = new Resolver(MutableMap.from(Seq.from(vars).view().map(v -> Tuple.of(v, new LocalVar(v)))));
     var akJr = CliMain.andrasKovacs();
-    resolver.env().forEach((k, v) -> akJr.gamma().put(v, Term.I));
+    resolver.env().forEach((k, v) -> akJr.gamma().put((LocalVar) v, Term.I));
     return Tuple.of(resolver, akJr);
   }
 
