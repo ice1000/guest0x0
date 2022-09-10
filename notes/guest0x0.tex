@@ -842,21 +842,66 @@ It is left to the reader to construct its inverse.
 \end{proof}
 
 \subsection{Transportation rules}\label{sub:transp}
-In \CTT, for every line on types \fbox{$\PiGvdash x\isType{A}$},
-we add a function $\coeLong:A[\lcon/x]\to A[\rcon/x]$ to the type theory,
+\begin{defn}[Freeze]\label{defn:freeze}
+A type-line $A:\II\to\UU$ \textit{freezes} on a cofibration $\disj$ if
+it is \textit{constant} under $\disj$. In terms of typing judgment:
+\[\Psi,x:\II;\Gamma,\disj\vdash \isTypeBox{A~\lcon\equiv A~x}\]
+The judgment is from~\cite[\S 2.1]{HCompPDF}.
+\end{defn}
+Here is an illustration of~\cref{defn:freeze} inspired from an online cubical tutorial
+by Favonia. Consider the type-line $A:\II\to\UU$, how can it be frozen under a cofibration?
+\begin{enumerate}
+\item If $A$ is already constant,
+then it is frozen under all cofibrations, which is not interesting.
+\item Consider a non-constant $A$ which is constant under $\disj$.
+For convenience, let $A:=\plam x{A_0}$. Apparently,
+there are subexpressions in $A_0$ involving the interval variable $x$.
+\item Recall~\cref{sub:tyck-cofib}, this means under some interval substitution,
+these subexpressions will reduce and will no longer refer to $x$.
+\item So, these subexpressions have to refer to interval variables other than $x$
+which are substituted away under $\disj$!
+\end{enumerate}
+So, suppose $A_0$ also refers to $y:\II$. This makes $A$ a square:
+\carloCTikZ{\carloXy
+\carloSqBullets
+\draw[->] (00) -- (01) node [midway,left] {$A~\lcon$} ;
+\draw[->] (10) -- (11) node [midway,right] {$A~\rcon$} ;
+\draw[->] (00) -- (10) node [midway,above] {$A_0[\lcon/y]$} ;
+\draw[->] (01) -- (11) node [midway,below] {$A_0[\rcon/y]$} ;}
+Since $\disj$ substitutes $y$ away, either $y=\lcon\in\disj$ or $y=\rcon\in\disj$.
+We may choose either, say, $y=\lcon$. We may also forget about the other conditions,
+as they are unrelated to the square. Then, since $A$ \textit{freezes} under $y=\lcon$,
+the corresponding face must be constant, resulting in a triangle:
+\carloCTikZ{\carloXy
+\carloSqBullets
+\draw[->] (00) -- (01) node [midway,left] {$A~\lcon$} ;
+\draw[->] (10) -- (11) node [midway,right] {$A~\rcon$} ;
+\draw[equals arrow] (00) -- (10) node [midway,above] {} ;
+\draw[->] (01) -- (11) node [midway,below] {$A_0[\rcon/y]$} ;
+\shiftTikZ{2, 0}{
+\carloSqVertices{~~}
+\draw[->] (10) -- (01) node [midway,left] {$A~\lcon$} ;
+\draw[->] (10) -- (11) node [midway,right] {$A~\rcon$} ;
+\draw[->] (01) -- (11) node [midway,below] {$A_0[\rcon/y]$} ;
+}}
+\begin{remark}
+Note that the judgment in~\cref{defn:freeze} is not equivalent to:
+\[\Psi;\Gamma,\disj\vdash \isTypeBox{A~\lcon\equiv A~\rcon}\]
+Because a nontrivial loop (hence the two sides are the same,
+but it's distinguishable from the identity path, hence not constant)
+satisfies the latter condition.
+\end{remark}
+In \CTT, for every type-line \fbox{$A:\II\to\UU$},
+we add a function $\coeLong:A~\lcon\to A~\rcon$ to the type theory,
 satisfying the following properties:
 \begin{itemize}
 \item It is an isomorphism -- so we want
-an inverse $\coeLong_A^{-1}:A[\rcon/x]\to A[\lcon/x]$.
+an inverse $\coeLong_A^{-1}:A~\rcon\to A~\lcon$.
 One may easily guess that this is achieved by the
-$\coeLong$ function on type $A[\neg x/x]$.
-\item There exists a cofibration $\disj$ such that $A$ does not reference $x$ under $\disj$.
-We may apply the following check:
-\[\Psi,\Gamma,\disj\vdash \isTypeBox{A[\lcon/x]\equiv A[\rcon/x]}\]
-As in~\cite[\S 2.1]{HCompPDF}, we may also check:
-\[\Psi,x:\II,\Gamma,\disj\vdash \isTypeBox{A\equiv A[\lcon/x]}\]
-Furthermore, we want that for every $\PGvdash u:A[\lcon/x]$:
-\[\Psi,x:\II,\Gamma,\disj\vdash \coeLong(u)\equiv u:A[\lcon/x]\]
+$\coeLong$ function on type $\plam x A~(\neg x)$.
+\item There exists a cofibration $\disj$ that $A$ freezes (\cref{defn:freeze}) on it.
+Furthermore, we want that for every $u:A~\lcon$:
+\[\disj\vdash \coeLong(u)\equiv u:A~\lcon\]
 \item It computes on type formers, e.g. for the type line $\lam x{A~x\to B~x}$, we have:
 \[\coeLong:(A~\lcon\to B~\lcon)\to(A~\rcon\to B~\rcon)\]
 And we expect this function to behave like:
@@ -937,6 +982,11 @@ There exists the following path: \[p:\ExtTy x {A~x}{ccl}{
 	x&=\lcon&\mapsto u}\]
 In more traditional notations:
 \[p:\PathTy{A} u {(\coe A{\disj}{(u)})}\]
+Diagrammatically:
+\[\begin{tikzcd}
+	u && {\coe A{\disj}{(u)}}
+	\arrow["p"', from=1-1, to=1-3]
+\end{tikzcd}\]
 \end{lem}
 \begin{proof}
 Let

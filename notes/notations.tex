@@ -56,12 +56,13 @@
   \foreach \z in {0,1}
    \node (\x\y\z) at (\x , \y , \z) {\textbullet} ;
 \end{scope}\end{pgfonlayer}}
-\newcommand{\carloSqBullets}{
+\newcommand{\carloSqVertices}[1]{
 \begin{pgfonlayer}{frontmost}\begin{scope}[every node/.style = {inner sep = 0pt}]
 \foreach \x in {0,1}
  \foreach \y in {0,1}
-  \node (\x\y) at (\x , \y) {\textbullet} ;
+  \node (\x\y) at (\x , \y) {#1} ;
 \end{scope}\end{pgfonlayer}}
+\newcommand{\carloSqBullets}{\carloSqVertices{\textbullet}}
 \newcommand{\carloTikZ}[1]{
   \begin{tikzpicture}[carlo-axes, scale = 1.6]
 		#1
