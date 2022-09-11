@@ -356,7 +356,7 @@ We may substitute the variable $x$ with three possible terms of type $\II$:
 and the face becomes $y=\lcon\mapsto u$.
 \item $\lcon$, i.e. take the face that $x=\lcon$ in this partial element.
 Then, evidently, we get the face $u$, so the partial element should reduce
-to the trivial cofibration $\lrbbar u$, with other faces ignored.
+to a trivial one $\lrbbar u$, with other faces ignored.
 In this case, we say that the face is \textit{satisfied}.
 \item $\rcon$, i.e. take the face that $x=\rcon$,
 which is unspecified by this face, so we drop this particular face and
@@ -734,14 +734,14 @@ based on the idea of cofibrations. Here's a brief table for comparison:
  Scope of cofibrations & Open & Open & Bound \\ \hline
 %  Number of faces & $1$ & $\geq 1$ & $\geq 0$ \\ \hline
 %  Support composition & $\times$ & $\times$ & \checkmark \\ \hline
-%  Support transport & $\times$ & $\times$ & \checkmark \\ \hline
+%  Support coercion & $\times$ & $\times$ & \checkmark \\ \hline
 \end{tabular}
 \end{center}
 
 Cubical subtypes will be useful later in~\cref{sub:transp}.
 
 \section{De Morgan structure}
-This section introduces the notion of \textit{transportation rules} and
+This section introduces the notion of \textit{coercion rules} and
 motivates the De Morgan structure on the interval type.
 
 \subsection{Minimum and maximum squares}\label{sub:minmax}
@@ -841,7 +841,7 @@ By constructing the following bijective function.
 It is left to the reader to construct its inverse.
 \end{proof}
 
-\subsection{Transportation rules}\label{sub:transp}
+\subsection{Coercion rules}\label{sub:transp}
 \begin{defn}[Freeze]\label{defn:freeze}
 A type-line $A:\II\to\UU$ \textit{freezes} on a cofibration $\disj$ if
 it is \textit{constant} under $\disj$. In terms of typing judgment:
@@ -899,6 +899,15 @@ Because a nontrivial loop (hence the two sides are the same,
 but it's distinguishable from the identity path, hence not constant)
 satisfies the latter condition.
 \end{remark}
+Here are some simple facts that might be helpful for building up
+intuition about freezing:
+\begin{lem}
+Any type line freezes on the absurd cofibration.
+\end{lem}
+\begin{lem}
+If a type line freezes on the truth cofibration,
+then it is constant.
+\end{lem}
 In \CTT, for every type-line \fbox{$A:\II\to\UU$},
 we add a function $\coeLong:A~\lcon\to A~\rcon$ to the type theory,
 satisfying the following properties:
@@ -923,7 +932,7 @@ Hence the well-typed result: an instance of type $B~\rcon$.
 This means the function does not obviously break canonicity.
 \end{itemize}
 The behavior of $\coeLong$ is considered an extra set of \textit{rules}
-called \textit{transportation rules} on each type former,
+called \textit{coercion rules} on each type former,
 just like introduction rules, elimination rules,
 and computation rules.
 
@@ -932,7 +941,7 @@ we add the following ``function'' to \CTT:
 
 \begin{figure}[h!]
 \[u,A::= \coe{A}{\disj} \mid \cdots~\text{(see~\cref{fig:subtype})}\]
-\caption{Syntax of transport}
+\caption{Syntax of coercion}
 \label{fig:syntax-transp}
 \end{figure}
 
@@ -950,7 +959,7 @@ as in~\cref{fig:typing-transp}.
 \coe{A}{\overline{\conj_i}}:(u:A~\lcon) \to
  \subTy{(A~\rcon)}{\overline{\conj_i}}{\overline{\conj_i\mapsto u}}}
 \end{mathpar}
-\caption{Typing of the transportation rule}
+\caption{Typing of the coercion rule}
 \label{fig:typing-transp}
 \end{figure}
 
@@ -968,7 +977,7 @@ This approach does not have the cubical subtype boilerplate, which leads to clea
 \Psi;\Gamma,\disj\vdash\fbox{$\coe{A}{\disj}\equiv \lam x x$}:
 A~\lcon \to A~\lcon\footnotemark}
 \end{mathpar}
-\caption{Alternative way to type the transportation rule}
+\caption{Alternative way to type the coercion rule}
 \label{fig:typing-transp-2}
 \end{figure}
 \footnotetext{Note that the conversion rule is well-typed because under $\disj$, $A~\lcon\equiv A~\rcon$}
@@ -1005,13 +1014,16 @@ It is left to the reader to check the well-typedness of these constructions
 In some sense, this construction motivates the De Morgan structure on $\II$.
 \end{proof}
 
-The transportation rules for type formers are omitted as they are
+The coercion rules for type formers are omitted as they are
 very long and are already written in~\cite[\S 3]{HCompPDF}. By comparing~\cref{lem:transpFill}
 and~\cite[\S 2.1]{HCompPDF}, one should be able to translate the rest.
 
 \subsection{Homogeneous composition}
 There is another primitive construction which is needed to define the
-transportation rules for the (generalized) path type:
-the \textit{homogeneous composition} operation.
+coercion rules for the (generalized) path type:
+the \textit{composition} operation, which takes a configuration
+of an $n$-cube \textit{without} the top face (also known as an \textit{open box}),
+and constructs the missing top face. In other words, composition asserts that any
+open box are \textit{closed} (i.e.~the top face is, in fact, filled).
 
 \TODO
