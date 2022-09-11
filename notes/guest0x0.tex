@@ -909,13 +909,15 @@ If a type line freezes on the truth cofibration,
 then it is constant.
 \end{lem}
 In \CTT, for every type-line \fbox{$A:\II\to\UU$},
-we add a function $\coeLong:A~\lcon\to A~\rcon$ to the type theory,
-satisfying the following properties:
+we add a function $\coeLong:A~\lcon\to A~\rcon$ to the type theory.
+Since a type-line expresses the equivalence between two types (the two sides
+of the line), the instances of these two types can be safely coerced.
+
+We expect the coercion to satisfy the following properties:
 \begin{itemize}
-\item It is an isomorphism -- so we want
-an inverse $\coeLong_A^{-1}:A~\rcon\to A~\lcon$.
-One may easily guess that this is achieved by the
-$\coeLong$ function on type $\plam x A~(\neg x)$.
+\item It is an isomorphism -- so an inverse $\coeLong_A^{-1}:A~\rcon\to A~\lcon$ must exist.
+One may easily guess that this is induced by the
+$\coeLong$ function on the type-line $\plam x A~(\neg x)$.
 \item There exists a cofibration $\disj$ that $A$ freezes (\cref{defn:freeze}) on it.
 Furthermore, we want that for every $u:A~\lcon$:
 \[\disj\vdash \coeLong(u)\equiv u:A~\lcon\]
@@ -935,6 +937,12 @@ The behavior of $\coeLong$ is considered an extra set of \textit{rules}
 called \textit{coercion rules} on each type former,
 just like introduction rules, elimination rules,
 and computation rules.
+
+\begin{terminology}
+In~\cite{CCHM,CHM,HCompPDF}, coercion is called \textit{transport}.
+We use the name \textit{coercion} because it fits better with the
+traditional functional programming literature.
+\end{terminology}
 
 To achieve all the properties we have asked for,
 we add the following ``function'' to \CTT:
