@@ -65,6 +65,11 @@ subprojects {
     }
   }
 
+  // Gradle module metadata contains Gradle JVM version, disable it
+  tasks.withType<GenerateModuleMetadata>().configureEach {
+    enabled = false
+  }
+
   tasks.withType<Javadoc>().configureEach {
     val options = options as StandardJavadocDocletOptions
     options.addBooleanOption("-enable-preview", true)
