@@ -200,6 +200,11 @@ we may place $u$ in three orientations:
 Note that all of them can also be reflected by their diagonals.
 \end{remark}
 
+\begin{defn}\label{defn:homo-path}
+A term-line is said to be \textit{homogeneous} if its type is a constant type-line.
+The notion of homogeneous term-line can be generalized to any $n$-cube of terms.
+\end{defn}
+
 \subsection{Partial elements}\label{sub:partial}
 In \CTT{}, the idea that \textit{open shapes can be filled}
 is the core concept that makes terms in type theory space-like,
@@ -213,8 +218,9 @@ The composition operation takes a description of some parts of an $n$-dimensiona
 (an \textit{incomplete} cube, or a \textit{partial} cube) and completes it.
 To describe the input of composition, we introduce partial elements.
 \begin{terminology}
-We follow the terminology in~\cite{CubicalAgda}.
-In~\cite{CCHM}, partial elements are called \textit{systems}.
+In~\cite{CCHM}, partial elements are called \textit{systems},
+but the sequel~\cite{CHM} switched to the name ``partial element''.
+Cubical Agda~\cite{CubicalAgda} also uses ``partial element''.
 \end{terminology}
 When we write \fbox{$x:\II,y:\II\vdash u:A$},
 we are describing the following 2-dimensional cube, which is a square:
@@ -1038,5 +1044,9 @@ the \textit{composition} operation, which takes a configuration
 of an $n$-cube \textit{without} the top face (also known as an \textit{open box}),
 and constructs the missing top face. In other words, composition asserts that any
 open box are \textit{closed} (i.e.~the top face is, in fact, filled).
+
+There are two versions of composition: \textit{homogeneous composition} and
+\textit{heterogeneous composition}. The former requires that all the given faces
+are homogeneous (\cref{defn:homo-path}), while the latter does not have this restriction.
 
 \TODO
