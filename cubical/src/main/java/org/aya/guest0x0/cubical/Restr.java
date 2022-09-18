@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.util.function.Function;
 
 /**
@@ -16,7 +17,7 @@ import java.util.function.Function;
  * @param <E> "terms"
  * @see CofThy for cofibration operations
  */
-public sealed interface Restr<E extends Restr.TermLike<E>> {
+public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable {
   @NotNull SeqView<E> instView();
   @NotNull Restr<E> normalize();
   interface TermLike<E extends TermLike<E>> {
@@ -101,7 +102,7 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
   static <E extends TermLike<E>> @NotNull Vary<E> fromCond(Cond<E> cond) {
     return new Vary<>(ImmutableSeq.of(new Cofib<>(ImmutableSeq.of(cond))));
   }
-  record Cond<E>(@NotNull E inst, boolean isLeft) {
+  record Cond<E>(@NotNull E inst, boolean isLeft) implements Serializable {
     public Cond<E> map(@NotNull Function<E, E> g) {
       var apply = g.apply(inst);
       if (apply == inst) return this;
@@ -113,7 +114,7 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
       return new Cond<>(g.apply(inst), isLeft);
     }
   }
-  record Cofib<E extends TermLike<E>>(@NotNull ImmutableSeq<Cond<E>> ands) {
+  record Cofib<E extends TermLike<E>>(@NotNull ImmutableSeq<Cond<E>> ands) implements Serializable {
 
     public Cofib<E> map(@NotNull Function<E, E> g) {
       var newAnds = ands.map(c -> c.map(g));
@@ -139,7 +140,7 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
       Doc.sep(and.inst.toDoc(), Doc.symbol("="), Doc.symbol(and.isLeft() ? "0" : "1"))));
   }
 
-  record Side<E extends TermLike<E>>(@NotNull Cofib<E> cof, @NotNull E u) {
+  record Side<E extends TermLike<E>>(@NotNull Cofib<E> cof, @NotNull E u) implements Serializable {
 
     public Side<E> rename(@NotNull Function<E, E> g) {
       var apply = g.apply(u);

@@ -6,6 +6,7 @@ import kala.collection.mutable.MutableArrayList;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.function.Function;
 
 /**
@@ -13,7 +14,7 @@ import java.util.function.Function;
  *
  * @author imkiva, ice1000
  */
-public sealed interface Partial<Term extends Restr.TermLike<Term>> {
+public sealed interface Partial<Term extends Restr.TermLike<Term>> extends Serializable {
   /** Faces filled by this partial element */
   @NotNull Restr<Term> restr();
   /** @implNote unlike {@link Partial#fmap(Function)}, this method returns this when nothing changes. */
