@@ -51,6 +51,12 @@ Make sure you listen to Red Hot Chili Peppers while looking at this project.
 
 ### Untagged
 
+## v0.17
+
+![image](https://user-images.githubusercontent.com/16398479/190887801-5f238d5a-8e53-4159-b198-b8030233a38b.png)
+
+Renamed some methods, added an API needed by Aya.
+
 ## v0.16.2
 
 ![image](https://user-images.githubusercontent.com/16398479/189467603-a1c598c3-86d9-457d-a845-e4724e90b7e1.png)
