@@ -92,7 +92,7 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
   record Transp(@NotNull Term cover, @NotNull Cof restr) implements Term {}
   record Cof(@NotNull Restr<Term> restr) implements Term {
     public @NotNull Cof fmap(@NotNull Function<Term, Term> f) {
-      return new Cof(restr.fmap(f));
+      return new Cof(restr.map(f));
     }
   }
   record PartTy(@NotNull Term ty, @NotNull Term restr) implements Term {}

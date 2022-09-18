@@ -28,7 +28,9 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
       T apply(@NotNull Formula<T> formula);
     }
   }
-  @NotNull Restr<E> fmap(@NotNull Function<E, E> g);
+  @NotNull Restr<E> map(@NotNull Function<E, E> g);
+  @NotNull <T extends TermLike<T>> Restr<T>
+  fmap(@NotNull Function<E, T> g);
   @NotNull Restr<E> or(@NotNull Cond<E> cond);
   <T extends TermLike<T>> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f);
   record Vary<E extends TermLike<E>>(@NotNull ImmutableSeq<Cofib<E>> orz) implements Restr<E> {
@@ -40,7 +42,14 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
       return CofThy.normalizeRestr(this);
     }
 
-    @Override public @NotNull Vary<E> fmap(@NotNull Function<E, E> g) {
+    @Override public @NotNull Vary<E> map(@NotNull Function<E, E> g) {
+      var newOrz = orz.map(x -> x.map(g));
+      if (newOrz.sameElements(orz, true)) return this;
+      return new Vary<>(newOrz);
+    }
+
+    @Override public @NotNull <T extends TermLike<T>>
+    Restr.Vary<T> fmap(@NotNull Function<E, T> g) {
       return new Vary<>(orz.map(x -> x.fmap(g)));
     }
 
@@ -72,8 +81,13 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
       return this;
     }
 
-    @Override public @NotNull Const<E> fmap(@NotNull Function<E, E> g) {
+    @Override public @NotNull Const<E> map(@NotNull Function<E, E> g) {
       return this;
+    }
+
+    @Override public @NotNull <T extends TermLike<T>>
+    Restr.Const<T> fmap(@NotNull Function<E, T> g) {
+      return new Const<>(isTrue);
     }
 
     @Override public @NotNull Restr<E> or(@NotNull Cond<E> cond) {
@@ -88,13 +102,27 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
     return new Vary<>(ImmutableSeq.of(new Cofib<>(ImmutableSeq.of(cond))));
   }
   record Cond<E>(@NotNull E inst, boolean isLeft) {
-    public Cond<E> fmap(@NotNull Function<E, E> g) {
+    public Cond<E> map(@NotNull Function<E, E> g) {
+      var apply = g.apply(inst);
+      if (apply == inst) return this;
+      return new Cond<>(apply, isLeft);
+    }
+
+    @Contract("_ -> new") public <To extends Restr.TermLike<To>>
+    @NotNull Cond<To> fmap(@NotNull Function<E, To> g) {
       return new Cond<>(g.apply(inst), isLeft);
     }
   }
   record Cofib<E extends TermLike<E>>(@NotNull ImmutableSeq<Cond<E>> ands) {
 
-    public Cofib<E> fmap(@NotNull Function<E, E> g) {
+    public Cofib<E> map(@NotNull Function<E, E> g) {
+      var newAnds = ands.map(c -> c.map(g));
+      if (newAnds.sameElements(ands, true)) return this;
+      return new Cofib<>(newAnds);
+    }
+
+    @Contract("_ -> new") public <To extends Restr.TermLike<To>>
+    @NotNull Cofib<To> fmap(@NotNull Function<E, To> g) {
       return new Cofib<>(ands.map(c -> c.fmap(g)));
     }
 
@@ -114,6 +142,14 @@ public sealed interface Restr<E extends Restr.TermLike<E>> {
   record Side<E extends TermLike<E>>(@NotNull Cofib<E> cof, @NotNull E u) {
 
     public Side<E> rename(@NotNull Function<E, E> g) {
+      var apply = g.apply(u);
+      var newCof = cof.map(g);
+      if (apply == u && newCof == cof) return this;
+      return new Side<>(newCof, apply);
+    }
+
+    @Contract("_ -> new") public <To extends Restr.TermLike<To>>
+    @NotNull Side<To> fmap(@NotNull Function<E, To> g) {
       return new Side<>(cof.fmap(g), g.apply(u));
     }
   }

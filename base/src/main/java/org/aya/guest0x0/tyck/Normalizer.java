@@ -137,7 +137,7 @@ public record Normalizer(
   }
 
   public Restr<Term> restr(@NotNull Restr<Term> restr) {
-    return restr.fmap(this::term).normalize();
+    return restr.map(this::term).normalize();
   }
 
   private Term transp(LocalVar i, Term cover, Term.Cof cof) {
@@ -195,7 +195,7 @@ public record Normalizer(
         case Term.PartTy par -> new Term.PartTy(term(par.ty()), term(par.restr()));
         case Term.PartEl par -> new Term.PartEl(partEl(par.inner()));
         case Term.Sub sub -> new Term.Sub(term(sub.ty()), partEl(sub.par()));
-        case Term.InS inS -> new Term.InS(term(inS.e()), inS.restr().fmap(this::term));
+        case Term.InS inS -> new Term.InS(term(inS.e()), inS.restr().map(this::term));
         case Term.OutS outS -> new Term.OutS(term(outS.e()), partEl(outS.par()));
         case Term.Hcomp hcomp -> new Term.Hcomp(hcomp.data().fmap(this::term));
       };

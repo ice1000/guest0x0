@@ -206,7 +206,7 @@ public record Elaborator(
   private void boundaries(SourcePos pos, Normalizer subst, Term core, ImmutableSeq<Restr.Side<Term>> boundaries) {
     for (var boundary : boundaries) {
       // Based on the very assumption as in the function's javadoc
-      CofThy.conv(boundary.cof().fmap(subst::term), subst, norm -> {
+      CofThy.conv(boundary.cof().map(subst::term), subst, norm -> {
         unify(norm.term(boundary.u()), toDoc(boundary), norm.term(core), pos,
           Doc.english("Boundary mismatch, oh no."));
         return true;

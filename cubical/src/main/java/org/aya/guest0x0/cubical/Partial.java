@@ -3,6 +3,7 @@ package org.aya.guest0x0.cubical;
 import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
@@ -15,7 +16,9 @@ import java.util.function.Function;
 public sealed interface Partial<Term extends Restr.TermLike<Term>> {
   /** Faces filled by this partial element */
   @NotNull Restr<Term> restr();
+  /** @implNote unlike {@link Partial#fmap(Function)}, this method returns this when nothing changes. */
   @NotNull Partial<Term> map(@NotNull Function<Term, Term> mapper);
+  @Contract("_->new") @NotNull <To extends Restr.TermLike<To>> Partial<To> fmap(@NotNull Function<Term, To> mapper);
   @NotNull Partial<Term> flatMap(@NotNull Function<Term, Term> mapper);
   /** Includes cofibrations and face terms */
   @NotNull SeqView<Term> termsView();
@@ -34,11 +37,17 @@ public sealed interface Partial<Term extends Restr.TermLike<Term>> {
       return new Split<>(cl);
     }
 
+    @Override
+    public @NotNull <To extends Restr.TermLike<To>>
+    Partial.Split<To> fmap(@NotNull Function<Term, To> mapper) {
+      return new Split<>(clauses.map(c -> c.fmap(mapper)));
+    }
+
     @Override public @NotNull Partial<Term> flatMap(@NotNull Function<Term, Term> mapper) {
       var cl = MutableArrayList.<Restr.Side<Term>>create();
       for (var clause : clauses) {
         var u = mapper.apply(clause.u());
-        if (CofThy.normalizeCof(clause.cof().fmap(mapper), cl, cofib -> new Restr.Side<>(cofib, u))) {
+        if (CofThy.normalizeCof(clause.cof().map(mapper), cl, cofib -> new Restr.Side<>(cofib, u))) {
           return new Const<>(u);
         }
       }
@@ -60,6 +69,11 @@ public sealed interface Partial<Term extends Restr.TermLike<Term>> {
       var v = mapper.apply(u);
       if (v == u) return this;
       return new Const<>(v);
+    }
+
+    @Override public @NotNull <To extends Restr.TermLike<To>>
+    Partial.Const<To> fmap(@NotNull Function<Term, To> mapper) {
+      return new Const<>(mapper.apply(u));
     }
 
     @Override public @NotNull Partial<Term> flatMap(@NotNull Function<Term, Term> mapper) {

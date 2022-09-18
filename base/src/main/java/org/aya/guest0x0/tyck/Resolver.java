@@ -91,7 +91,7 @@ public record Resolver(@NotNull MutableMap<String, AnyVar> env) {
       }
       case Expr.Mula f -> new Expr.Mula(f.pos(), f.asFormula().fmap(this::expr));
       case Expr.Transp transp -> new Expr.Transp(transp.pos(), expr(transp.cover()), expr(transp.restr()));
-      case Expr.Cof cof -> new Expr.Cof(cof.pos(), cof.data().fmap(this::expr));
+      case Expr.Cof cof -> new Expr.Cof(cof.pos(), cof.data().map(this::expr));
       case Expr.PartEl par -> par(par);
       case Expr.PartTy par -> new Expr.PartTy(par.pos(), expr(par.ty()), expr(par.restr()));
       case Expr.Sub sub -> new Expr.Sub(sub.pos(), expr(sub.ty()), par(sub.par()));
