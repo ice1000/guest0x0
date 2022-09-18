@@ -2,9 +2,10 @@ package org.aya.guest0x0.cubical;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.function.Function;
 
-public sealed interface Formula<E> {
+public sealed interface Formula<E> extends Serializable {
   <T> @NotNull Formula<T> fmap(@NotNull Function<E, T> f);
   /** @param isAnd it's or if false */
   record Conn<E>(boolean isAnd, @NotNull E l, @NotNull E r) implements Formula<E> {
