@@ -1036,8 +1036,10 @@ In some sense, this construction motivates the De Morgan structure on $\II$.
 The coercion rules for type formers are omitted as they are
 very long and are already written in~\cite[\S 3]{HCompPDF}. By comparing~\cref{lem:transpFill}
 and~\cite[\S 2.1]{HCompPDF}, one should be able to translate the rest.
+There is one exception though -- the coercion rule for the generalized path type
+is slightly different. To define the rule, we need another Kan operation.
 
-\subsection{Homogeneous composition}
+\subsection{Homogeneous composition}\label{sub:hcomp}
 There is another primitive construction which is needed to define the
 coercion rules for the (generalized) path type:
 the \textit{composition} operation, which takes a configuration
@@ -1048,5 +1050,12 @@ open box are \textit{closed} (i.e.~the top face is, in fact, filled).
 There are two versions of composition: \textit{homogeneous composition} and
 \textit{heterogeneous composition}. The former requires that all the given faces
 are homogeneous (\cref{defn:homo-path}), while the latter does not have this restriction.
+
+\begin{history}
+In~\cite{CCHM}, heterogeneous composition \texttt{comp} is the only primitive Kan operation,
+where \coeLong{} is a special case where the given configuration has ``no walls''.
+For higher inductive types convenience, \cite{CHM} decomposed \texttt{comp} into a
+homogeneous version \texttt{hcomp} and a primitive \coeLong.
+\end{history}
 
 \TODO
