@@ -847,7 +847,7 @@ By constructing the following bijective function.
 It is left to the reader to construct its inverse.
 \end{proof}
 
-\subsection{Coercion rules}\label{sub:transp}
+\subsection{Freezing}\label{sub:freeze}
 \begin{defn}[Freeze]\label{defn:freeze}
 A type-line $A:\II\to\UU$ \textit{freezes} on a cofibration $\disj$ if
 it is \textit{constant} under $\disj$. In terms of typing judgment:
@@ -914,6 +914,8 @@ Any type line freezes on the absurd cofibration.
 If a type line freezes on the truth cofibration,
 then it is constant.
 \end{lem}
+
+\subsection{Coercion rules}\label{sub:transp}
 In \CTT, for every type-line \fbox{$A:\II\to\UU$},
 we add a function $\coeLong:A~\lcon\to A~\rcon$ to the type theory.
 Since a type-line expresses the equivalence between two types (the two sides
