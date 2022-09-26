@@ -70,7 +70,7 @@ public class Unifier {
 
   /** Daniel Gratzer used <code>N</code> when explaining these to me */
   private boolean clause(@NotNull Restr.Side<Term> clause, @NotNull Term n) {
-    return CofThy.conv(new Restr.Disj<>(ImmutableSeq.of(clause.cof())),
+    return CofThy.conv(new Restr.Disj<>(clause.cof()),
       Normalizer.create(), subst -> untyped(new Term.PartEl(new Partial.Const<>(clause.u())), subst.term(n)));
   }
 

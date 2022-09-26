@@ -35,6 +35,10 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
   @NotNull Restr<E> or(@NotNull Cond<E> cond);
   <T extends TermLike<T>> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f);
   record Disj<E extends TermLike<E>>(@NotNull ImmutableSeq<Conj<E>> orz) implements Restr<E> {
+    @java.lang.SafeVarargs public Disj(Conj<E>... orz) {
+      this(ImmutableSeq.of(orz));
+    }
+
     @Override public @NotNull SeqView<E> instView() {
       return orz.view().flatMap(Conj::view);
     }
@@ -64,7 +68,7 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
   }
   static <E extends TermLike<E> & Docile> @NotNull Doc toDoc(Restr<E> cof) {
     return switch (cof) {
-      case Restr.Const<E> c -> Doc.symbol(c.isTrue ? "0=0" : "0=1");
+      case Restr.Const<E> c -> Doc.symbol(c.isOne ? "0=0" : "0=1");
       case Restr.Disj<E> disj -> toDoc(disj);
     };
   }
@@ -73,7 +77,7 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
       or.ands.sizeGreaterThan(1) && cof.orz.sizeGreaterThan(1)
         ? Doc.parened(toDoc(or)) : toDoc(or)));
   }
-  record Const<E extends TermLike<E>>(boolean isTrue) implements Restr<E> {
+  record Const<E extends TermLike<E>>(boolean isOne) implements Restr<E> {
     @Override public @NotNull SeqView<E> instView() {
       return SeqView.empty();
     }
@@ -88,15 +92,15 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
 
     @Override public @NotNull <T extends TermLike<T>>
     Restr.Const<T> fmap(@NotNull Function<E, T> g) {
-      return new Const<>(isTrue);
+      return new Const<>(isOne);
     }
 
     @Override public @NotNull Restr<E> or(@NotNull Cond<E> cond) {
-      return isTrue ? this : fromCond(cond);
+      return isOne ? this : fromCond(cond);
     }
 
     @Override public <T extends TermLike<T>> Const<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f) {
-      return new Const<>(isTrue);
+      return new Const<>(isOne);
     }
   }
   static <E extends TermLike<E>> @NotNull Disj<E> fromCond(Cond<E> cond) {

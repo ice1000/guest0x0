@@ -74,7 +74,7 @@ public interface CofThy {
   /** @see CofThy#conv(Restr, SubstObj, Predicate) */
   static <E extends TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
   conv(@NotNull Restr.Conj<E> r, @NotNull Subst initial, @NotNull Predicate<Subst> sat) {
-    return conv(new Restr.Disj<>(ImmutableSeq.of(r)), initial, sat);
+    return conv(new Restr.Disj<>(r), initial, sat);
   }
 
   /**
@@ -86,7 +86,7 @@ public interface CofThy {
   static <E extends TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
   conv(@NotNull Restr<E> r, @NotNull Subst initial, @NotNull Predicate<Subst> sat) {
     return switch (r) {
-      case Restr.Const<E> c -> !c.isTrue() || sat.test(initial);
+      case Restr.Const<E> c -> !c.isOne() || sat.test(initial);
       case Restr.Disj<E> restr -> {
         for (var or : restr.orz()) {
           var result = vdash(or, initial, sat::test);
@@ -232,7 +232,7 @@ public interface CofThy {
 
   static boolean satisfied(@NotNull Restr<?> restriction) {
     return switch (restriction) {
-      case Restr.Const<?> c -> c.isTrue();
+      case Restr.Const<?> c -> c.isOne();
       case Restr.Disj<?> restr -> {
         for (var or : restr.orz()) {
           var satisfied = true;
