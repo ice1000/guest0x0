@@ -12,6 +12,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           java-version: '18'
+          distribution: 'liberica'
       - uses: gradle/gradle-build-action@v2
         with:
           arguments: test --info --no-daemon --stacktrace --warning-mode all
