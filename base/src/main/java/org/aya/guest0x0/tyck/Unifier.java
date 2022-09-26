@@ -81,7 +81,7 @@ public class Unifier {
   // Hopefully.... I don't know. :shrug:
   private boolean formulae(Formula<Term> lf, Formula<Term> rf) {
     return switch (lf) {
-      case Formula.Lit<Term> l && rf instanceof Formula.Lit<Term> r -> l.isLeft() == !r.isOne();
+      case Formula.Lit<Term> l && rf instanceof Formula.Lit<Term> r -> l.isOne() == r.isOne();
       case Formula.Inv<Term> l && rf instanceof Formula.Inv<Term> r -> untyped(l.i(), r.i());
       case Formula.Conn<Term> l && rf instanceof Formula.Conn<Term> r && l.isAnd() == r.isAnd() ->
         untyped(l.l(), r.l()) && untyped(l.r(), r.r());
