@@ -116,7 +116,7 @@ public interface CofThy {
     var unsat = false;
     for (var eq : or.ands()) {
       var inst = eq.inst();
-      if (inst.asFormula() instanceof Formula.Lit<?> lit && lit.isLeft() == eq.isOne())
+      if (inst.asFormula() instanceof Formula.Lit<?> lit && !lit.isOne() == eq.isOne())
         unsat = true;
       else {
         var castVar = initial.asRef(inst);
@@ -177,7 +177,7 @@ public interface CofThy {
       var and = todoAnds.pop();
       switch (and.inst().asFormula()) {
         case Formula.Lit<E> lit -> {
-          if (lit.isLeft() == and.isOne()) return true;
+          if (!lit.isOne() == and.isOne()) return true;
           // Skip truth
         }
         // ~ a = j ==> a = ~ j for j \in {0, 1}
@@ -239,7 +239,7 @@ public interface CofThy {
           for (var eq : or.ands()) {
             if (!(eq.inst().asFormula() instanceof Formula.Lit<?> lit))
               satisfied = false;
-            else if (lit.isLeft() == eq.isOne())
+            else if (!lit.isOne() == eq.isOne())
               satisfied = false;
           }
           if (satisfied) yield true;

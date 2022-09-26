@@ -14,7 +14,7 @@ public sealed interface Formula<E> extends Serializable {
   record Inv<E>(@NotNull E i) implements Formula<E> {
     public <T> @NotNull Inv<T> fmap(@NotNull Function<E, T> f) {return new Inv<>(f.apply(i));}
   }
-  record Lit<E>(boolean isLeft) implements Formula<E> {
-    public <T> @NotNull Lit<T> fmap(@NotNull Function<E, T> f) {return new Lit<>(isLeft);}
+  record Lit<E>(boolean isOne) implements Formula<E> {
+    public <T> @NotNull Lit<T> fmap(@NotNull Function<E, T> f) {return new Lit<>(isOne);}
   }
 }

@@ -40,7 +40,7 @@ public record Normalizer(
   @Override public boolean contradicts(LocalVar i, boolean newIsLeft) {
     if (!rho.containsKey(i)) return false;
     if (!(rho.get(i).asFormula() instanceof Formula.Lit<Term> lit)) return false;
-    return lit.isLeft() != newIsLeft;
+      return lit.isOne() == newIsLeft;
   }
 
   @Override public @Nullable LocalVar asRef(@NotNull Term term) {

@@ -286,7 +286,7 @@ public record Elaborator(
         case Formula.Inv<Expr> inv -> new Synth(Term.neg(inherit(inv.i(), Term.I)), Term.I);
         case Formula.Conn<Expr> conn -> new Synth(new Term.Mula(
           new Formula.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);
-        case Formula.Lit<Expr> lit -> new Synth(Term.end(lit.isLeft()), Term.I);
+        case Formula.Lit<Expr> lit -> new Synth(Term.end(!lit.isOne()), Term.I);
       };
       case Expr.Cof cof -> new Synth(new Term.Cof(cof.data().mapCond(this::condition)), Term.F);
       case Expr.PartTy par -> new Synth(new Term.PartTy(inherit(par.ty(), Term.U), cof(par.restr())), Term.U);

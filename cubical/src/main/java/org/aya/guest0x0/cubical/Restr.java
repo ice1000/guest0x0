@@ -168,7 +168,7 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
     return switch (formula) { // de Morgan laws
       // ~ 1 = 0, ~ 0 = 1
       case Formula.Inv<T> inv && inv.i().asFormula() instanceof Formula.Lit<T> lit ->
-        factory.apply(new Formula.Lit<>(!lit.isLeft()));
+        factory.apply(new Formula.Lit<>(!lit.isOne()));
       // ~ (~ a) = a
       case Formula.Inv<T> inv && inv.i().asFormula() instanceof Formula.Inv<T> ii -> ii.i(); // DNE!! :fear:
       // ~ (a /\ b) = (~ a \/ ~ b), ~ (a \/ b) = (~ a /\ ~ b)
@@ -177,11 +177,11 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
           formulae(new Formula.Inv<>(conn.l()), factory),
           formulae(new Formula.Inv<>(conn.r()), factory)));
       // 0 /\ a = 0, 1 /\ a = a, 0 \/ a = a, 1 \/ a = 1
-      case Formula.Conn<T> conn && conn.l().asFormula() instanceof Formula.Lit<T> l -> l.isLeft()
+      case Formula.Conn<T> conn && conn.l().asFormula() instanceof Formula.Lit<T> l -> !l.isOne()
         ? (conn.isAnd() ? conn.l() : conn.r())
         : (conn.isAnd() ? conn.r() : conn.l());
       // a /\ 0 = 0, a /\ 1 = a, a \/ 0 = a, a \/ 1 = 1
-      case Formula.Conn<T> conn && conn.r().asFormula() instanceof Formula.Lit<T> r -> r.isLeft()
+      case Formula.Conn<T> conn && conn.r().asFormula() instanceof Formula.Lit<T> r -> !r.isOne()
         ? (conn.isAnd() ? conn.r() : conn.l())
         : (conn.isAnd() ? conn.l() : conn.r());
       default -> factory.apply(formula);

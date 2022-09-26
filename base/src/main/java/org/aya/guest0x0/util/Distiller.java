@@ -78,7 +78,7 @@ public interface Distiller {
       case Formula.Inv<E> inv -> Doc.sep(Doc.plain("~"), f.apply(inv.i(), IOp));
       case Formula.Lit<E> lit -> {
         envPrec = Free; // A hack to force no paren
-        yield Doc.symbol(lit.isLeft() ? "0" : "1");
+          yield Doc.symbol(!lit.isOne() ? "0" : "1");
       }
     };
     return envPrec.ordinal() >= IOp.ordinal() ? Doc.parened(doc) : doc;

@@ -84,7 +84,7 @@ public sealed interface Term extends Docile, Restr.TermLike<Term> {
   record PLam(@NotNull ImmutableSeq<LocalVar> dims, @NotNull Term fill) implements Term {}
   record PCall(@NotNull Term p, @NotNull ImmutableSeq<Term> i, @NotNull Partial<Term> b) implements Term {}
   record Mula(@Override @NotNull Formula<Term> asFormula) implements Term {}
-  static @NotNull Term end(boolean isLeft) {return new Mula(new Formula.Lit<>(isLeft));}
+  static @NotNull Term end(boolean isLeft) {return new Mula(new Formula.Lit<>(!isLeft));}
   static @NotNull Term neg(@NotNull Term term) {return new Mula(new Formula.Inv<>(term));}
   static @NotNull Term conn(boolean isAnd, @NotNull Term l, @NotNull Term r) {return new Mula(new Formula.Conn<>(isAnd, l, r));}
   static @NotNull Term and(@NotNull Term l, @NotNull Term r) {return conn(true, l, r);}

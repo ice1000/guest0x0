@@ -87,8 +87,8 @@ public record Parser(@NotNull SourceFile source) {
 
   private @NotNull Expr iPat(Guest0x0Parser.IPatContext iPat) {
     var pos = sourcePosOf(iPat);
-    return iPat.LEFT() != null ? new Expr.Mula(pos, new Formula.Lit<>(true))
-      : iPat.RIGHT() != null ? new Expr.Mula(pos, new Formula.Lit<>(false))
+    return iPat.LEFT() != null ? new Expr.Mula(pos, new Formula.Lit<>(false))
+      : iPat.RIGHT() != null ? new Expr.Mula(pos, new Formula.Lit<>(true))
       : new Expr.Hole(pos, ImmutableSeq.empty());
   }
 
