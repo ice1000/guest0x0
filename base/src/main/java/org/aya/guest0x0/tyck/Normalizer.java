@@ -34,7 +34,7 @@ public record Normalizer(
   }
 
   @Override public void put(LocalVar i, boolean isLeft) {
-    rho.put(i, Term.end(isLeft));
+    rho.put(i, Term.end(!isLeft));
   }
 
   @Override public boolean contradicts(LocalVar i, boolean newIsLeft) {
@@ -125,7 +125,7 @@ public record Normalizer(
       }
       case Term.Hcomp hcomp -> {
         var data = hcomp.data().fmap(this::term);
-        if (data.walls().app(Term.end(false)) instanceof Term.PartEl p
+        if (data.walls().app(Term.end(true)) instanceof Term.PartEl p
           && p.inner() instanceof Partial.Const<Term> c) yield c.u();
         yield new Term.Hcomp(data);
       }

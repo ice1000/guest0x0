@@ -51,7 +51,7 @@ public interface HCompPDF {
   static @NotNull Term comp(@NotNull Term cover, @NotNull LocalVar x, @NotNull Partial<Term> par, @NotNull Term u0) {
     assert !(par instanceof Partial.Const<Term>);
     return new Hcomp(new CompData<>(new Cof(par.restr()),
-      cover.app(end(false)), new Lam(x,
+      cover.app(end(true)), new Lam(x,
       new PartEl(par.map(u -> forward(cover, new Ref(x)).app(u)))), u0));
   }
 }

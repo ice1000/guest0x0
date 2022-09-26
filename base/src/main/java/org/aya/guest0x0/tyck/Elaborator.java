@@ -286,7 +286,7 @@ public record Elaborator(
         case Formula.Inv<Expr> inv -> new Synth(Term.neg(inherit(inv.i(), Term.I)), Term.I);
         case Formula.Conn<Expr> conn -> new Synth(new Term.Mula(
           new Formula.Conn<>(conn.isAnd(), inherit(conn.l(), Term.I), inherit(conn.r(), Term.I))), Term.I);
-        case Formula.Lit<Expr> lit -> new Synth(Term.end(!lit.isOne()), Term.I);
+        case Formula.Lit<Expr> lit -> new Synth(Term.end(lit.isOne()), Term.I);
       };
       case Expr.Cof cof -> new Synth(new Term.Cof(cof.data().mapCond(this::condition)), Term.F);
       case Expr.PartTy par -> new Synth(new Term.PartTy(inherit(par.ty(), Term.U), cof(par.restr())), Term.U);
@@ -294,7 +294,7 @@ public record Elaborator(
         var cover = inherit(transp.cover(), Term.mkPi(Term.I, Term.U));
         var detective = new AltF7(new LocalVar("?"));
         var sample = cover.app(new Term.Ref(detective.var()));
-        var ty = Term.mkPi(cover.app(Term.end(true)), cover.app(Term.end(false)));
+        var ty = Term.mkPi(cover.app(Term.end(false)), cover.app(Term.end(true)));
         var cof = cof(transp.restr());
         // I believe find-usages is slightly more efficient than what Huber wrote in hcomp.pdf
         var capture = new Object() {
@@ -314,7 +314,7 @@ public record Elaborator(
         var phi = inherit(hcomp.data().phi(), Term.F);
         // This already implies overlapping checks
         var walls = inherit(hcomp.data().walls(), Term.mkPi(Term.I, new Term.PartTy(ty, phi)));
-        var walls0 = walls.app(Term.end(true));
+        var walls0 = walls.app(Term.end(false));
         if (!(normalize(walls0) instanceof Term.PartEl par))
           throw new SPE(hcomp.data().walls().pos(),
             Doc.english("Only support walls normalized as partials for now, got"), walls0, Doc.english("at floor"));
