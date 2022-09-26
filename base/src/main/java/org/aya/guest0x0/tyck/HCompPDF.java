@@ -28,18 +28,18 @@ public interface HCompPDF {
     public @NotNull Term fill(@NotNull LocalVar i) {
       var ri = new Ref(i);
       return new Transp(mkLam("j", j -> cover.app(and(ri, j))),
-        new Cof(restr.restr().or(new Restr.Cond<>(ri, true))));
+        new Cof(restr.restr().or(new Restr.Cond<>(ri, false))));
     }
 
     public @NotNull Term invFill(@NotNull LocalVar i) {
       var ri = new Ref(i);
       return new Transp(mkLam("j", j -> cover.app(neg(and(neg(ri), j)))),
-        new Cof(restr.restr().or(new Restr.Cond<>(ri, false))));
+        new Cof(restr.restr().or(new Restr.Cond<>(ri, true))));
     }
   }
   static @NotNull Term forward(@NotNull Term cover, @NotNull Term r) {
     return new Transp(mkLam("i", i -> cover.app(or(i, r))),
-      new Cof(Restr.fromCond(new Restr.Cond<>(r, false))));
+      new Cof(Restr.fromCond(new Restr.Cond<>(r, true))));
   }
   /**
    * CCHM comp, similar to the analogous comp as in

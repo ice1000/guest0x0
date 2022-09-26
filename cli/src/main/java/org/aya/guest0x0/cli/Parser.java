@@ -78,7 +78,7 @@ public record Parser(@NotNull SourceFile source) {
 
   private @NotNull Restr.Conj<Expr> cofib(Guest0x0Parser.CofContext cof) {
     return new Restr.Conj<>(Seq.wrapJava(cof.cond())
-      .map(c -> new Restr.Cond<>(new Expr.Unresolved(sourcePosOf(c), c.ID().getText()), c.LEFT() != null)));
+      .map(c -> new Restr.Cond<>(new Expr.Unresolved(sourcePosOf(c), c.ID().getText()), c.LEFT() == null)));
   }
 
   @NotNull private ImmutableSeq<LocalVar> localVars(List<TerminalNode> ids) {

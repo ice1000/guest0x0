@@ -106,16 +106,16 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
   static <E extends TermLike<E>> @NotNull Disj<E> fromCond(Cond<E> cond) {
     return new Disj<>(ImmutableSeq.of(new Conj<>(ImmutableSeq.of(cond))));
   }
-  record Cond<E>(@NotNull E inst, boolean isLeft) implements Serializable {
+  record Cond<E>(@NotNull E inst, boolean isOne) implements Serializable {
     public Cond<E> map(@NotNull Function<E, E> g) {
       var apply = g.apply(inst);
       if (apply == inst) return this;
-      return new Cond<>(apply, isLeft);
+      return new Cond<>(apply, isOne);
     }
 
-    @Contract("_ -> new") public <To extends Restr.TermLike<To>>
+    @Contract("_ -> new") public <To extends TermLike<To>>
     @NotNull Cond<To> fmap(@NotNull Function<E, To> g) {
-      return new Cond<>(g.apply(inst), isLeft);
+      return new Cond<>(g.apply(inst), isOne);
     }
   }
   record Conj<E extends TermLike<E>>(@NotNull ImmutableSeq<Cond<E>> ands) implements Serializable {
@@ -140,8 +140,7 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
     }
   }
   static <E extends TermLike<E> & Docile> @NotNull Doc toDoc(Conj<E> cof) {
-    return Doc.join(Doc.spaced(Doc.symbol("/\\")), cof.ands.view().map(and ->
-      Doc.sep(and.inst.toDoc(), Doc.symbol("="), Doc.symbol(and.isLeft() ? "0" : "1"))));
+    return Doc.join(Doc.spaced(Doc.symbol("/\\")), cof.ands.view().map(and -> Doc.sep(and.inst.toDoc(), Doc.symbol("="), Doc.symbol(!and.isOne() ? "0" : "1"))));
   }
 
   record Side<E extends TermLike<E>>(@NotNull Restr.Conj<E> cof, @NotNull E u) implements Serializable {

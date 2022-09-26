@@ -36,15 +36,15 @@ public interface CofThy {
     var conn = localOrz.first();
     var lateDropped = localOrz.drop(1);
     if (conn.isAnd()) { // a /\ b = 0 ==> a = 0 \/ b = 0
-      conds.push(new Restr.Cond<>(conn.l(), true));
-      combineRecursively(lateDropped, conds, combined);
-      conds.pop();
-      conds.push(new Restr.Cond<>(conn.r(), true));
-    } else { // a \/ b = 1 ==> a = 1 \/ b = 1
       conds.push(new Restr.Cond<>(conn.l(), false));
       combineRecursively(lateDropped, conds, combined);
       conds.pop();
       conds.push(new Restr.Cond<>(conn.r(), false));
+    } else { // a \/ b = 1 ==> a = 1 \/ b = 1
+      conds.push(new Restr.Cond<>(conn.l(), true));
+      combineRecursively(lateDropped, conds, combined);
+      conds.pop();
+      conds.push(new Restr.Cond<>(conn.r(), true));
     }
     combineRecursively(lateDropped, conds, combined);
     conds.pop();
@@ -63,7 +63,7 @@ public interface CofThy {
 
   /** @see CofThy#isOne(TermLike) */
   @ApiStatus.Internal static <E extends TermLike<E>> Restr.Disj<E> embed(E e) {
-    var conds = ImmutableSeq.of(new Restr.Cond<>(e, false));
+    var conds = ImmutableSeq.of(new Restr.Cond<>(e, true));
     return new Restr.Disj<>(ImmutableSeq.of(new Restr.Conj<>(conds)));
   }
 
@@ -116,14 +116,14 @@ public interface CofThy {
     var unsat = false;
     for (var eq : or.ands()) {
       var inst = eq.inst();
-      if (inst.asFormula() instanceof Formula.Lit<?> lit && lit.isLeft() != eq.isLeft())
+      if (inst.asFormula() instanceof Formula.Lit<?> lit && lit.isLeft() == eq.isOne())
         unsat = true;
       else {
         var castVar = initial.asRef(inst);
         if (castVar != null) {
-          if (derived.contradicts(castVar, eq.isLeft()))
+          if (derived.contradicts(castVar, !eq.isOne()))
             return Option.none(); // Unsatisfiable
-          else derived.put(castVar, eq.isLeft());
+          else derived.put(castVar, !eq.isOne());
         } else return Option.some(null);
       }
     }
@@ -177,21 +177,21 @@ public interface CofThy {
       var and = todoAnds.pop();
       switch (and.inst().asFormula()) {
         case Formula.Lit<E> lit -> {
-          if (lit.isLeft() != and.isLeft()) return true;
+          if (lit.isLeft() == and.isOne()) return true;
           // Skip truth
         }
         // ~ a = j ==> a = ~ j for j \in {0, 1}
         // According to CCHM, the canonical map takes (1-i) to (i=0)
-        case Formula.Inv<E> inv -> todoAnds.push(new Restr.Cond<>(inv.i(), !and.isLeft()));
+        case Formula.Inv<E> inv -> todoAnds.push(new Restr.Cond<>(inv.i(), !and.isOne()));
         // a /\ b = 1 ==> a = 1 /\ b = 1
-        case Formula.Conn<E> conn && conn.isAnd() && !and.isLeft() -> {
-          todoAnds.push(new Restr.Cond<>(conn.l(), false));
-          todoAnds.push(new Restr.Cond<>(conn.r(), false));
-        }
-        // a \/ b = 0 ==> a = 0 /\ b = 0
-        case Formula.Conn<E> conn && !conn.isAnd() && and.isLeft() -> {
+        case Formula.Conn<E> conn && conn.isAnd() && and.isOne() -> {
           todoAnds.push(new Restr.Cond<>(conn.l(), true));
           todoAnds.push(new Restr.Cond<>(conn.r(), true));
+        }
+        // a \/ b = 0 ==> a = 0 /\ b = 0
+        case Formula.Conn<E> conn && !conn.isAnd() && !and.isOne() -> {
+          todoAnds.push(new Restr.Cond<>(conn.l(), false));
+          todoAnds.push(new Restr.Cond<>(conn.r(), false));
         }
         // a /\ b = 0 ==> a = 0 \/ b = 0
         case Formula.Conn<E> conn && conn.isAnd() /*&& and.isLeft()*/ -> orz.append(conn);
@@ -239,7 +239,7 @@ public interface CofThy {
           for (var eq : or.ands()) {
             if (!(eq.inst().asFormula() instanceof Formula.Lit<?> lit))
               satisfied = false;
-            else if (lit.isLeft() != eq.isLeft())
+            else if (lit.isLeft() == eq.isOne())
               satisfied = false;
           }
           if (satisfied) yield true;

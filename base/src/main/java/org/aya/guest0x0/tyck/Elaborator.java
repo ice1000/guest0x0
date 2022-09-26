@@ -339,7 +339,7 @@ public record Elaborator(
   }
 
   private @NotNull Restr.Cond<Term> condition(Restr.Cond<Expr> c) {
-    return new Restr.Cond<>(inherit(c.inst(), Term.I), c.isLeft());
+    return new Restr.Cond<>(inherit(c.inst(), Term.I), c.isOne());
   }
 
   private @NotNull Term.Cof cof(@NotNull Expr restr) {

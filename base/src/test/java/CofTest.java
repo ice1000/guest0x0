@@ -24,7 +24,7 @@ public class CofTest {
     var parser = new Parser(SourceFile.NONE);
     var parsed = parser.expr(CliMain.parser(s).expr());
     var raw = ((Expr.Cof) parsed).data().map(context._1::expr);
-    var cof = raw.mapCond(c -> new Restr.Cond<>(context._2.inherit(c.inst(), Term.I), c.isLeft()));
+    var cof = raw.mapCond(c -> new Restr.Cond<>(context._2.inherit(c.inst(), Term.I), c.isOne()));
     var tot = context._2.inherit(context._1.expr(parser.expr(CliMain.parser(to).expr())), Term.I);
     var subst = new Normalizer(MutableMap.of((LocalVar) context._1.env().get(i), tot));
     return subst.restr(cof);
