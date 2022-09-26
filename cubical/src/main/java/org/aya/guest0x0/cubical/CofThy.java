@@ -27,10 +27,10 @@ public interface CofThy {
   static <T extends TermLike<T>> void combineRecursively(
     @NotNull SeqView<Formula.Conn<T>> localOrz,
     MutableStack<Restr.Cond<T>> conds,
-    MutableList<Restr.Cofib<T>> combined
+    MutableList<Restr.Conj<T>> combined
   ) {
     if (localOrz.isEmpty()) {
-      combined.append(new Restr.Cofib<>(conds.toImmutableArray()));
+      combined.append(new Restr.Conj<>(conds.toImmutableArray()));
       return;
     }
     var conn = localOrz.first();
@@ -62,9 +62,9 @@ public interface CofThy {
   }
 
   /** @see CofThy#isOne(TermLike) */
-  @ApiStatus.Internal static <E extends TermLike<E>> Restr.Vary<E> embed(E e) {
+  @ApiStatus.Internal static <E extends TermLike<E>> Restr.Disj<E> embed(E e) {
     var conds = ImmutableSeq.of(new Restr.Cond<>(e, false));
-    return new Restr.Vary<>(ImmutableSeq.of(new Restr.Cofib<>(conds)));
+    return new Restr.Disj<>(ImmutableSeq.of(new Restr.Conj<>(conds)));
   }
 
   static <E extends TermLike<E>> Restr<E> isOne(E e) {
@@ -73,8 +73,8 @@ public interface CofThy {
 
   /** @see CofThy#conv(Restr, SubstObj, Predicate) */
   static <E extends TermLike<E>, V, Subst extends SubstObj<E, V, Subst>> boolean
-  conv(@NotNull Restr.Cofib<E> r, @NotNull Subst initial, @NotNull Predicate<Subst> sat) {
-    return conv(new Restr.Vary<>(ImmutableSeq.of(r)), initial, sat);
+  conv(@NotNull Restr.Conj<E> r, @NotNull Subst initial, @NotNull Predicate<Subst> sat) {
+    return conv(new Restr.Disj<>(ImmutableSeq.of(r)), initial, sat);
   }
 
   /**
@@ -87,7 +87,7 @@ public interface CofThy {
   conv(@NotNull Restr<E> r, @NotNull Subst initial, @NotNull Predicate<Subst> sat) {
     return switch (r) {
       case Restr.Const<E> c -> !c.isTrue() || sat.test(initial);
-      case Restr.Vary<E> restr -> {
+      case Restr.Disj<E> restr -> {
         for (var or : restr.orz()) {
           var result = vdash(or, initial, sat::test);
           if (result.isEmpty()) continue; // Skip unsatisfiable cases
@@ -111,7 +111,7 @@ public interface CofThy {
    * @see SubstObj
    */
   static <V, T extends TermLike<T>, Subst extends SubstObj<T, V, Subst>, E> Option<E>
-  vdash(@NotNull Restr.Cofib<T> or, @NotNull Subst initial, @NotNull Function<Subst, E> tyck) {
+  vdash(@NotNull Restr.Conj<T> or, @NotNull Subst initial, @NotNull Function<Subst, E> tyck) {
     var derived = initial.derive();
     var unsat = false;
     for (var eq : or.ands()) {
@@ -150,14 +150,14 @@ public interface CofThy {
    * Normalizes a "restriction" which looks like "f1 \/ f2 \/ ..." where
    * f1, f2 are like "a /\ b /\ ...".
    */
-  static <E extends TermLike<E>> @NotNull Restr<E> normalizeRestr(Restr.Vary<E> vary) {
-    var orz = MutableArrayList.<Restr.Cofib<E>>create(vary.orz().size());
+  static <E extends TermLike<E>> @NotNull Restr<E> normalizeRestr(Restr.Disj<E> disj) {
+    var orz = MutableArrayList.<Restr.Conj<E>>create(disj.orz().size());
     // This is a sequence of "or"s, so if any cof is true, the whole thing is true
-    for (var cof : vary.orz())
+    for (var cof : disj.orz())
       if (normalizeCof(cof, orz, Function.identity()))
         return new Restr.Const<>(true);
     if (orz.isEmpty()) return new Restr.Const<>(false);
-    return new Restr.Vary<>(orz.toImmutableArray());
+    return new Restr.Disj<>(orz.toImmutableArray());
   }
 
   /**
@@ -168,7 +168,7 @@ public interface CofThy {
    * @return true if this is constant false
    */
   static <E extends TermLike<E>> boolean collectAnds(
-    Restr.Cofib<E> cof,
+    Restr.Conj<E> cof,
     MutableList<Restr.Cond<E>> ands,
     MutableList<Formula.Conn<E>> orz
   ) {
@@ -210,22 +210,22 @@ public interface CofThy {
    * @return true if this is constantly true
    */
   static <E extends TermLike<E>, Clause> boolean normalizeCof(
-    Restr.Cofib<E> cof, MutableList<Clause> orz,
-    Function<Restr.Cofib<E>, Clause> clause
+    Restr.Conj<E> cof, MutableList<Clause> orz,
+    Function<Restr.Conj<E>, Clause> clause
   ) {
     var ands = MutableArrayList.<Restr.Cond<E>>create(cof.ands().size());
     var localOrz = MutableList.<Formula.Conn<E>>create();
     // If a false is found, do not modify orz
     if (collectAnds(cof, ands, localOrz)) return false;
     if (localOrz.isNotEmpty()) {
-      var combined = MutableArrayList.<Restr.Cofib<E>>create(1 << localOrz.size());
+      var combined = MutableArrayList.<Restr.Conj<E>>create(1 << localOrz.size());
       combineRecursively(localOrz.view(), ands.asMutableStack(), combined);
       // `cofib` has side effects, so you must first traverse them and then call `allMatch`
       // Can I do this without recursion?
       return combined.map(cofib -> normalizeCof(cofib, orz, clause)).allMatch(b -> b);
     }
     if (ands.isNotEmpty()) {
-      orz.append(clause.apply(new Restr.Cofib<>(ands.toImmutableArray())));
+      orz.append(clause.apply(new Restr.Conj<>(ands.toImmutableArray())));
       return false;
     } else return true;
   }
@@ -233,7 +233,7 @@ public interface CofThy {
   static boolean satisfied(@NotNull Restr<?> restriction) {
     return switch (restriction) {
       case Restr.Const<?> c -> c.isTrue();
-      case Restr.Vary<?> restr -> {
+      case Restr.Disj<?> restr -> {
         for (var or : restr.orz()) {
           var satisfied = true;
           for (var eq : or.ands()) {

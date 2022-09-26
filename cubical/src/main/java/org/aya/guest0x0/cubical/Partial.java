@@ -29,7 +29,7 @@ public sealed interface Partial<Term extends Restr.TermLike<Term>> extends Seria
     @NotNull ImmutableSeq<Restr.Side<Term>> clauses
   ) implements Partial<Term> {
     @Override public @NotNull Restr<Term> restr() {
-      return new Restr.Vary<>(clauses.map(Restr.Side::cof));
+      return new Restr.Disj<>(clauses.map(Restr.Side::cof));
     }
 
     @Override public @NotNull Partial.Split<Term> map(@NotNull Function<Term, Term> mapper) {

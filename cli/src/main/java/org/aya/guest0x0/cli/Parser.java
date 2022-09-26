@@ -73,11 +73,11 @@ public record Parser(@NotNull SourceFile source) {
   @NotNull Restr<Expr> restr(Guest0x0Parser.RestrContext psi) {
     if (psi.ABSURD() != null) return new Restr.Const<>(false);
     if (psi.TRUTH() != null) return new Restr.Const<>(true);
-    return new Restr.Vary<>(Seq.wrapJava(psi.cof()).map(this::cofib));
+    return new Restr.Disj<>(Seq.wrapJava(psi.cof()).map(this::cofib));
   }
 
-  private @NotNull Restr.Cofib<Expr> cofib(Guest0x0Parser.CofContext cof) {
-    return new Restr.Cofib<>(Seq.wrapJava(cof.cond())
+  private @NotNull Restr.Conj<Expr> cofib(Guest0x0Parser.CofContext cof) {
+    return new Restr.Conj<>(Seq.wrapJava(cof.cond())
       .map(c -> new Restr.Cond<>(new Expr.Unresolved(sourcePosOf(c), c.ID().getText()), c.LEFT() != null)));
   }
 

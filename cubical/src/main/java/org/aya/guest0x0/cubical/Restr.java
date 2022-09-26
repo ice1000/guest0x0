@@ -34,41 +34,41 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
   fmap(@NotNull Function<E, T> g);
   @NotNull Restr<E> or(@NotNull Cond<E> cond);
   <T extends TermLike<T>> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f);
-  record Vary<E extends TermLike<E>>(@NotNull ImmutableSeq<Cofib<E>> orz) implements Restr<E> {
+  record Disj<E extends TermLike<E>>(@NotNull ImmutableSeq<Conj<E>> orz) implements Restr<E> {
     @Override public @NotNull SeqView<E> instView() {
-      return orz.view().flatMap(Cofib::view);
+      return orz.view().flatMap(Conj::view);
     }
 
     @Override public @NotNull Restr<E> normalize() {
       return CofThy.normalizeRestr(this);
     }
 
-    @Override public @NotNull Vary<E> map(@NotNull Function<E, E> g) {
+    @Override public @NotNull Restr.Disj<E> map(@NotNull Function<E, E> g) {
       var newOrz = orz.map(x -> x.map(g));
       if (newOrz.sameElements(orz, true)) return this;
-      return new Vary<>(newOrz);
+      return new Disj<>(newOrz);
     }
 
     @Override public @NotNull <T extends TermLike<T>>
-    Restr.Vary<T> fmap(@NotNull Function<E, T> g) {
-      return new Vary<>(orz.map(x -> x.fmap(g)));
+    Restr.Disj<T> fmap(@NotNull Function<E, T> g) {
+      return new Disj<>(orz.map(x -> x.fmap(g)));
     }
 
-    @Override public @NotNull Vary<E> or(@NotNull Cond<E> cond) {
-      return new Vary<>(orz.appended(new Cofib<>(ImmutableSeq.of(cond))));
+    @Override public @NotNull Restr.Disj<E> or(@NotNull Cond<E> cond) {
+      return new Disj<>(orz.appended(new Conj<>(ImmutableSeq.of(cond))));
     }
 
     @Override public <T extends TermLike<T>> Restr<T> mapCond(@NotNull Function<Cond<E>, Cond<T>> f) {
-      return new Vary<>(orz.map(x -> new Cofib<>(x.ands.map(f))));
+      return new Disj<>(orz.map(x -> new Conj<>(x.ands.map(f))));
     }
   }
   static <E extends TermLike<E> & Docile> @NotNull Doc toDoc(Restr<E> cof) {
     return switch (cof) {
       case Restr.Const<E> c -> Doc.symbol(c.isTrue ? "0=0" : "0=1");
-      case Restr.Vary<E> vary -> toDoc(vary);
+      case Restr.Disj<E> disj -> toDoc(disj);
     };
   }
-  static <E extends TermLike<E> & Docile> @NotNull Doc toDoc(Vary<E> cof) {
+  static <E extends TermLike<E> & Docile> @NotNull Doc toDoc(Disj<E> cof) {
     return Doc.join(Doc.spaced(Doc.symbol("\\/")), cof.orz.view().map(or ->
       or.ands.sizeGreaterThan(1) && cof.orz.sizeGreaterThan(1)
         ? Doc.parened(toDoc(or)) : toDoc(or)));
@@ -99,8 +99,8 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
       return new Const<>(isTrue);
     }
   }
-  static <E extends TermLike<E>> @NotNull Vary<E> fromCond(Cond<E> cond) {
-    return new Vary<>(ImmutableSeq.of(new Cofib<>(ImmutableSeq.of(cond))));
+  static <E extends TermLike<E>> @NotNull Disj<E> fromCond(Cond<E> cond) {
+    return new Disj<>(ImmutableSeq.of(new Conj<>(ImmutableSeq.of(cond))));
   }
   record Cond<E>(@NotNull E inst, boolean isLeft) implements Serializable {
     public Cond<E> map(@NotNull Function<E, E> g) {
@@ -114,33 +114,33 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
       return new Cond<>(g.apply(inst), isLeft);
     }
   }
-  record Cofib<E extends TermLike<E>>(@NotNull ImmutableSeq<Cond<E>> ands) implements Serializable {
+  record Conj<E extends TermLike<E>>(@NotNull ImmutableSeq<Cond<E>> ands) implements Serializable {
 
-    public Cofib<E> map(@NotNull Function<E, E> g) {
+    public Conj<E> map(@NotNull Function<E, E> g) {
       var newAnds = ands.map(c -> c.map(g));
       if (newAnds.sameElements(ands, true)) return this;
-      return new Cofib<>(newAnds);
+      return new Conj<>(newAnds);
     }
 
     @Contract("_ -> new") public <To extends Restr.TermLike<To>>
-    @NotNull Cofib<To> fmap(@NotNull Function<E, To> g) {
-      return new Cofib<>(ands.map(c -> c.fmap(g)));
+    @NotNull Conj<To> fmap(@NotNull Function<E, To> g) {
+      return new Conj<>(ands.map(c -> c.fmap(g)));
     }
 
     public @NotNull SeqView<E> view() {
       return ands.view().map(and -> and.inst);
     }
 
-    public Cofib<E> and(@NotNull Cofib<E> cof) {
-      return new Cofib<>(ands.appendedAll(cof.ands));
+    public Conj<E> and(@NotNull Restr.Conj<E> cof) {
+      return new Conj<>(ands.appendedAll(cof.ands));
     }
   }
-  static <E extends TermLike<E> & Docile> @NotNull Doc toDoc(Cofib<E> cof) {
+  static <E extends TermLike<E> & Docile> @NotNull Doc toDoc(Conj<E> cof) {
     return Doc.join(Doc.spaced(Doc.symbol("/\\")), cof.ands.view().map(and ->
       Doc.sep(and.inst.toDoc(), Doc.symbol("="), Doc.symbol(and.isLeft() ? "0" : "1"))));
   }
 
-  record Side<E extends TermLike<E>>(@NotNull Cofib<E> cof, @NotNull E u) implements Serializable {
+  record Side<E extends TermLike<E>>(@NotNull Restr.Conj<E> cof, @NotNull E u) implements Serializable {
 
     public Side<E> rename(@NotNull Function<E, E> g) {
       var apply = g.apply(u);

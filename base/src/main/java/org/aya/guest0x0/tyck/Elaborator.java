@@ -355,7 +355,7 @@ public record Elaborator(
     @NotNull SourcePos pos,
     @NotNull Restr.Side<Expr> clause, @NotNull Term ty
   ) {
-    var cofib = new Restr.Cofib<>(clause.cof().ands().map(this::condition));
+    var cofib = new Restr.Conj<>(clause.cof().ands().map(this::condition));
     var u = CofThy.vdash(cofib, normalizer(), norm -> inherit(clause.u(), norm.term(ty)));
     if (u.isDefined() && u.get() == null)
       throw new SPE(pos, Doc.english("The cofibration in"), toDoc(cofib),
