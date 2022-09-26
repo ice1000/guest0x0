@@ -1,3 +1,5 @@
+// Copyright (c) 2020-2022 Tesla (Yinsen) Zhang.
+// Use of this source code is governed by the MIT license that can be found in the LICENSE.md file.
 package org.aya.guest0x0.tyck;
 
 import kala.collection.mutable.MutableMap;
@@ -33,14 +35,14 @@ public record Normalizer(
     return new Param<>(param.x(), term(param.type()));
   }
 
-  @Override public void put(LocalVar i, boolean isLeft) {
-    rho.put(i, Term.end(!isLeft));
+  @Override public void put(LocalVar i, boolean isOne) {
+    rho.put(i, Term.end(isOne));
   }
 
-  @Override public boolean contradicts(LocalVar i, boolean newIsLeft) {
+  @Override public boolean contradicts(LocalVar i, boolean newIsOne) {
     if (!rho.containsKey(i)) return false;
     if (!(rho.get(i).asFormula() instanceof Formula.Lit<Term> lit)) return false;
-      return lit.isOne() == newIsLeft;
+    return lit.isOne() != newIsOne;
   }
 
   @Override public @Nullable LocalVar asRef(@NotNull Term term) {

@@ -1,3 +1,5 @@
+// Copyright (c) 2020-2022 Tesla (Yinsen) Zhang.
+// Use of this source code is governed by the MIT license that can be found in the LICENSE.md file.
 package org.aya.guest0x0.cubical;
 
 import kala.collection.SeqView;
@@ -121,9 +123,9 @@ public interface CofThy {
       else {
         var castVar = initial.asRef(inst);
         if (castVar != null) {
-          if (derived.contradicts(castVar, !eq.isOne()))
+          if (derived.contradicts(castVar, eq.isOne()))
             return Option.none(); // Unsatisfiable
-          else derived.put(castVar, !eq.isOne());
+          else derived.put(castVar, eq.isOne());
         } else return Option.some(null);
       }
     }
@@ -138,10 +140,10 @@ public interface CofThy {
    * @param <V> "variables" -- assuming capture-avoiding substitution instead of indices
    */
   interface SubstObj<E, V, Subst extends SubstObj<E, V, Subst>> {
-    /** Put <code>i := I(isLeft)</code> into the substitution */
-    void put(V i, boolean isLeft);
-    /** @return true if there is <code>i := I(oldIsLeft)</code> while <code>oldIsLeft != newIsLeft</code> */
-    boolean contradicts(V i, boolean newIsLeft);
+    /** Put <code>i := I(isOne)</code> into the substitution */
+    void put(V i, boolean isOne);
+    /** @return true if there is <code>i := I(oldIsOne)</code> while <code>oldIsOne != newIsOne</code> */
+    boolean contradicts(V i, boolean newIsOne);
     @Nullable V asRef(@NotNull E term);
     @NotNull Subst derive();
   }
