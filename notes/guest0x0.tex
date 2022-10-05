@@ -1059,9 +1059,11 @@ of an $n$-cube \textit{without} the top face (also known as an \textit{open box}
 and constructs the missing top face. In other words, composition asserts that any
 open box are \textit{closed} (i.e.~the top face is, in fact, filled).
 
-There are two versions of composition: \textit{homogeneous composition} and
+There are two versions of composition: \textit{homogeneous composition} (hereafter as \hcompLong) and
 \textit{heterogeneous composition}. The former requires that all the given faces
 are homogeneous (\cref{defn:homo-path}), while the latter does not have this restriction.
+Heterogeneous composition can be implemented in terms of homogeneous composition and \coeLong.
+This tutorial will work with primitive homogeneous composition.
 
 \begin{history}
 In~\cite{CCHM}, heterogeneous composition \texttt{comp} is the only primitive Kan operation,
@@ -1070,7 +1072,18 @@ For higher inductive types convenience, \cite{CHM} decomposed \texttt{comp} into
 homogeneous version \hcompLong{} and a primitive \coeLong.
 \end{history}
 
-\TODO
+The syntax of homogeneous composition is quite straightforward -- it looks like a function
+that takes an ``open box'' of type $\Partial \disj A$ and returns the missing top face,
+which is of type $A$. Below is a demonstration with upside-down cubes:
+\carloCTikZ{
+\carloXyz
+\refcube{Partial}
+\node (text) at (0, 2) {Input} ;
+\shiftTikZ{2,0}{\refcube{Comped}
+\node (text) at (0, 2) {Composition} ;}
+}
+However, this is not convenient as we cannot easily tell which face is
+the missing one that we want to obtain. Hence we slightly reorganize the parameters.
 
 The reduction of \hcompLong{} on universes is discussed in~\cref{sec:read}.
 
@@ -1082,7 +1095,7 @@ There are several constructs in \CTT{} that are not covered in this tutorial:
 	where $i$ and $j$ are both variables) is added. The diagonal cofibration implies
 	an extensional equality on $\II$.
 \item[Glue type] is a type former (with an introduction and elimination rule)
-  that is similar to \hcompLong{} on the universe, but with the edges replaced
+  that is similar to \hcompLong{} on the universe, but with the sides replaced
 	with equivalences (functions with contractible fibers).
 	In fact, \hcompLong{} on universes is reduced to Glue with trivial equivalences.
 	Glue type can be used to prove univalence, and is discussed in~\cite{CCHM,ABCFHL,HCompPDF}.
