@@ -1077,30 +1077,35 @@ The reduction of \hcompLong{} on universes is discussed in~\cref{sec:read}.
 \section{Suggestions for further reading}\label{sec:read}
 There are several constructs in \CTT{} that are not covered in this tutorial:
 \begin{description}
-\item[Glue type] is a type former (with an introduction and elimination rule)
-  that is similar to \hcompLong{} on the universe, but with the edges replaced
-	with equivalences (functions with contractible fibers).
-	In fact, \hcompLong{} on universes is reduced to Glue with trivial equivalences.
-	Glue type can be used to prove univalence, and is discussed in~\cite{CCHM,HCompPDF}.
-\item[V type] is a special case of Glue type that is sufficient to prove univalence,
-  but cannot handle \hcompLong{} on universes, hence a \CTT{} with V type needs
-	to handle \hcompLong{} on universes.
-	V type is discussed in~\cite{ABCFHL}.
 \item[Cartesian cubical type theory] is a variant of \CTT{} discussed in~\cite{ABCFHL},
   where the De Morgan structure is removed but ``diagonal cofibration'' (like $i\equiv j$,
 	where $i$ and $j$ are both variables) is added. The diagonal cofibration implies
 	an extensional equality on $\II$.
+\item[Glue type] is a type former (with an introduction and elimination rule)
+  that is similar to \hcompLong{} on the universe, but with the edges replaced
+	with equivalences (functions with contractible fibers).
+	In fact, \hcompLong{} on universes is reduced to Glue with trivial equivalences.
+	Glue type can be used to prove univalence, and is discussed in~\cite{CCHM,ABCFHL,HCompPDF}.
+\item[V type] is a special case of Glue type that is sufficient to prove univalence,
+  but cannot handle \hcompLong{} on universes, hence a \CTT{} with V type needs
+	to handle \hcompLong{} on universes.
+	V type is discussed in~\cite{CHTT3}.
 \item[Cubical computational type theory] is a variant of \CTT{} built in a computational
   (extensional) type theory, discussed in~\cite{CHTT1,CHTT2,CHTT3,CHTT4}.
 	It features an exact equality type with equality reflection.
-	Jon Sterling mentioned in a talk
+	Jon Sterling mentioned in a talk%
 	\footnote{Slides: \url{https://www.jonmsterling.com/slides/sterling:2022:wits.pdf}}
-	that the is not going to work well
+	that this setting is not going to work well
 	due to the lack of automated $\eta$-equality support.
-\item[Higher inductive types] are a way to define inductive types.
+\item[Higher inductive types] are a way to define inductive types generated
+  by both normal constructors and path constructors (i.e. that returns
+	a cubical subtype of the ambient type).
   They are introduced in~\cite{CHM} with a general scheme
 	(attach a partial element on a constructor).
 	Higher inductive types in Cartesian cubical computational type theory are discussed in~\cite{HIT-CCTT}.
+	Pattern matching on higher inductive types is discussed in~\cite{CubicalAgda}.
+\item[Guardedness] in cubical type theory is discussed in~\cite{GCTT,GHIT}. It is useful to
+	integrate coinductive types into cubical type theory.
 \end{description}
 
 The source code of the \GuestName{} project is available at
