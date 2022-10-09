@@ -1085,6 +1085,20 @@ which is of type $A$. Below is a demonstration with upside-down cubes:
 However, this is not convenient as we cannot easily tell which face is
 the missing one that we want to obtain. Hence we slightly reorganize the parameters.
 
+The practice in \CTT{} is to use the type $\II \to \Partial \disj A$ to represent the sides,
+and ask separately for the bottom face. This is because the bottom face is required
+while the sides are optional\footnote{This is a questionable design,
+speaking of evaluation performance. See \url{https://cse.umn.edu/cs/feature-stories/nullable-compositions-talk}}.
+where the parameter is the ``direction of composition''. For example, the above composition problem
+is decomposed as (pictures are still upside-down):
+\carloCTikZ{
+\carloXyz
+\refcube{PartialSide}
+\node (text) at (0, 2) {Sides} ;
+\shiftTikZ{2,0}{\refcube{PartialBot}
+\node (text) at (0, 2) {Bottom} ;}
+}
+
 The reduction of \hcompLong{} on universes is discussed in~\cref{sec:read}.
 
 \section{Suggestions for further reading}\label{sec:read}
