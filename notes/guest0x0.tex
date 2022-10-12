@@ -456,7 +456,7 @@ In~\cref{ex:parTyck}, the overlap-check step is a conversion check
 between a \textit{substituted version} of the two faces $u_i$ and $u_j$.
 For convenience, we introduce the typing judgment as in~\cref{fig:conv-cofib}.
 \begin{figure}[h!]
-\[\Psi;\Gamma,\conj\vdash u\equiv v:A\]
+\[\PGfvdash\conj u\equiv v:A\]
 \caption{Conversion check under a conjunction cofibration}\label{fig:conv-cofib}
 \end{figure}
 
@@ -467,7 +467,7 @@ and then apply the normal conversion check under $\Psi;\Gamma$.
 The idea in~\cref{fig:conv-cofib} can be extended in the following ways:
 \begin{itemize}
 \item To do a normal type-check under conjunctions,
-e.g. \fbox{$\Psi;\Gamma,\conj\vdash u:A$}, we apply the substitution to $A$
+e.g. \fbox{$\PGfvdash\conj u:A$}, we apply the substitution to $A$
 and run the normal type-check.
 \item To check anything that results in a \textit{yes} or \textit{no},
 we may check them under a disjunction cofibration $\disj$
@@ -481,11 +481,11 @@ is equivalent to $\disj_0\vdash \disj_1\equiv\top$ and $\disj_1\vdash \disj_0\eq
 These ideas give rise to the judgments in~\cref{fig:tyck-w-cofib}.
 \begin{figure}[h!]
 \begin{align*}
-\Psi;\Gamma,\disj&\vdash u\equiv v:A\\
-\Psi;\Gamma,\conj&\vdash u:A\\
-\Psi;\Gamma,\disj&\vdash \isType{A\equiv B}\\
-\Psi;\Gamma,\conj&\vdash \isType{A}\\
-\Psi;\Gamma,\disj&\vdash \disj_0\equiv \disj_1
+\PGfvdash{\disj&} u\equiv v:A\\
+\PGfvdash{\conj&} u:A\\
+\PGfvdash{\disj&} \isType{A\equiv B}\\
+\PGfvdash{\conj&} \isType{A}\\
+\PGfvdash{\disj&} \disj_0\equiv \disj_1
 \end{align*}
 \caption{Judgments under cofibrations}\label{fig:tyck-w-cofib}
 \end{figure}
@@ -499,8 +499,8 @@ reference variables in $\Psi$), as in~\cref{fig:tyck-par}.
 \inferrule{\PGvdash u:A}{\PGvdash \lrbbar u : \Partial\top A}\and
 \inferrule{
 \forall i\in I.(\Psi\vdash \conj_i)\\
-\forall i\in I.(\Psi;\Gamma,\conj_i\vdash u_i:A)\\\\
-\forall i,j\in I.(\Psi;\Gamma,\conj_i\land\conj_j\vdash u_i\equiv u_j:A)}
+\forall i\in I.(\PGfvdash{\conj_i} u_i:A)\\\\
+\forall i,j\in I.(\PGfvdash{\conj_i\land\conj_j} u_i\equiv u_j:A)}
 {\PGvdash\lrbbar{\overline{\conj_i\mapsto u_i}}
 :\Partial{\left(\bigvee\nolimits_{i\in I} \conj_i\right)}A}
 \end{mathpar}
@@ -958,7 +958,7 @@ traditional functional programming literature.
 \end{terminology}
 
 To achieve all the properties we have asked for,
-we add the following ``function'' to \CTT:
+we add the following ``function'' to \CTT (\cref{fig:syntax-transp}):
 
 \begin{figure}[h!]
 \[u,A::= \coe{A}{\disj} \mid \cdots~\text{(see~\cref{fig:subtype})}\]
@@ -1094,8 +1094,9 @@ The practice in \CTT{} is to use the type \fbox{$\II \to \Partial \disj A$} to r
 and ask separately for the floor. This is because the floor is required
 while the walls are optional\footnote{This is a questionable design,
 speaking of evaluation performance.
-However, there isn't any easy workarounds.
-See the ICMS talk \url{https://cse.umn.edu/cs/feature-stories/nullable-compositions-talk}}.
+However, there isn't any known easy workarounds.
+See the ICMS talk, which proposed a ``7-levels type theory'' solution:
+\url{https://cse.umn.edu/cs/feature-stories/nullable-compositions-talk}}.
 where the parameter is the ``direction of composition'',
 which is used to orient the walls (using the idea in~\cref{rem:sq-ori}).
 For example, the above composition problem
@@ -1109,16 +1110,16 @@ is decomposed as (pictures are still upside-down):
 }
 Note that $\disj$ in this case is $(z=\rcon)$,
 and the corresponding terms should look like the following,
-where \fbox{$x:\II;z= \rcon \vdash u:A$}:
+where \fbox{$i:\II;z= \rcon \vdash u:A$}:
 \[
-	\lam x \lrbbar{z=\rcon \mapsto u} :
+	\lam i \lrbbar{z=\rcon \mapsto u} :
 	\II \to \Partial{z=\rcon} A
 \]
 Then, \hcompLong{} should give us the following,
-where $u[\rcon/x]$ is just the top face of the wall $u$:
+where $u[\rcon/i]$ is just the top face of the wall $u$:
 \[
-\hcomp{A}{\lam x \lrbbar{z=\rcon \mapsto u}}
-: \subTy{A}{z=\rcon}{z=\rcon \mapsto u[\rcon/x]}
+\hcomp{A}{\lam i \lrbbar{z=\rcon \mapsto u}}
+: \subTy{A}{z=\rcon}{z=\rcon \mapsto u[\rcon/i]}
 \]
 \carloCTikZ{
 \carloXyz
@@ -1133,6 +1134,26 @@ where $\phi$ converts interval to the corresponding cofibration (\cref{lem:isomo
 	\hcompLong{} : (A : \UU)~(x:\II)~(w:\II \to \Partial{\phi(x)} A)
 	\to \subTy{A}{\phi(x)}{z\equiv\rcon \mapsto u}
 \]
+The formal syntax and typing of \hcompLong{} is straightforward
+(\cref{fig:syntax-hcomp,fig:typing-hcomp}).
+
+\begin{figure}[h!]
+\[u,A::= \hcomp A u \mid \cdots~\text{(see~\cref{fig:syntax-transp})}\]
+\caption{Syntax of homogeneous composition}
+\label{fig:syntax-hcomp}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{mathpar}
+\inferrule{\PGvdash A:\UU \\
+\Psi\vdash\overline{\conj_i} \\
+}{
+\coe{A}{\overline{\conj_i}}:(u:A~\lcon) \to
+ \subTy{(A~\rcon)}{\overline{\conj_i}}{\overline{\conj_i\mapsto u}}}
+\end{mathpar}
+\caption{Typing of the homogeneous composition}
+\label{fig:typing-hcomp}
+\end{figure}
 
 The reduction of \hcompLong{} on universes is discussed in~\cref{sec:read}.
 
