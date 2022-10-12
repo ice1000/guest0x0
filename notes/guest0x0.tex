@@ -832,7 +832,7 @@ decidable conversion check algorithm.
 Note that there are established facts that support~\cref{ex:norm-i},
 so it is not recommended to do it in a brute-force way.
 
-\begin{lem}
+\begin{lem}\label{lem:isomorphism}
 There exists an isomorphism between expressions of type $\II$ in open contexts
 and cofibrations in the same context.
 \end{lem}
@@ -1062,6 +1062,7 @@ open box are \textit{closed} (i.e.~the top face is, in fact, filled).
 The intuition behind the composition operation is like ``any cube
 that \textit{makes cubical sense} has a filling'', which gives \CTT{} a lot of terms
 that we desire but cannot construct using other term formers.
+The most notable motivating example is path concatenation (\cref{ex:concat-sym}).
 
 There are two versions of composition: \textit{homogeneous composition} (hereafter as \hcompLong) and
 \textit{heterogeneous composition}. The former requires that all the given faces
@@ -1093,7 +1094,8 @@ The practice in \CTT{} is to use the type \fbox{$\II \to \Partial \disj A$} to r
 and ask separately for the floor. This is because the floor is required
 while the walls are optional\footnote{This is a questionable design,
 speaking of evaluation performance.
-See \url{https://cse.umn.edu/cs/feature-stories/nullable-compositions-talk}}.
+However, there isn't any easy workarounds.
+See the ICMS talk \url{https://cse.umn.edu/cs/feature-stories/nullable-compositions-talk}}.
 where the parameter is the ``direction of composition'',
 which is used to orient the walls (using the idea in~\cref{rem:sq-ori}).
 For example, the above composition problem
@@ -1106,16 +1108,30 @@ is decomposed as (pictures are still upside-down):
 \node (text) at (0, 2) {Floor} ;}
 }
 Note that $\disj$ in this case is $(z\equiv\rcon)$,
-and the corresponding terms should be something like the following,
+and the corresponding terms should look like the following,
 where \fbox{$x:\II;z\equiv \rcon \vdash u:A$}:
 \[
 	\lam x \lrbbar{z\equiv\rcon \mapsto u} :
 	\II \to \Partial{z\equiv\rcon} A
 \]
-Then, \hcompLong{} should give us the following:
+Then, \hcompLong{} should give us the following,
+where $u[\rcon/x]$ is just the top face of the wall $u$:
 \[
 \hcomp{A}{\lam x \lrbbar{z\equiv\rcon \mapsto u}}
-: \subTy{A}{z\equiv\rcon}{z\equiv\rcon \mapsto u}
+: \subTy{A}{z\equiv\rcon}{z\equiv\rcon \mapsto u[\rcon/x]}
+\]
+\carloCTikZ{
+\carloXyz
+\refcube{URconX}
+}
+Note that for convenience, we have omitted the cofibration parameter
+of \hcompLong{} because it is already given in another argument.
+In practice, it might be needed explicitly to assign a type to \hcompLong.
+If \hcompLong{} is going to have a type, it should be like the following,
+where $\phi$ converts interval to the corresponding cofibration (\cref{lem:isomorphism}):
+\[
+	\hcompLong{} : (A : \UU)~(x:\II)~(w:\II \to \Partial{\phi(x)} A)
+	\to \subTy{A}{\phi(x)}{z\equiv\rcon \mapsto u}
 \]
 
 The reduction of \hcompLong{} on universes is discussed in~\cref{sec:read}.
