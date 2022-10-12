@@ -1132,7 +1132,7 @@ If \hcompLong{} is going to have a type, it should be like the following,
 where $\phi$ converts interval to the corresponding cofibration (\cref{lem:isomorphism}):
 \[
 	\hcompLong{} : (A : \UU)~(x:\II)~(w:\II \to \Partial{\phi(x)} A)
-	\to \subTy{A}{\phi(x)}{z\equiv\rcon \mapsto u}
+	\to \subTyImpl{A}{\phi(x)}{(w~\rcon)}
 \]
 The formal syntax and typing of \hcompLong{} is straightforward
 (\cref{fig:syntax-hcomp,fig:typing-hcomp}).
@@ -1184,7 +1184,25 @@ The desired property of \textsf{forward} is the following definitional equality:
 \[\forall u,	\textsf{forward}_A^\rcon(u)\equiv u\]
 \end{prop}
 
-Also, \textsf{comp} is just heterogeneous composition.
+\begin{terminology}
+A type former is called \textit{fibrant} if it supports Kan operations
+(i.e. have coercion rules and supports homogeneous composition).
+\end{terminology}
+\begin{example}
+Fibrant type formers: $\Pi$-types, $\Sigma$-types, $\UU$,
+generalized path types, (higher) inductive types.
+
+Non-fibrant type formers\footnote{In the type theory of the Arend language,
+the interval type \textit{is} fibrant, but they do not have the notion of
+homogeneous composition or coercion rules. Instead,
+they have a coercion operator with regularity and the $\beta$-law of univalence.}:
+$\II$, $\Partial\disj A$, $\subTyImpl A \disj u$.
+\end{example}
+\begin{terminology}
+Non-fibrant types are sometimes known as \textit{pretypes}.
+A type theory that combines pretypes and fibrant types is known as
+\textit{2-level type theory}.
+\end{terminology}
 
 \section{Suggestions for further reading}\label{sec:read}
 There are several constructs in \CTT{} that are not covered in this tutorial:
@@ -1218,6 +1236,11 @@ There are several constructs in \CTT{} that are not covered in this tutorial:
 	Pattern matching on higher inductive types is discussed in~\cite{CubicalAgda}.
 \item[Guardedness] in cubical type theory is discussed in~\cite{GCTT,GHIT}. It is useful to
 	integrate coinductive types into cubical type theory.
+\item[Regularity] is the $\beta$-law of Martin-L\"of's identity type. It is difficult to
+  support this rule in \CTT, see~\cite[\S 3.4]{CAThesis}. This seems to be the \textit{only}
+	remaining problem of interpreting homotopy type theory using \CTT.
+	Note that we have already proved this rule propositionally (\cref{lem:transpFill}),
+	but Martin-L\"of type theory and homotopy type theory assumes the judgmental version of this rule.
 \end{description}
 
 The source code of the \GuestName{} project is available at
