@@ -68,7 +68,7 @@ Consider path concatenation and symmetry in \CTT{}:
 \concat&:(p:a=b)\to(q:b=c)\to{a=c}\\
 \sym&:(p:a=b)\to{b=a}
 \end{align*}
-Define both using \hcomp{} on the following squares,
+Define both using \hcompLong{} on the following squares,
 preferably in a cubical programming language:
 % https://q.uiver.app/?q=WzAsOCxbMCwwLCJhIl0sWzEsMCwiYyJdLFswLDEsImEiXSxbMSwxLCJiIl0sWzIsMSwiYSJdLFsyLDAsImIiXSxbMywxLCJhIl0sWzMsMCwiYSJdLFswLDEsIlxcY29uY2F0KHAsIHEpIiwwLHsic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZGFzaGVkIn19fV0sWzIsMCwiIiwwLHsibGV2ZWwiOjIsInN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMiwzLCJwIiwyXSxbMywxLCJxIiwyXSxbNCw1LCJwIl0sWzQsNiwiIiwyLHsibGV2ZWwiOjIsInN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNiw3LCIiLDIseyJsZXZlbCI6Miwic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs1LDcsIlxcc3ltKHApIiwwLHsic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoiZGFzaGVkIn19fV1d
 \[\begin{tikzcd}
@@ -1059,6 +1059,10 @@ of an $n$-cube \textit{without} the top face (also known as an \textit{open box}
 and constructs the missing top face. In other words, composition asserts that any
 open box are \textit{closed} (i.e.~the top face is, in fact, filled).
 
+The intuition behind the composition operation is like ``any cube
+that \textit{makes cubical sense} has a filling'', which gives \CTT{} a lot of terms
+that we desire but cannot construct using other term formers.
+
 There are two versions of composition: \textit{homogeneous composition} (hereafter as \hcompLong) and
 \textit{heterogeneous composition}. The former requires that all the given faces
 are homogeneous (\cref{defn:homo-path}), while the latter does not have this restriction.
@@ -1085,12 +1089,14 @@ which is of type $A$. Below is a demonstration with upside-down cubes:
 However, this is not convenient as we cannot easily tell which face is
 the missing one that we want to obtain. Hence we slightly reorganize the parameters.
 
-The practice in \CTT{} is to use the type $\II \to \Partial \disj A$ to represent the sides,
+The practice in \CTT{} is to use the type \fbox{$\II \to \Partial \disj A$} to represent the walls,
 and ask separately for the floor. This is because the floor is required
-while the sides are optional\footnote{This is a questionable design,
+while the walls are optional\footnote{This is a questionable design,
 speaking of evaluation performance.
 See \url{https://cse.umn.edu/cs/feature-stories/nullable-compositions-talk}}.
-where the parameter is the ``direction of composition''. For example, the above composition problem
+where the parameter is the ``direction of composition'',
+which is used to orient the walls (using the idea in~\cref{rem:sq-ori}).
+For example, the above composition problem
 is decomposed as (pictures are still upside-down):
 \carloCTikZ{
 \carloXyz
@@ -1099,7 +1105,18 @@ is decomposed as (pictures are still upside-down):
 \shiftTikZ{2,0}{\refcube{PartialBot}
 \node (text) at (0, 2) {Floor} ;}
 }
-Note that $\disj$ in this case is $(z\equiv\rcon)$.
+Note that $\disj$ in this case is $(z\equiv\rcon)$,
+and the corresponding terms should be something like the following,
+where \fbox{$x:\II;z\equiv \rcon \vdash u:A$}:
+\[
+	\lam x \lrbbar{z\equiv\rcon \mapsto u} :
+	\II \to \Partial{z\equiv\rcon} A
+\]
+Then, \hcompLong{} should give us the following:
+\[
+\hcomp{A}{\lam x \lrbbar{z\equiv\rcon \mapsto u}}
+: \subTy{A}{z\equiv\rcon}{z\equiv\rcon \mapsto u}
+\]
 
 The reduction of \hcompLong{} on universes is discussed in~\cref{sec:read}.
 
@@ -1111,7 +1128,7 @@ There are several constructs in \CTT{} that are not covered in this tutorial:
 	where $i$ and $j$ are both variables) is added. The diagonal cofibration implies
 	an extensional equality on $\II$.
 \item[Glue type] is a type former (with an introduction and elimination rule)
-  that is similar to \hcompLong{} on the universe, but with the sides replaced
+  that is similar to \hcompLong{} on the universe, but with the walls replaced
 	with equivalences (functions with contractible fibers).
 	In fact, \hcompLong{} on universes is reduced to Glue with trivial equivalences.
 	Glue type can be used to prove univalence, and is discussed in~\cite{CCHM,ABCFHL,HCompPDF}.
