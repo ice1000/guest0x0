@@ -1107,18 +1107,18 @@ is decomposed as (pictures are still upside-down):
 \shiftTikZ{2,0}{\refcube{PartialBot}
 \node (text) at (0, 2) {Floor} ;}
 }
-Note that $\disj$ in this case is $(z\equiv\rcon)$,
+Note that $\disj$ in this case is $(z=\rcon)$,
 and the corresponding terms should look like the following,
-where \fbox{$x:\II;z\equiv \rcon \vdash u:A$}:
+where \fbox{$x:\II;z= \rcon \vdash u:A$}:
 \[
-	\lam x \lrbbar{z\equiv\rcon \mapsto u} :
-	\II \to \Partial{z\equiv\rcon} A
+	\lam x \lrbbar{z=\rcon \mapsto u} :
+	\II \to \Partial{z=\rcon} A
 \]
 Then, \hcompLong{} should give us the following,
 where $u[\rcon/x]$ is just the top face of the wall $u$:
 \[
-\hcomp{A}{\lam x \lrbbar{z\equiv\rcon \mapsto u}}
-: \subTy{A}{z\equiv\rcon}{z\equiv\rcon \mapsto u[\rcon/x]}
+\hcomp{A}{\lam x \lrbbar{z=\rcon \mapsto u}}
+: \subTy{A}{z=\rcon}{z=\rcon \mapsto u[\rcon/x]}
 \]
 \carloCTikZ{
 \carloXyz
