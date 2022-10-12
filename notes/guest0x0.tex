@@ -687,7 +687,7 @@ Hence the typing rules as in~\cref{fig:typing-subtype}.
 \inferrule{\Hint{\PGvdash \isType A} \\
 \PGvdash \lrbbar{\overline\face}:\Partial{\disj}A}
 {\PGvdash\isTypeBox{\subTy{A}{\disj}{\overline\face}}}\and
-\inferrule{\forall i.(\Psi;\Gamma,\conj_i\vdash u\equiv v_i)}
+\inferrule{\forall i.(\PGfvdash{\conj_i} u\equiv v_i)}
 {\PGvdash\inS\disj u:\subTy{A}{\disj}{\overline{\conj_i\mapsto v_i}}}\and
 \inferrule{\PGvdash u:\subTy{A}{\disj}{\overline\face}}
 {\PGvdash\outS\disj u:A}
@@ -710,7 +710,7 @@ Hence the computation rules as in~\cref{fig:compute-subtype}.
 \inferrule{\PGvdash u:\subTy{A}{\disj}{\overline\face}}
 {\PGvdash \inS{\disj}{\outS{\disj} u}\equiv u:\subTy{A}{\disj}{\overline\face}}\and
 \inferrule{\PGvdash u:\subTy{A}{\disj}{\overline{\conj_i\mapsto v_i}}}
-{\forall i.(\Psi;\Gamma,\conj_i\vdash \outS{\disj}u\equiv v_i:A)}
+{\forall i.(\PGfvdash{\conj_i} \outS{\disj}u\equiv v_i:A)}
 \end{mathpar}
 \caption{Typing rules of cubical subtypes, computation part}\label{fig:compute-subtype}
 \end{figure}
@@ -900,7 +900,7 @@ specified by $\disj$ are constant.
 \end{example}
 \begin{remark}
 Note that the judgment in~\cref{defn:freeze} is not equivalent to:
-\[\Psi;\Gamma,\disj\vdash \isTypeBox{A~\lcon\equiv A~\rcon}\]
+\[\PGfvdash\disj \isTypeBox{A~\lcon\equiv A~\rcon}\]
 Because a nontrivial loop (hence the two sides are the same,
 but it's distinguishable from the identity path, hence not constant)
 satisfies the latter condition.
@@ -995,7 +995,7 @@ This approach does not have the cubical subtype boilerplate, which leads to clea
 \Psi\vdash\disj \\ \PiGvdash{x}\isTypeBox{A~x\equiv A~\lcon}}{
 \PGvdash\coe{A}{\disj}:A~\lcon \to A~\rcon}\and
 \inferrule{\PGvdash A:\II\to\UU \\ \Psi\vdash\disj}{
-\Psi;\Gamma,\disj\vdash\fbox{$\coe{A}{\disj}\equiv \lam x x$}:
+\PGfvdash\disj\fbox{$\coe{A}{\disj}\equiv \lam x x$}:
 A~\lcon \to A~\lcon\footnotemark}
 \end{mathpar}
 \caption{Alternative way to type the coercion rule}
@@ -1146,16 +1146,45 @@ The formal syntax and typing of \hcompLong{} is straightforward
 \begin{figure}[h!]
 \begin{mathpar}
 \inferrule{\PGvdash A:\UU \\
-\Psi\vdash\overline{\conj_i} \\
-}{
-\coe{A}{\overline{\conj_i}}:(u:A~\lcon) \to
- \subTy{(A~\rcon)}{\overline{\conj_i}}{\overline{\conj_i\mapsto u}}}
+\PGvdash{\disj} \\
+\PGvdash u : \II \to \Partial{\disj} A}{
+\hcomp{A}{u}:\subTyImpl{A}{\disj}{(u~\rcon)}}
 \end{mathpar}
 \caption{Typing of the homogeneous composition}
 \label{fig:typing-hcomp}
 \end{figure}
 
-The reduction of \hcompLong{} on universes is discussed in~\cref{sec:read}.
+The reduction of \hcompLong{} is very simple:
+\begin{enumerate}
+\item For types with an introduction rule, it is structural over the rules
+(see rules in~\cite{HCompPDF}).
+\item For higher inductive types, it is canonical.
+\item For universes, see~\cref{sec:read}.
+\end{enumerate}
+
+We can finally define the coercion rule of the generalized path type.
+First, we introduce some operations, like in~\cite{HCompPDF}:
+
+\begin{defn}
+The heterogeneous composition is defined as:
+\begin{mathpar}
+\inferrule{\PGvdash A:\II\to\UU \\
+\PGvdash r : \II}
+{\textsf{forward}_A^r := \coe{\lam x {A~(x\lor r)}}{r=\rcon}
+: A~r \to A~\rcon} \and
+\inferrule{\PGvdash A:\II\to\UU \\
+\PGvdash u : (x:\II) \to \Partial{\disj} {(A~x)}}
+{\textsf{comp}_A}
+\end{mathpar}
+\end{defn}
+
+The desired property of \textsf{forward} is the following definitional equality:
+
+\begin{prop}
+\[\forall u,	\textsf{forward}_A^\rcon(u)\equiv u\]
+\end{prop}
+
+Also, \textsf{comp} is just heterogeneous composition.
 
 \section{Suggestions for further reading}\label{sec:read}
 There are several constructs in \CTT{} that are not covered in this tutorial:

@@ -18,7 +18,8 @@
 \newcommand{\extTy}[3]{\textsf{Ext}_{#1}~{#2}~\lrbbar{#3}}
 \newcommand{\papp}[2]{{#1}~@~{#2}}
 \newcommand{\SubTy}[4]{\textsf{Sub}_{#2}~{#1}~\LRbbar{\begin{array}{#3}#4\end{array}}}
-\newcommand{\subTy}[3]{\textsf{Sub}_{#2}~{#1}~\lrbbar{#3}}
+\newcommand{\subTyImpl}[3]{\textsf{Sub}_{#2}~{#1}~{#3}}
+\newcommand{\subTy}[3]{\subTyImpl{#1}{#2}{\lrbbar{#3}}}
 \newcommand{\inS}[2]{\textsf{inS}_{#1}(#2)}
 \newcommand{\outSLong}{\textsf{outS}}
 \newcommand{\outS}[2]{\outSLong_{#1}(#2)}
