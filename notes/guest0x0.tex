@@ -1153,7 +1153,7 @@ The formal syntax and typing of \hcompLong{} is straightforward
 \PGvdash{\disj} \\\\
 \PGvdash u : A\\
 \PGvdash w : \II \to \Partial{\disj} A\\
-\PGfvdash\disj \lrbbar u\equiv w~\lcon}{
+\PGfvdash\disj \lrbbar u\equiv w~\lcon : A}{
 \hcomp A u w:\subTyImpl{A}{\disj}{(u~\rcon)}}
 \end{mathpar}
 \caption{Typing of the homogeneous composition}
@@ -1162,6 +1162,8 @@ The formal syntax and typing of \hcompLong{} is straightforward
 
 The reduction of \hcompLong{} is very simple:
 \begin{enumerate}
+\item In case walls are constant, it reduces to the walls. In other words,
+\[\hcomp{A}{u}{\lrbbar{w}}\mapsto w\]
 \item For types with an introduction rule, it is structural over the rules
 (see rules in~\cite{HCompPDF}).
 \item For higher inductive types, it is canonical.
@@ -1171,7 +1173,7 @@ The reduction of \hcompLong{} is very simple:
 We can finally define the coercion rule of the generalized path type.
 First, we introduce some operations, like in~\cite{HCompPDF}:
 
-\begin{defn}
+\begin{defn}\label{defn:comp}
 The heterogeneous composition is defined as:
 \begin{mathpar}
 \inferrule{\PGvdash A:\II\to\UU \\
@@ -1179,23 +1181,35 @@ The heterogeneous composition is defined as:
 {\textsf{forward}_A^r := \coe{\lam x {A~(x\lor r)}}{r=\rcon}
 : A~r \to A~\rcon} \and
 \inferrule{\PGvdash A:\II\to\UU \\
-\PGvdash w : (x:\II) \to \Partial{\disj} {(A~x)}}
-{\textsf{comp}_A(u):=
-\hcomp{A~\rcon}{}
+\PGvdash u: A~\lcon\\\\
+\PGvdash w : (x:\II) \to \Partial{\disj} {(A~x)}\\
+\PGfvdash\disj \lrbbar u\equiv w~\lcon : A~\lcon}
+{\textsf{comp}_A(u, w):=
+\hcomp{A~\rcon}
+{\textsf{forward}_A^\lcon(u)}
+{\lam x {\textsf{forward}_{\Partial\disj {(A~x)}}^x(w~x)}}
 :{A~\rcon}}
 \end{mathpar}
+The idea is that we \textit{forward} the heterogeneous composition problem
+(where the partial element has type $A:\II\to\UU$) to a homogeneous one of type $A~\rcon$,
+and the forward operation is implemented as ``coercion to the right''.
 \end{defn}
 
 The desired property of \textsf{forward} is the following definitional equality:
-
-\begin{prop}
-For any well-typed $u$ and $A$,
 \[\textsf{forward}_A^\rcon(u)\equiv u\]
-\end{prop}
+
+Note that in~\cref{defn:comp}, we have assumed \textsf{forward} to work for partial elements,
+which indirectly assumes \coeLong{} on partial elements, which does not exist.
+But it really is just structurally applying \coeLong{} to the faces,
+and writing the really formal definition would make it less readable.
 
 \begin{terminology}
-A type former is called \textit{fibrant} if it supports Kan operations
+A type former is said to be \textit{fibrant} if it supports Kan operations
 (i.e. have coercion rules and supports homogeneous composition).
+
+Non-fibrant types are sometimes known as \textit{pretypes}.
+A type theory that combines pretypes and fibrant types is known as
+\textit{2-level type theory}.
 \end{terminology}
 \begin{example}
 Fibrant type formers: $\Pi$-types, $\Sigma$-types, $\UU$,
@@ -1207,11 +1221,6 @@ homogeneous composition or coercion rules. Instead,
 they have a coercion operator with regularity and the $\beta$-law of univalence.}:
 $\II$, $\Partial\disj A$, $\subTyImpl A \disj u$.
 \end{example}
-\begin{terminology}
-Non-fibrant types are sometimes known as \textit{pretypes}.
-A type theory that combines pretypes and fibrant types is known as
-\textit{2-level type theory}.
-\end{terminology}
 
 \section{Suggestions for further reading}\label{sec:read}
 There are several constructs in \CTT{} that are not covered in this tutorial:
