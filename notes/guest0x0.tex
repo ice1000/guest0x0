@@ -1087,7 +1087,9 @@ which is of type $A$. Below is a demonstration with upside-down cubes:
 \shiftTikZ{2,0}{\refcube{Comped}
 \node (text) at (0, 2) {Composition} ;}
 }
-However, this is not convenient as we cannot easily tell which face is
+Note that \hcompLong{} works for all $n$-cubes, not just 3-dimensional ones.
+
+This syntax is not convenient as we cannot easily tell which face is
 the missing one that we want to obtain. Hence we slightly reorganize the parameters.
 
 The practice in \CTT{} is to use the type \fbox{$\II \to \Partial \disj A$} to represent the walls,
@@ -1099,6 +1101,8 @@ See the ICMS talk, which proposed a ``7-levels type theory'' solution:
 \url{https://cse.umn.edu/cs/feature-stories/nullable-compositions-talk}}.
 where the parameter is the ``direction of composition'',
 which is used to orient the walls (using the idea in~\cref{rem:sq-ori}).
+This decomposition requires an additional check that makes sure
+the walls and the floor \textit{agree} on the intersection.
 For example, the above composition problem
 is decomposed as (pictures are still upside-down):
 \carloCTikZ{
@@ -1138,7 +1142,7 @@ The formal syntax and typing of \hcompLong{} is straightforward
 (\cref{fig:syntax-hcomp,fig:typing-hcomp}).
 
 \begin{figure}[h!]
-\[u,A::= \hcomp A u \mid \cdots~\text{(see~\cref{fig:syntax-transp})}\]
+\[u,A::= \hcomp A u v \mid \cdots~\text{(see~\cref{fig:syntax-transp})}\]
 \caption{Syntax of homogeneous composition}
 \label{fig:syntax-hcomp}
 \end{figure}
@@ -1146,9 +1150,11 @@ The formal syntax and typing of \hcompLong{} is straightforward
 \begin{figure}[h!]
 \begin{mathpar}
 \inferrule{\PGvdash A:\UU \\
-\PGvdash{\disj} \\
-\PGvdash u : \II \to \Partial{\disj} A}{
-\hcomp{A}{u}:\subTyImpl{A}{\disj}{(u~\rcon)}}
+\PGvdash{\disj} \\\\
+\PGvdash u : A\\
+\PGvdash w : \II \to \Partial{\disj} A\\
+\PGfvdash\disj \lrbbar u\equiv w~\lcon}{
+\hcomp A u w:\subTyImpl{A}{\disj}{(u~\rcon)}}
 \end{mathpar}
 \caption{Typing of the homogeneous composition}
 \label{fig:typing-hcomp}
@@ -1173,15 +1179,18 @@ The heterogeneous composition is defined as:
 {\textsf{forward}_A^r := \coe{\lam x {A~(x\lor r)}}{r=\rcon}
 : A~r \to A~\rcon} \and
 \inferrule{\PGvdash A:\II\to\UU \\
-\PGvdash u : (x:\II) \to \Partial{\disj} {(A~x)}}
-{\textsf{comp}_A}
+\PGvdash w : (x:\II) \to \Partial{\disj} {(A~x)}}
+{\textsf{comp}_A(u):=
+\hcomp{A~\rcon}{}
+:{A~\rcon}}
 \end{mathpar}
 \end{defn}
 
 The desired property of \textsf{forward} is the following definitional equality:
 
 \begin{prop}
-\[\forall u,	\textsf{forward}_A^\rcon(u)\equiv u\]
+For any well-typed $u$ and $A$,
+\[\textsf{forward}_A^\rcon(u)\equiv u\]
 \end{prop}
 
 \begin{terminology}
