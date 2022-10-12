@@ -1292,6 +1292,16 @@ There are several constructs in \CTT{} that are not covered in this tutorial:
 	remaining problem of interpreting homotopy type theory using \CTT.
 	Note that we have already proved this rule propositionally (\cref{lem:transpFill}),
 	but Martin-L\"of type theory and homotopy type theory assumes the judgmental version of this rule.
+\item[Universe of $\II$] we have not discussed in what universe does $\II$ belong to.
+  This is a non-trivial question, see Agda issue tracker
+	\href{https://github.com/agda/agda/pull/5439}{\#5439}\footnote{\url{https://github.com/agda/agda/pull/5439}}.
+\item[Propositional resizing] is a property of universes of propositions.
+  It corresponds to the ``completeness'' of the universe: for every type $A$
+	that we can show it's a proposition,
+	there is supposed to be $[A] : \textsf{Prop}$ (please don't take the notation seriously)
+	that is logically equivalent to $A$.
+	It can drastically increase proof-theoretic strength of \CTT{} when the universe of proposition
+	is impredicative.
 \end{description}
 
 The source code of the \GuestName{} project is available at
