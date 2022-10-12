@@ -1203,13 +1203,46 @@ which indirectly assumes \coeLong{} on partial elements, which does not exist.
 But it really is just structurally applying \coeLong{} to the faces,
 and writing the really formal definition would make it less readable.
 
+% End of the story!
+Then, we define the coercion rule of 1-dimensional generalized path types:
+\[
+\coe{\lam y{\extTy{x}{A}{\overline{\conj_i\mapsto u_i}}}}{\bigvee\nolimits_j \conj_j}(p)
+:=
+\plam{x}{\textsf{comp}_{\lam x A}(\papp p x, \lam y{\lrbbar{
+	\overline{\conj_j \mapsto \papp p x},
+	\overline{\conj_i \mapsto u_i}}})}
+\]
+The idea behind the definition, which should be helpful for readers to generalize it
+to higher dimensions, lies in the partial element being constructed:
+\begin{enumerate}
+\item The coercion needs to be frozen on $\bigvee_j \conj_j$, so we add these faces
+	to the walls and let them reduce to the floor $\papp p x$.
+\item The faces of the path need to be preserved, so we add them to the walls.
+\end{enumerate}
+That's it! To generalize to higher dimensions, we need to answer the following questions,
+which are left to the readers:
+\begin{enumerate}
+\item What is the direction of composition?
+\item What is the input and output type and in what scope are they defined?
+\item How to generalize forwarding to higher dimensions?
+\item Do we need to generalized homogeneous composition to higher dimensions?
+  The answer is no, but why?
+\item How to generalize heterogeneous composition to higher dimensions?
+  For sure we will be working with $A:\II^n\to \UU$, but how does the type of $w$ change?
+\end{enumerate}
+Make sure to validate your definition by specializing to 1 or 2-dimensional cases
+and check the results.
+
 \begin{terminology}
 A type former is said to be \textit{fibrant} if it supports Kan operations
 (i.e. have coercion rules and supports homogeneous composition).
 
 Non-fibrant types are sometimes known as \textit{pretypes}.
 A type theory that combines pretypes and fibrant types is known as
-\textit{2-level type theory}.
+\textit{2-level type theory}~\cite{2LTT}.
+
+We tend to work with a strict (exact) equality type on pretypes,
+while for fibrant types we use path equality.
 \end{terminology}
 \begin{example}
 Fibrant type formers: $\Pi$-types, $\Sigma$-types, $\UU$,
