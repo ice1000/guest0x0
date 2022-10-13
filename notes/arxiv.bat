@@ -1,0 +1,1 @@
+zip latex *.tex main.bbl
