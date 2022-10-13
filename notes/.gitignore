@@ -1,6 +1,7 @@
 *.cmd
 *.sh
 !cubes.bin
+latex.zip
 
 ## Agda
 *.agdai

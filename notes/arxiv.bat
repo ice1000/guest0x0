@@ -1,1 +1,1 @@
-zip latex *.tex main.bbl
+zip latex *.tex main.bbl *.sty
