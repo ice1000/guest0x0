@@ -994,7 +994,7 @@ This approach does not have the cubical subtype boilerplate, which leads to clea
 \begin{mathpar}
 \inferrule{\PGvdash A:\II\to\UU \\
 \Psi\vdash\disj \\
-\Psi,x:\II;\Gamma,\overline{\conj_i}\isTypeBox{A~x\equiv A~\lcon}}{
+\Psi,x:\II;\Gamma,\overline{\conj_i}\vdash\isTypeBox{A~x\equiv A~\lcon}}{
 \PGvdash\coe{A}{\disj}:A~\lcon \to A~\rcon}\and
 \inferrule{\PGvdash A:\II\to\UU \\ \Psi\vdash\disj}{
 \PGfvdash\disj\fbox{$\coe{A}{\disj}\equiv \lam x x$}:
