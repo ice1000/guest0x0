@@ -976,7 +976,8 @@ as in~\cref{fig:typing-transp}.
 \begin{figure}[h!]
 \begin{mathpar}
 \inferrule{\PGvdash A:\II\to\UU \\
-\Psi\vdash\overline{\conj_i} \\ \PiGvdash{x}\isTypeBox{A~x\equiv A~\lcon}}{
+\Psi\vdash\overline{\conj_i} \\
+\Psi,x:\II;\Gamma,\overline{\conj_i}\vdash \isTypeBox{A~x\equiv A~\lcon}}{
 \coe{A}{\overline{\conj_i}}:(u:A~\lcon) \to
  \subTy{(A~\rcon)}{\overline{\conj_i}}{\overline{\conj_i\mapsto u}}}
 \end{mathpar}
@@ -992,7 +993,8 @@ This approach does not have the cubical subtype boilerplate, which leads to clea
 \begin{figure}[h!]
 \begin{mathpar}
 \inferrule{\PGvdash A:\II\to\UU \\
-\Psi\vdash\disj \\ \PiGvdash{x}\isTypeBox{A~x\equiv A~\lcon}}{
+\Psi\vdash\disj \\
+\Psi,x:\II;\Gamma,\overline{\conj_i}\isTypeBox{A~x\equiv A~\lcon}}{
 \PGvdash\coe{A}{\disj}:A~\lcon \to A~\rcon}\and
 \inferrule{\PGvdash A:\II\to\UU \\ \Psi\vdash\disj}{
 \PGfvdash\disj\fbox{$\coe{A}{\disj}\equiv \lam x x$}:
