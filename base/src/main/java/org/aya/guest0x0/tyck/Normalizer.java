@@ -135,11 +135,11 @@ public record Normalizer(
   }
 
   public @NotNull Partial<Term> partial(@NotNull Partial<Term> partial) {
-    return partial.flatMap(this::term);
+    return GuestRestrHandler.INSTANCE.mapPartial(partial, this::term);
   }
 
   public Restr<Term> restr(@NotNull Restr<Term> restr) {
-    return restr.map(this::term).normalize();
+    return GuestRestrHandler.INSTANCE.normalizeRestr(restr.map(this::term));
   }
 
   private Term transp(LocalVar i, Term cover, Term.Cof cof) {

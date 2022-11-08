@@ -9,8 +9,8 @@ dependencyResolutionManagement {
 
 include(
   "cubical",
-  // "base",
-  // "cli",
+  "base",
+  "cli",
   "cube-visualizer",
   "cube-compiler",
 )

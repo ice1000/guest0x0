@@ -101,6 +101,13 @@ public interface RestrSimplifier<T extends Restr.TermLike<T>, LocalVar> {
     return false;
   }
 
+  default @NotNull Partial<T> mapPartial(@NotNull Partial<T> par, @NotNull UnaryOperator<T> mapper) {
+    return switch (par) {
+      case Partial.Split<T> p -> mapSplit(p, mapper);
+      case Partial.Const<T> c -> new Partial.Const<>(mapper.apply(c.u()));
+    };
+  }
+
   default @NotNull Partial<T> mapSplit(@NotNull Partial.Split<T> split, @NotNull UnaryOperator<T> mapper) {
     var cl = MutableArrayList.<Restr.Side<T>>create();
     for (var clause : split.clauses()) {
@@ -144,16 +151,22 @@ public interface RestrSimplifier<T extends Restr.TermLike<T>, LocalVar> {
    * Normalizes a "restriction" which looks like "f1 \/ f2 \/ ..." where
    * f1, f2 are like "a /\ b /\ ...".
    */
-  default @NotNull Restr<T> normalizeRestr(Restr.Disj<T> disj) {
+  default @NotNull Restr<T> normalizeDisj(Restr.Disj<T> disj) {
     var orz = MutableArrayList.<Restr.Conj<T>>create(disj.orz().size());
     // This is a sequence of "or"s, so if any cof is true, the whole thing is true
     for (var cof : disj.orz())
-      if (normalizeCof(cof, orz, Function.identity()))
+      if (normalizeCof(cof, orz, UnaryOperator.identity()))
         return new Restr.Const<>(true);
     if (orz.isEmpty()) return new Restr.Const<>(false);
     return new Restr.Disj<>(orz.toImmutableArray());
   }
 
+  default @NotNull Restr<T> normalizeRestr(Restr<T> disj) {
+    return switch (disj) {
+      case Restr.Const<T> c -> c;
+      case Restr.Disj<T> d -> normalizeDisj(d);
+    };
+  }
 
   /** @see RestrSimplifier#isOne(Restr.TermLike) */
   @ApiStatus.Internal default Restr.Disj<T> embed(T e) {
@@ -162,6 +175,6 @@ public interface RestrSimplifier<T extends Restr.TermLike<T>, LocalVar> {
   }
 
   default Restr<T> isOne(T e) {
-    return normalizeRestr(embed(e));
+    return normalizeDisj(embed(e));
   }
 }

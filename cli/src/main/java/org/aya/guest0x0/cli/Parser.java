@@ -11,7 +11,6 @@ import org.aya.guest0x0.parser.Guest0x0Parser;
 import org.aya.guest0x0.syntax.*;
 import org.aya.guest0x0.util.LocalVar;
 import org.aya.guest0x0.util.Param;
-import org.aya.repl.antlr.AntlrUtil;
 import org.aya.util.error.SourceFile;
 import org.aya.util.error.SourcePos;
 import org.aya.util.error.WithPos;
@@ -20,6 +19,55 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public record Parser(@NotNull SourceFile source) {
+  static @NotNull SourcePos sourcePosOf(TerminalNode node, SourceFile sourceFile) {
+    var token = node.getSymbol();
+    var line = token.getLine();
+    return new SourcePos(
+      sourceFile,
+      token.getStartIndex(),
+      token.getStopIndex(),
+      line,
+      token.getCharPositionInLine(),
+      line,
+      token.getCharPositionInLine() + token.getText().length() - 1
+    );
+  }
+
+  static @NotNull SourcePos sourcePosOf(ParserRuleContext ctx, SourceFile sourceFile) {
+    var start = ctx.getStart();
+    var end = ctx.getStop();
+    return new SourcePos(
+      sourceFile,
+      start.getStartIndex(),
+      end.getStopIndex(),
+      start.getLine(),
+      start.getCharPositionInLine(),
+      end.getLine(),
+      end.getCharPositionInLine() + end.getText().length() - 1
+    );
+  }
+
+  static @NotNull SourcePos sourcePosForSubExpr(
+    @NotNull SourceFile sourceFile,
+    @NotNull SeqView<SourcePos> params,
+    @NotNull SourcePos bodyPos
+  ) {
+    var restParamSourcePos = params.fold(SourcePos.NONE, (acc, it) -> {
+      if (acc == SourcePos.NONE) return it;
+      return new SourcePos(sourceFile, acc.tokenStartIndex(), it.tokenEndIndex(),
+        acc.startLine(), acc.startColumn(), it.endLine(), it.endColumn());
+    });
+    return new SourcePos(
+      sourceFile,
+      restParamSourcePos.tokenStartIndex(),
+      bodyPos.tokenEndIndex(),
+      restParamSourcePos.startLine(),
+      restParamSourcePos.startColumn(),
+      bodyPos.endLine(),
+      bodyPos.endColumn()
+    );
+  }
+
   public @NotNull Expr expr(@NotNull Guest0x0Parser.ExprContext expr) {
     return switch (expr) {
       case Guest0x0Parser.ParenContext paren -> expr(paren.expr());
@@ -34,14 +82,15 @@ public record Parser(@NotNull SourceFile source) {
         else /*if (trebor.INTERVAL() != null)*/ yield new Expr.PrimTy(pos, Keyword.I);
       }
       case Guest0x0Parser.LamContext lam -> buildLam(sourcePosOf(lam), Seq.wrapJava(lam.ID()).view()
-        .map(id -> new WithPos<>(AntlrUtil.sourcePosOf(id, source), new LocalVar(id.getText()))), expr(lam.expr()));
+        .map(id -> new WithPos<>(sourcePosOf(id, source), new LocalVar(id.getText()))), expr(lam.expr()));
       case Guest0x0Parser.RefContext ref -> new Expr.Unresolved(sourcePosOf(ref), ref.ID().getText());
       case Guest0x0Parser.PiContext pi -> buildDT(true, sourcePosOf(pi), param(pi.param()), expr(pi.expr()));
       case Guest0x0Parser.SigContext si -> buildDT(false, sourcePosOf(si), param(si.param()), expr(si.expr()));
       case Guest0x0Parser.SimpFunContext pi -> new Expr.DT(true, sourcePosOf(pi), param(pi.expr(0)), expr(pi.expr(1)));
       case Guest0x0Parser.SimpTupContext si -> new Expr.DT(false, sourcePosOf(si), param(si.expr(0)), expr(si.expr(1)));
       case Guest0x0Parser.ILitContext il -> iPat(il.iPat());
-      case Guest0x0Parser.TransContext tp -> new Expr.Transp(sourcePosOf(tp), expr(tp.expr()), expr(tp.wrappedExpr().expr()));
+      case Guest0x0Parser.TransContext tp ->
+        new Expr.Transp(sourcePosOf(tp), expr(tp.expr()), expr(tp.wrappedExpr().expr()));
       case Guest0x0Parser.RestrContext restr -> new Expr.Cof(sourcePosOf(restr), restr(restr));
       case Guest0x0Parser.InvContext in -> new Expr.Mula(sourcePosOf(in), new Formula.Inv<>(expr(in.expr())));
       case Guest0x0Parser.IConnContext ic -> new Expr.Mula(sourcePosOf(ic),
@@ -52,7 +101,8 @@ public record Parser(@NotNull SourceFile source) {
       case Guest0x0Parser.SubContext sub -> new Expr.Sub(sourcePosOf(sub), expr(sub.expr()), partial(sub.partial()));
       case Guest0x0Parser.InSContext inS -> new Expr.SubEl(sourcePosOf(inS), expr(inS.expr()), true);
       case Guest0x0Parser.OutSContext outS -> new Expr.SubEl(sourcePosOf(outS), expr(outS.expr()), false);
-      case Guest0x0Parser.PartTyContext par -> new Expr.PartTy(sourcePosOf(par), expr(par.expr()), expr(par.wrappedExpr().expr()));
+      case Guest0x0Parser.PartTyContext par ->
+        new Expr.PartTy(sourcePosOf(par), expr(par.expr()), expr(par.wrappedExpr().expr()));
       case Guest0x0Parser.PartElContext par -> partial(par.partial());
       case Guest0x0Parser.HcompContext hcomp -> new Expr.Hcomp(sourcePosOf(hcomp),
         new CompData<>(expr(hcomp.wrappedExpr().expr()), expr(hcomp.expr(0)), expr(hcomp.expr(1)), expr(hcomp.expr(2))));
@@ -116,14 +166,14 @@ public record Parser(@NotNull SourceFile source) {
     if (params.isEmpty()) return body;
     var drop = params.drop(1);
     return new Expr.DT(isPi, pos, params.first(), buildDT(isPi,
-      AntlrUtil.sourcePosForSubExpr(source, drop.map(x -> x.type().pos()), body.pos()), drop, body));
+      sourcePosForSubExpr(source, drop.map(x -> x.type().pos()), body.pos()), drop, body));
   }
 
   private Expr buildLam(SourcePos pos, SeqView<WithPos<LocalVar>> params, Expr body) {
     if (params.isEmpty()) return body;
     var drop = params.drop(1);
     return new Expr.Lam(pos, params.first().data(), buildLam(
-      AntlrUtil.sourcePosForSubExpr(source, drop.map(WithPos::sourcePos), body.pos()), drop, body));
+      sourcePosForSubExpr(source, drop.map(WithPos::sourcePos), body.pos()), drop, body));
   }
 
   private @NotNull Param<Expr> param(Guest0x0Parser.ExprContext paramExpr) {
@@ -137,6 +187,6 @@ public record Parser(@NotNull SourceFile source) {
   }
 
   private @NotNull SourcePos sourcePosOf(ParserRuleContext ctx) {
-    return AntlrUtil.sourcePosOf(ctx, source);
+    return sourcePosOf(ctx, source);
   }
 }
