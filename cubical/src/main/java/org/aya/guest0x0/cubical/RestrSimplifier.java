@@ -60,15 +60,12 @@ public interface RestrSimplifier<T extends Restr.TermLike<T>, LocalVar> {
     }
     var conn = localOrz.first();
     var lateDropped = localOrz.drop(1);
-    // a /\ b = 0 ==> a = 0 \/ b = 0
-    if (conn.isAnd()) collector.withCond(() -> combineRecursively(lateDropped, collector, combined),
-      new Restr.Cond<>(conn.l(), false),
-      new Restr.Cond<>(conn.r(), false)
-    );
-      // a \/ b = 1 ==> a = 1 \/ b = 1
-    else collector.withCond(() -> combineRecursively(lateDropped, collector, combined),
-      new Restr.Cond<>(conn.l(), true),
-      new Restr.Cond<>(conn.r(), true)
+    // isAnd:  a /\ b = 0 ==> a = 0 \/ b = 0
+    // !isAnd: a \/ b = 1 ==> a = 1 \/ b = 1
+    var isOne = !conn.isAnd();
+    collector.withCond(() -> combineRecursively(lateDropped, collector, combined),
+      new Restr.Cond<>(conn.l(), isOne),
+      new Restr.Cond<>(conn.r(), isOne)
     );
   }
 
