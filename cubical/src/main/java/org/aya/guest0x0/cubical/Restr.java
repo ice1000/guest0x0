@@ -19,7 +19,6 @@ import java.util.function.Function;
  */
 public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable {
   @NotNull SeqView<E> instView();
-  @NotNull Restr<E> normalize();
   interface TermLike<E extends TermLike<E>> {
     default @Nullable Formula<E> asFormula() {return null;}
 
@@ -41,10 +40,6 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
 
     @Override public @NotNull SeqView<E> instView() {
       return orz.view().flatMap(Conj::view);
-    }
-
-    @Override public @NotNull Restr<E> normalize() {
-      return CofThy.normalizeRestr(this);
     }
 
     @Override public @NotNull Restr.Disj<E> map(@NotNull Function<E, E> g) {
@@ -80,10 +75,6 @@ public sealed interface Restr<E extends Restr.TermLike<E>> extends Serializable 
   record Const<E extends TermLike<E>>(boolean isOne) implements Restr<E> {
     @Override public @NotNull SeqView<E> instView() {
       return SeqView.empty();
-    }
-
-    @Override public @NotNull Const<E> normalize() {
-      return this;
     }
 
     @Override public @NotNull Const<E> map(@NotNull Function<E, E> g) {

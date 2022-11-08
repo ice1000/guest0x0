@@ -2,14 +2,8 @@
 // Use of this source code is governed by the MIT license that can be found in the LICENSE.md file.
 package org.aya.guest0x0.cubical;
 
-import kala.collection.SeqView;
-import kala.collection.immutable.ImmutableSeq;
-import kala.collection.mutable.MutableArrayList;
-import kala.collection.mutable.MutableList;
-import kala.collection.mutable.MutableStack;
 import kala.control.Option;
 import org.aya.guest0x0.cubical.Restr.TermLike;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,50 +14,10 @@ import java.util.function.Predicate;
 /**
  * Operations on face restrictions (cofibrations in cartesian cubical type theory),
  * for normalization, simplification, satisfaction, etc.
+ *
+ * @see RestrSimplifier
  */
 public interface CofThy {
-  record CondCollector<T extends TermLike<T>>(
-    MutableStack<Restr.Cond<T>> conds
-  ) {
-    public Restr.Conj<T> toConj() {
-      return new Restr.Conj<>(conds.toImmutableArray());
-    }
-
-    public void withCond(@NotNull Restr.Cond<T> cond, @NotNull Runnable code) {
-      conds.push(cond);
-      code.run();
-      conds.pop();
-    }
-  }
-
-  /**
-   * I'm sorry, I'm just too bad at writing while loops.
-   * Add <code>localOrz</code> into <code>conds</code>, and push the results into <code>combined</code>.
-   */
-  static <T extends TermLike<T>> void combineRecursively(
-    @NotNull SeqView<Formula.Conn<T>> localOrz,
-    CondCollector<T> conds,
-    MutableList<Restr.Conj<T>> combined
-  ) {
-    if (localOrz.isEmpty()) {
-      combined.append(conds.toConj());
-      return;
-    }
-    var conn = localOrz.first();
-    var lateDropped = localOrz.drop(1);
-    if (conn.isAnd()) { // a /\ b = 0 ==> a = 0 \/ b = 0
-      conds.withCond(new Restr.Cond<>(conn.l(), false),
-        () -> combineRecursively(lateDropped, conds, combined));
-      conds.withCond(new Restr.Cond<>(conn.r(), false),
-        () -> combineRecursively(lateDropped, conds, combined));
-    } else { // a \/ b = 1 ==> a = 1 \/ b = 1
-      conds.withCond(new Restr.Cond<>(conn.l(), true),
-        () -> combineRecursively(lateDropped, conds, combined));
-      conds.withCond(new Restr.Cond<>(conn.r(), true),
-        () -> combineRecursively(lateDropped, conds, combined));
-    }
-  }
-
   @FunctionalInterface
   interface RestrNormalizer<E extends TermLike<E>, V, Subst extends SubstObj<E, V, Subst>>
     extends BiFunction<Subst, Restr<E>, Restr<E>> {
@@ -73,16 +27,6 @@ public interface CofThy {
   propExt(Subst subst, Restr<E> ll, Restr<E> rr, RestrNormalizer<E, V, Subst> normalize) {
     return conv(ll, subst, sub -> satisfied(normalize.apply(sub, rr)))
       && conv(rr, subst, sub -> satisfied(normalize.apply(sub, ll)));
-  }
-
-  /** @see CofThy#isOne(TermLike) */
-  @ApiStatus.Internal static <E extends TermLike<E>> Restr.Disj<E> embed(E e) {
-    var conds = ImmutableSeq.of(new Restr.Cond<>(e, true));
-    return new Restr.Disj<>(ImmutableSeq.of(new Restr.Conj<>(conds)));
-  }
-
-  static <E extends TermLike<E>> Restr<E> isOne(E e) {
-    return normalizeRestr(embed(e));
   }
 
   /** @see CofThy#conv(Restr, SubstObj, Predicate) */
@@ -158,90 +102,6 @@ public interface CofThy {
     boolean contradicts(V i, boolean newIsOne);
     @Nullable V asRef(@NotNull E term);
     @NotNull Subst derive();
-  }
-
-  /**
-   * Normalizes a "restriction" which looks like "f1 \/ f2 \/ ..." where
-   * f1, f2 are like "a /\ b /\ ...".
-   */
-  static <E extends TermLike<E>> @NotNull Restr<E> normalizeRestr(Restr.Disj<E> disj) {
-    var orz = MutableArrayList.<Restr.Conj<E>>create(disj.orz().size());
-    // This is a sequence of "or"s, so if any cof is true, the whole thing is true
-    for (var cof : disj.orz())
-      if (normalizeCof(cof, orz, Function.identity()))
-        return new Restr.Const<>(true);
-    if (orz.isEmpty()) return new Restr.Const<>(false);
-    return new Restr.Disj<>(orz.toImmutableArray());
-  }
-
-  /**
-   * Only when we cannot simplify an LHS do we add it to "ands".
-   * Unsimplifiable terms are basically non-formulae (e.g. variable references, neutrals, etc.)
-   * In case of \/, we add them to "orz" and do not add to "ands".
-   *
-   * @return true if this is constant false
-   */
-  static <E extends TermLike<E>> boolean collectAnds(
-    Restr.Conj<E> cof,
-    MutableList<Restr.Cond<E>> ands,
-    MutableList<Formula.Conn<E>> orz
-  ) {
-    var todoAnds = MutableList.from(cof.ands()).asMutableStack();
-    while (todoAnds.isNotEmpty()) {
-      var and = todoAnds.pop();
-      switch (and.inst().asFormula()) {
-        case Formula.Lit<E> lit -> {
-          if (!lit.isOne() == and.isOne()) return true;
-          // Skip truth
-        }
-        // ~ a = j ==> a = ~ j for j \in {0, 1}
-        // According to CCHM, the canonical map takes (1-i) to (i=0)
-        case Formula.Inv<E> inv -> todoAnds.push(new Restr.Cond<>(inv.i(), !and.isOne()));
-        // a /\ b = 1 ==> a = 1 /\ b = 1
-        case Formula.Conn<E> conn && conn.isAnd() && and.isOne() -> {
-          todoAnds.push(new Restr.Cond<>(conn.l(), true));
-          todoAnds.push(new Restr.Cond<>(conn.r(), true));
-        }
-        // a \/ b = 0 ==> a = 0 /\ b = 0
-        case Formula.Conn<E> conn && !conn.isAnd() && !and.isOne() -> {
-          todoAnds.push(new Restr.Cond<>(conn.l(), false));
-          todoAnds.push(new Restr.Cond<>(conn.r(), false));
-        }
-        // a /\ b = 0 ==> a = 0 \/ b = 0
-        case Formula.Conn<E> conn && conn.isAnd() /*&& and.isLeft()*/ -> orz.append(conn);
-        // a \/ b = 1 ==> a = 1 \/ b = 1
-        case Formula.Conn<E> conn /*&& !conn.isAnd() && !and.isLeft()*/ -> orz.append(conn);
-        case null -> ands.append(and);
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Normalizes a list of "a /\ b /\ ..." into orz.
-   * If it is false (implied by any of them being false), orz is unmodified.
-   *
-   * @return true if this is constantly true
-   */
-  static <E extends TermLike<E>, Clause> boolean normalizeCof(
-    Restr.Conj<E> cof, MutableList<Clause> orz,
-    Function<Restr.Conj<E>, Clause> clause
-  ) {
-    var ands = MutableArrayList.<Restr.Cond<E>>create(cof.ands().size());
-    var localOrz = MutableList.<Formula.Conn<E>>create();
-    // If a false is found, do not modify orz
-    if (collectAnds(cof, ands, localOrz)) return false;
-    if (localOrz.isNotEmpty()) {
-      var combined = MutableArrayList.<Restr.Conj<E>>create(1 << localOrz.size());
-      combineRecursively(localOrz.view(), new CondCollector<>(ands.asMutableStack()), combined);
-      // `cofib` has side effects, so you must first traverse them and then call `allMatch`
-      // Can I do this without recursion?
-      return combined.map(cofib -> normalizeCof(cofib, orz, clause)).allMatch(b -> b);
-    }
-    if (ands.isNotEmpty()) {
-      orz.append(clause.apply(new Restr.Conj<>(ands.toImmutableArray())));
-      return false;
-    } else return true;
   }
 
   static boolean satisfied(@NotNull Restr<?> restriction) {
