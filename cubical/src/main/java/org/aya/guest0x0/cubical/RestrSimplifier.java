@@ -3,6 +3,7 @@ package org.aya.guest0x0.cubical;
 import kala.collection.SeqView;
 import kala.collection.immutable.ImmutableSeq;
 import kala.collection.mutable.MutableArrayList;
+import kala.collection.mutable.MutableHashMap;
 import kala.collection.mutable.MutableList;
 import kala.collection.mutable.MutableStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -12,17 +13,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+/**
+ * @param <LocalVar> must implement a proper {@link Object#hashCode()} and {@link Object#equals(Object)} method.
+ */
 public interface RestrSimplifier<T extends Restr.TermLike<T>, LocalVar> {
   @Nullable LocalVar asRef(T term);
-  record CondCollector<T extends Restr.TermLike<T>>(
-    MutableStack<Restr.Cond<T>> conds
-  ) {
-    public Restr.Conj<T> toConj() {
-      var arr = MutableArrayList.<Restr.Cond<T>>create(conds.size());
 
-      return new Restr.Conj<>(conds.toImmutableArray());
-    }
+  record Key<LV>(@NotNull LV var, boolean bool) {}
 
+  record CondCollector<T extends Restr.TermLike<T>>(MutableStack<Restr.Cond<T>> conds) {
     @SafeVarargs public final void withCond(@NotNull Runnable code, @NotNull Restr.Cond<T> @NotNull ... more) {
       for (var cond : more) {
         conds.push(cond);
@@ -31,28 +30,43 @@ public interface RestrSimplifier<T extends Restr.TermLike<T>, LocalVar> {
       }
     }
   }
+
   /**
    * I'm sorry, I'm just too bad at writing while loops.
-   * Add <code>localOrz</code> into <code>conds</code>, and push the results into <code>combined</code>.
+   * Add <code>localOrz</code> into <code>collector</code>, and push the results into <code>combined</code>.
    */
-  default void combineRecursively(
+  private void combineRecursively(
     @NotNull SeqView<Formula.Conn<T>> localOrz,
-    CondCollector<T> conds,
+    CondCollector<T> collector,
     MutableList<Restr.Conj<T>> combined
   ) {
     if (localOrz.isEmpty()) {
-      combined.append(conds.toConj());
+      var conds = collector.conds;
+      var arr = MutableArrayList.<Restr.Cond<T>>create(conds.size());
+      var map = MutableHashMap.<Key<LocalVar>, Restr.Cond<T>>create();
+      for (var cond : conds) {
+        var var = asRef(cond.inst());
+        if (var == null) {
+          arr.append(cond);
+          continue;
+        }
+        var key = new Key<>(var, cond.isOne());
+        if (map.containsKey(key)) continue;
+        map.put(key, cond);
+        arr.append(cond);
+      }
+      combined.append(new Restr.Conj<>(arr.toImmutableArray()));
       return;
     }
     var conn = localOrz.first();
     var lateDropped = localOrz.drop(1);
     // a /\ b = 0 ==> a = 0 \/ b = 0
-    if (conn.isAnd()) conds.withCond(() -> combineRecursively(lateDropped, conds, combined),
+    if (conn.isAnd()) collector.withCond(() -> combineRecursively(lateDropped, collector, combined),
       new Restr.Cond<>(conn.l(), false),
       new Restr.Cond<>(conn.r(), false)
     );
       // a \/ b = 1 ==> a = 1 \/ b = 1
-    else conds.withCond(() -> combineRecursively(lateDropped, conds, combined),
+    else collector.withCond(() -> combineRecursively(lateDropped, collector, combined),
       new Restr.Cond<>(conn.l(), true),
       new Restr.Cond<>(conn.r(), true)
     );
@@ -65,7 +79,7 @@ public interface RestrSimplifier<T extends Restr.TermLike<T>, LocalVar> {
    *
    * @return true if this is constant false
    */
-  default boolean collectAnds(
+  private boolean collectAnds(
     Restr.Conj<T> cof,
     MutableList<Restr.Cond<T>> ands,
     MutableList<Formula.Conn<T>> orz
