@@ -12,10 +12,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * Operations on face restrictions (cofibrations in cartesian cubical type theory),
- * for normalization, simplification, satisfaction, etc.
+ * Typing judgments under face restrictions (cofibrations in cartesian cubical type theory).
+ * For satisfaction tests, conversion, typing derivation, etc.
  *
- * @see RestrSimplifier
+ * @see RestrSimplifier For normalization, simplification, etc.
  */
 public interface CofThy {
   @FunctionalInterface

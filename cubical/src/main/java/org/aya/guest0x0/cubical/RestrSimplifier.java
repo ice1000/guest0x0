@@ -15,6 +15,9 @@ import java.util.function.UnaryOperator;
 
 /**
  * @param <LocalVar> must implement a proper {@link Object#hashCode()} and {@link Object#equals(Object)} method.
+ * @implNote Do not try to combine this with {@link org.aya.guest0x0.cubical.CofThy.SubstObj},
+ * which seem to have the same {@link RestrSimplifier#asRef(Restr.TermLike)} method.
+ * The generic bounds are different.
  */
 public interface RestrSimplifier<T extends Restr.TermLike<T>, LocalVar> {
   @Nullable LocalVar asRef(T term);
@@ -34,6 +37,9 @@ public interface RestrSimplifier<T extends Restr.TermLike<T>, LocalVar> {
   /**
    * I'm sorry, I'm just too bad at writing while loops.
    * Add <code>localOrz</code> into <code>collector</code>, and push the results into <code>combined</code>.
+   *
+   * @implSpec this method implements an optimization when combining the conditions in <code>collector</code>
+   * into <code>combined</code>: identical conditions are removed.
    */
   private void combineRecursively(
     @NotNull SeqView<Formula.Conn<T>> localOrz,
@@ -74,7 +80,7 @@ public interface RestrSimplifier<T extends Restr.TermLike<T>, LocalVar> {
    * Unsimplifiable terms are basically non-formulae (e.g. variable references, neutrals, etc.)
    * In case of \/, we add them to "orz" and do not add to "ands".
    *
-   * @return true if this is constant false
+   * @return true if this is constantly false
    */
   private boolean collectAnds(
     Restr.Conj<T> cof,
@@ -129,7 +135,6 @@ public interface RestrSimplifier<T extends Restr.TermLike<T>, LocalVar> {
     }
     return new Partial.Split<>(cl.toImmutableArray());
   }
-
 
   /**
    * Normalizes a list of "a /\ b /\ ..." into orz.
