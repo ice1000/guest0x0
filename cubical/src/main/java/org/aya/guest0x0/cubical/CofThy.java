@@ -22,34 +22,46 @@ import java.util.function.Predicate;
  * for normalization, simplification, satisfaction, etc.
  */
 public interface CofThy {
+  record CondCollector<T extends TermLike<T>>(
+    MutableStack<Restr.Cond<T>> conds
+  ) {
+    public Restr.Conj<T> toConj() {
+      return new Restr.Conj<>(conds.toImmutableArray());
+    }
+
+    public void withCond(@NotNull Restr.Cond<T> cond, @NotNull Runnable code) {
+      conds.push(cond);
+      code.run();
+      conds.pop();
+    }
+  }
+
   /**
    * I'm sorry, I'm just too bad at writing while loops.
    * Add <code>localOrz</code> into <code>conds</code>, and push the results into <code>combined</code>.
    */
   static <T extends TermLike<T>> void combineRecursively(
     @NotNull SeqView<Formula.Conn<T>> localOrz,
-    MutableStack<Restr.Cond<T>> conds,
+    CondCollector<T> conds,
     MutableList<Restr.Conj<T>> combined
   ) {
     if (localOrz.isEmpty()) {
-      combined.append(new Restr.Conj<>(conds.toImmutableArray()));
+      combined.append(conds.toConj());
       return;
     }
     var conn = localOrz.first();
     var lateDropped = localOrz.drop(1);
     if (conn.isAnd()) { // a /\ b = 0 ==> a = 0 \/ b = 0
-      conds.push(new Restr.Cond<>(conn.l(), false));
-      combineRecursively(lateDropped, conds, combined);
-      conds.pop();
-      conds.push(new Restr.Cond<>(conn.r(), false));
+      conds.withCond(new Restr.Cond<>(conn.l(), false),
+        () -> combineRecursively(lateDropped, conds, combined));
+      conds.withCond(new Restr.Cond<>(conn.r(), false),
+        () -> combineRecursively(lateDropped, conds, combined));
     } else { // a \/ b = 1 ==> a = 1 \/ b = 1
-      conds.push(new Restr.Cond<>(conn.l(), true));
-      combineRecursively(lateDropped, conds, combined);
-      conds.pop();
-      conds.push(new Restr.Cond<>(conn.r(), true));
+      conds.withCond(new Restr.Cond<>(conn.l(), true),
+        () -> combineRecursively(lateDropped, conds, combined));
+      conds.withCond(new Restr.Cond<>(conn.r(), true),
+        () -> combineRecursively(lateDropped, conds, combined));
     }
-    combineRecursively(lateDropped, conds, combined);
-    conds.pop();
   }
 
   @FunctionalInterface
@@ -221,7 +233,7 @@ public interface CofThy {
     if (collectAnds(cof, ands, localOrz)) return false;
     if (localOrz.isNotEmpty()) {
       var combined = MutableArrayList.<Restr.Conj<E>>create(1 << localOrz.size());
-      combineRecursively(localOrz.view(), ands.asMutableStack(), combined);
+      combineRecursively(localOrz.view(), new CondCollector<>(ands.asMutableStack()), combined);
       // `cofib` has side effects, so you must first traverse them and then call `allMatch`
       // Can I do this without recursion?
       return combined.map(cofib -> normalizeCof(cofib, orz, clause)).allMatch(b -> b);
