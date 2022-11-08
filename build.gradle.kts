@@ -1,4 +1,4 @@
-// Copyright (c) 2020-2021 Yinsen (Tesla) Zhang.
+// Copyright (c) 2020-2021 Tesla (Yinsen) Zhang.
 // Use of this source code is governed by the GNU GPLv3 license that can be found in the LICENSE file.
 import java.util.*
 import org.aya.gradle.BuildUtil

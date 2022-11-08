@@ -1,11 +1,11 @@
-// Copyright (c) 2020-2021 Yinsen (Tesla) Zhang.
+// Copyright (c) 2020-2021 Tesla (Yinsen) Zhang.
 // Use of this source code is governed by the GNU GPLv3 license that can be found in the LICENSE file.
 import java.util.*
 
 plugins {
   java
   groovy
-  antlr
+  // antlr
 }
 
 repositories { mavenCentral() }
@@ -13,6 +13,7 @@ repositories { mavenCentral() }
 val rootDir = projectDir.parentFile!!
 val genDir = rootDir.resolve("cli/src/main/gen")
 
+/*
 tasks.withType<AntlrTask>().configureEach antlr@{
   outputDirectory = genDir
   val packageName = "org.aya.guest0x0.parser"
@@ -26,10 +27,11 @@ tasks.withType<AntlrTask>().configureEach antlr@{
     ),
   )
 }
+*/
 
 dependencies {
   val deps = Properties()
   deps.load(rootDir.resolve("gradle/deps.properties").reader())
-  antlr("org.antlr", "antlr4", deps.getProperty("version.antlr"))
+  // antlr("org.antlr", "antlr4", deps.getProperty("version.antlr"))
   api("org.aya-prover.upstream", "build-util", deps.getProperty("version.build-util"))
 }
