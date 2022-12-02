@@ -5,7 +5,7 @@ Throughout this tutorial, \fbox{boxes} will be used in the following two cases:
 e.g. \fbox{$\Gvdash \fbox{$\lam x M$}~:~\fbox{$(y:A)\to B$}
 \Leftarrow \fbox{$\lam x u$}$}.
 \item to distinguish type theory terms from natural language text. \\
-e.g. ``we combine a term \fbox{$a$} with a term \fbox{$b$} to get a term \fbox{$a~b$}''.
+e.g. ``combine a term \fbox{$a$} with a term \fbox{$b$} to get a term \fbox{$a~b$}''.
 \end{itemize}
 \subsection{Target Audience}
 This tutorial assumes familiarity with the following:
@@ -113,13 +113,13 @@ This section introduces the notion of \textit{partial elements} and
 motivates typing judgments with cofibrations in the context.
 
 \subsection{The interval $\II$ and contexts}\label{sub:interval}
-In \CTT, we have the interval type:
+\CTT{} has the interval type:
 \[\vdash \isType\II\quad \vdash \lcon:\II \quad \vdash \rcon:\II\]
 The interval type and its products are used to represent dimensions
 (ignoring the De Morgan structures for now).
 \begin{example}\label{ex:interval-in-ctx}
 Suppose \fbox{$x:\II\vdash\isType{A}$} and \fbox{$x:\II\vdash u:A$}.
-From a semantical or a topological perspective, we can say:
+From a semantical or a topological perspective, one can say:
 \begin{itemize}
 \item $A$ is a (type) line between $A[\lcon/x]$ and $A[\rcon/x]$.
 \item $u$ is a (term) line between $u[\lcon/x]$ and $u[\rcon/x]$.
@@ -156,7 +156,7 @@ and other bindings in a unified context, just like usual dependent type checkers
 \begin{remark}\label{rem:line-ori}
 Consider \fbox{$x:\II\vdash u:A$} and \fbox{$\vdash v:\II\to A$}.
 Usually both are referred to as a \textit{line}, but they are very different.
-Suppose we weaken the context with $y:\II$ to be a $2$-dimensional space,
+Suppose the context is weakened with $y:\II$ to be a $2$-dimensional space,
 in which $u$ exists as a line:
 \carloCTikZ{\carloXy
 \node (0) at (0 , 0) {\textbullet} ;
@@ -191,7 +191,7 @@ Note that these two placements are symmetric with respect to the diagonal.
 In case of contexts and cubes of higher dimensions,
 the situations are much more complicated.
 For example, with one more dimension $z:\II$,
-we may place $u$ in three orientations:
+$u$ may be placed in three orientations:
 \carloCTikZ{\carloXyz
 \refcube{TopUXY}
 \shiftTikZ{0,0.3}{\refcube{FrontUXY}}
@@ -746,7 +746,7 @@ based on the idea of cofibrations. Here's a brief table for comparison:
 
 Cubical subtypes will be useful later in~\cref{sub:transp}.
 
-\section{De Morgan structure}
+\section{Coercion rules}
 This section introduces the notion of \textit{coercion rules} and
 motivates the De Morgan structure on the interval type.
 
@@ -915,7 +915,7 @@ If a type line freezes on the truth cofibration,
 then it is constant.
 \end{lem}
 
-\subsection{Coercion rules}\label{sub:transp}
+\subsection{The coercion operator}\label{sub:transp}
 In \CTT, for every type-line \fbox{$A:\II\to\UU$},
 we add a function $\coeLong:A~\lcon\to A~\rcon$ to the type theory.
 Since a type-line expresses the equivalence between two types (the two sides
@@ -952,9 +952,11 @@ just like introduction rules, elimination rules,
 and computation rules.
 
 \begin{terminology}
-In~\cite{CCHM,CHM,HCompPDF}, coercion is called \textit{transport}.
-We use the name \textit{coercion} because it fits better with the
-traditional functional programming literature.
+In~\cite{CCHM,CHM,HCompPDF}, coercion is called \textit{transport}
+or \textit{generalized transport}.
+We use the name \textit{coercion} (inspired from the Cartesian cubical
+type theory literature, including~\cite{ABCFHL,CoolCCTT}) because it fits
+better with the traditional functional programming literature.
 \end{terminology}
 
 To achieve all the properties we have asked for,
@@ -1012,7 +1014,8 @@ with the following type signature:
 However, invocations to this function is valid only when $A$ is constant under $\psi$,
 and this criterion is not expressed in the type signature.
 It is said to be a design flaw\footnote{\url{https://github.com/agda/agda/issues/3509\#issuecomment-456201777}}
-in the Agda bug tracker.
+in the Agda bug tracker as well as in~\cite[Cool Remark 2.2]{CoolCCTT}.
+The latter will be discussed in~\cref{rem:lame}.
 \end{remark}
 
 \begin{lem}[Fill]\label{lem:transpFill}
@@ -1041,7 +1044,7 @@ In some sense, this construction motivates the De Morgan structure on $\II$.
 The path $p$ in~\cref{lem:transpFill} is called the \textit{filler} of $\coe A{\disj}$.
 In general, for a function $f:A~\lcon\to A~\rcon$ where $A$ is just any type line,
 the path $p:u=f(u)$ is called the \textit{filler} of $f$.
-We will see the construction of another filler like this later in~\cref{sub:hcomp}.
+We will see the construction of another filler like this later in~\cref{sec:hcomp}.
 
 More generally, given \textit{any} partial configuration,
 a cube matching it is called a \textit{filler} (of the partial configuration).
@@ -1053,7 +1056,7 @@ and~\cite[\S 2.1]{HCompPDF}, one should be able to translate the rest.
 There is one exception though -- the coercion rule for the generalized path type
 is slightly different. To define the rule, we need another Kan operation.
 
-\subsection{Homogeneous composition}\label{sub:hcomp}
+\section{Composition}\label{sec:hcomp}
 There is another primitive construction which is needed to define the
 coercion rules for the (generalized) path type:
 the \textit{composition} operation, which takes a configuration
@@ -1061,27 +1064,45 @@ of an $n$-cube \textit{without} the top face (also known as an \textit{open box}
 and constructs the missing top face. In other words, composition asserts that any
 open box are \textit{closed} (i.e.~the top face is, in fact, filled).
 
+\subsection{Intuition behind composition}
 The intuition behind the composition operation is like ``any cube
-that \textit{makes cubical sense} has a filling'', which gives \CTT{} a lot of terms
+that \textit{makes cubical sense} has a filling'', which gives \CTT{} the terms
 that we desire but cannot construct using other term formers.
 The most notable motivating example is path concatenation (\cref{ex:concat-sym}).
 
 There are two versions of composition: \textit{homogeneous composition} (hereafter as \hcompLong) and
 \textit{heterogeneous composition}. The former requires that all the given faces
 are homogeneous (\cref{defn:homo-path}), while the latter does not have this restriction.
-Heterogeneous composition can be implemented in terms of homogeneous composition and \coeLong.
-This tutorial will work with primitive homogeneous composition.
+Heterogeneous composition can be implemented in terms of homogeneous composition \textit{and} \coeLong.
+This tutorial will work with primitive homogeneous composition~\cref{sub:homo-hcomp},
+and define heterogeneous composition as a corollary~\cref{sub:heter-hcomp}.
+
+\begin{terminology}
+When referring to particular faces of a cube, we call the front, back, left, and right faces \textit{walls}.
+Walls are parts of the (optional) input data of composition.
+The top and the bottom faces are either a (mandatory) input or an output of composition,
+depending on the authors' preference.
+We use the bottom face as the input and call it the \textit{floor}.
+In case of higher dimensions, we think of cubes as a term \fbox{$p:\II^n \to X$}
+with $p~\lcon$ called the floor and $p~\rcon$ the \textit{top face} or the \textit{ceiling}.
+All the other faces are called the walls.
+
+In~\cite{CoolCCTT}, the top face is the input and is called the \textit{cap}
+(and the walls are called the \textit{tubes}).
+\end{terminology}
 
 \begin{history}
 In~\cite{CCHM}, heterogeneous composition \texttt{comp} is the only primitive Kan operation,
-where \coeLong{} is a special case where the given configuration has ``no walls''.
-For higher inductive types convenience, \cite{CHM} decomposed \texttt{comp} into a
-homogeneous version \hcompLong{} and a primitive \coeLong.
+with \coeLong{} defined as a special case where the given configuration has ``no walls''.
+For higher inductive types convenience, \cite{HCompPDF,CHM} decomposed \texttt{comp} into a
+homogeneous version \hcompLong{} (which could possibly be a canonical term) and a primitive \coeLong.
 \end{history}
 
-The syntax of homogeneous composition is quite straightforward -- it looks like a function
+In order to derive a syntax of homogeneous composition, we start from an example.
+Homogeneous composition behaves like a function
 that takes an ``open box'' of type $\Partial \disj A$ and returns the missing top face,
-which is of type $A$. Below is a demonstration with upside-down cubes:
+which is of type $A$. Below is a demonstration with upside-down cubes
+(because we want the floors to be more visible):
 \carloCTikZ{
 \carloXyz
 \refcube{Partial}
@@ -1091,11 +1112,15 @@ which is of type $A$. Below is a demonstration with upside-down cubes:
 }
 Note that \hcompLong{} works for all $n$-cubes, not just 3-dimensional ones.
 
-This syntax is not convenient as we cannot easily tell which face is
-the missing one that we want to obtain. Hence we slightly reorganize the parameters.
+\subsection{Homogeneous composition}\label{sub:homo-hcomp}
+Given a partial element, it is quite difficult to figure out
+which face is the missing one that we would like to compose.
+However, it is also very important to make that obvious.
+% We would like to make which face is the missing one obvious.
+Hence, we need a careful organization of the parameters.
 
 The practice in \CTT{} is to use the type \fbox{$\II \to \Partial \disj A$} to represent the walls,
-and ask separately for the floor. This is because the floor is required
+and ask separately for the floor. This is because the floor is mandatory
 while the walls are optional\footnote{This is a questionable design,
 speaking of evaluation performance.
 However, there isn't any known easy workarounds.
@@ -1122,9 +1147,11 @@ where \fbox{$i:\II;z= \rcon \vdash u:A$}:
 	\II \to \Partial{z=\rcon} A
 \]
 Then, \hcompLong{} should give us the following,
-where $u[\rcon/i]$ is just the top face of the wall $u$:
+where $u[\rcon/i]$ is just the top face of the wall $u$
+(it is left to the reader to figure out why the floor
+must be $u[[\lcon/i]]$):
 \[
-\hcomp{A}{\lam i \lrbbar{z=\rcon \mapsto u}}
+\hcomp{A}{\lam i \lrbbar{z=\rcon \mapsto u}}{u[[\lcon/i]]}
 : \subTy{A}{z=\rcon}{z=\rcon \mapsto u[\rcon/i]}
 \]
 \carloCTikZ{
@@ -1134,12 +1161,32 @@ where $u[\rcon/i]$ is just the top face of the wall $u$:
 Note that for convenience, we have omitted the cofibration parameter
 of \hcompLong{} because it is already given in another argument.
 In practice, it might be needed explicitly to assign a type to \hcompLong.
-If \hcompLong{} is going to have a type, it should be like the following,
+If \hcompLong{} is ever going to have a type, it should be like the following,
 where $\phi$ converts interval to the corresponding cofibration (\cref{lem:isomorphism}):
-\[
-	\hcompLong{} : (A : \UU)~(x:\II)~(w:\II \to \Partial{\phi(x)} A)
-	\to \subTyImpl{A}{\phi(x)}{(w~\rcon)}
-\]
+\begin{align*}
+	\hcompLong{} :{}& (A : \UU)~(x:\II)\\
+	&(w:\II \to \Partial{\phi(x)} A)\\
+	&(u:\subTyImpl{A}{\phi(x)}{(w~\lcon)})\\
+	\to{}& \subTyImpl{A}{\phi(x)}{(w~\rcon)}
+\end{align*}
+
+\begin{remark}[Lame]\label{rem:lame}
+The above type signature is a refined version of the one implemented in Agda~\cite{CubicalAgda},
+where instead of asking for \fbox{$u:\subTyImpl{A}{\phi(x)}{(w~\lcon)}$}, they simply ask for
+\fbox{$u:A$} and inserts a cubical subtype constraint.
+In~\cite[Cool Remark 2.2]{CoolCCTT}, the authors claim that the Agda design of \hcompLong{}
+is ``unnecessary and inelegant in general'' because the check is ad-hoc and there is obviously
+a simpler type signature where $u$ is merged into the walls:
+\begin{align*}
+\hcompLong{} :{}& (A : \UU)~(x:\II) & \hcompLong{} :{}& (A : \UU)~(x:\II) \\
+&(w:\diffA\II \to \Partial{\diffA{\phi(x)}}{A}) & &(w:\diffB{(i:\II)} \to \Partial{\diffB{\phi(x)\lor(i=\lcon)}}{A})\\
+&\diffA{(u:\subTyImpl{\diffA A}{\phi(x)}{(w~\lcon)})} & & \\
+\to{}& \subTyImpl{A}{\phi(x)}{(w~\rcon)} & \to{}& \subTyImpl{A}{\phi(x)}{(w~\rcon)}
+\end{align*}
+However, there is a trick that could possibly simplify the reduction rules of \hcompLong{} on
+inductive types that would become difficult with the above signature. So we will stick to it
+in this tutorial. The readers should be able to translate them back and forth easily.
+\end{remark}
 The formal syntax and typing of \hcompLong{} is straightforward
 (\cref{fig:syntax-hcomp,fig:typing-hcomp}).
 
@@ -1156,7 +1203,7 @@ The formal syntax and typing of \hcompLong{} is straightforward
 \PGvdash u : A\\
 \PGvdash w : \II \to \Partial{\disj} A\\
 \PGfvdash\disj \lrbbar u\equiv w~\lcon : A}{
-\hcomp A u w:\subTyImpl{A}{\disj}{(u~\rcon)}}
+\hcomp A w u:\subTyImpl{A}{\disj}{(u~\rcon)}}
 \end{mathpar}
 \caption{Typing of the homogeneous composition}
 \label{fig:typing-hcomp}
@@ -1165,15 +1212,29 @@ The formal syntax and typing of \hcompLong{} is straightforward
 The reduction of \hcompLong{} is very simple:
 \begin{enumerate}
 \item In case walls are constant, it reduces to the walls. In other words,
-\[\hcomp{A}{u}{\lrbbar{w}}\mapsto w\]
+\[\hcomp{A}{\lrbbar{w}}u\mapsto w\]
 \item For types with an introduction rule, it is structural over the rules
 (see rules in~\cite{HCompPDF}).
 \item For higher inductive types, it is canonical.
 \item For universes, see~\cref{sec:read}.
 \end{enumerate}
+This is the last primitive operator we would like to introduce in this tutorial.
+It remains to define the coercion rule of the generalized path type!
 
-We can finally define the coercion rule of the generalized path type.
-First, we introduce some operations, like in~\cite{HCompPDF}:
+\subsection{Heterogeneous composition}\label{sub:heter-hcomp}
+Like in~\cite{HCompPDF}, we need some extra operations.
+First, we need heterogeneous composition, which is a \textit{dependent} version of \hcompLong.
+Here's a comparison on the imaginary type signatures:
+% A perfect application of \begin{align*}!
+\begin{align*}
+\hcompLong{} :{}& (A : \diffA\UU)~(x:\II) & \textsf{comp} :{}& (A : \diffB{\II\to\UU})~(x:\II) \\
+&(w:\diffA\II \to \Partial{\phi(x)}{\diffA A}) & &(w:\diffB{(i:\II)} \to \Partial{\phi(x)}{\diffB{(A~i)}})\\
+&(u:\subTyImpl{\diffA A}{\phi(x)}{(w~\lcon)}) & &(u:\subTyImpl{\diffB{(A~\lcon)}}{\phi(x)}{(w~\lcon)}) \\
+\to{}& \subTyImpl{\diffA A}{\phi(x)}{(w~\rcon)} & \to{}& \subTyImpl{\diffB{(A~\rcon)}}{\phi(x)}{(w~\rcon)}
+\end{align*}
+The implementation strategy is very crude: we first use coercion to \textit{forward} the walls
+and the floor to \fbox{$A~\rcon$}, and then do \hcompLong{} on the constant type \fbox{$A~\rcon$}.
+This leads to the following definition.
 
 \begin{defn}\label{defn:comp}
 The heterogeneous composition is defined as:
@@ -1186,15 +1247,15 @@ The heterogeneous composition is defined as:
 \PGvdash u: A~\lcon\\\\
 \PGvdash w : (x:\II) \to \Partial{\disj} {(A~x)}\\
 \PGfvdash\disj \lrbbar u\equiv w~\lcon : A~\lcon}
-{\textsf{comp}_A(u, w):=
+{\textsf{comp}_A(w, u):=
 \hcomp{A~\rcon}
-{\textsf{forward}_A^\lcon(u)}
 {\lam x {\textsf{forward}_{\Partial\disj {(A~x)}}^x(w~x)}}
+{\textsf{forward}_A^\lcon(u)}
 :{A~\rcon}}
 \end{mathpar}
-The idea is that we \textit{forward} the heterogeneous composition problem
-(where the partial element has type $A:\II\to\UU$) to a homogeneous one of type $A~\rcon$,
-and the forward operation is implemented as ``coercion to the right''.
+% The idea is that we \textit{forward} the heterogeneous composition problem
+% (where the partial element has type $A:\II\to\UU$) to a homogeneous one of type $A~\rcon$,
+% and the forward operation is implemented as ``coercion to the right''.
 \end{defn}
 
 The desired property of \textsf{forward} is the following definitional equality:
@@ -1294,10 +1355,13 @@ There are several constructs in \CTT{} that are not covered in this tutorial:
 	remaining problem of interpreting homotopy type theory using \CTT.
 	Note that we have already proved this rule propositionally (\cref{lem:transpFill}),
 	but Martin-L\"of type theory and homotopy type theory assumes the judgmental version of this rule.
-\item[Universe of $\II$] we have not discussed in what universe does $\II$ belong to.
-  This is a non-trivial question, see Agda issue tracker
+\item[Universe of partial types] we have not discussed in what universe the partial types belong to.
+  They are pretypes, which is discussed in~\cite{2LTT}. This is also how Cubical Agda implements them after
+  their paper is published.
+\item[Universe of $\II$] neither did we discuss in what universe does $\II$ belong to.
+  They are also pretypes, but are quite different pretypes. See Agda issue tracker
 	\href{https://github.com/agda/agda/pull/5439}{\#5439}\footnote{\url{https://github.com/agda/agda/pull/5439}}.
-\item[Propositional resizing] is a property of universes of propositions.
+\item[Propositional resizing] is an axiom about universes of propositions.
   It corresponds to the ``completeness'' of the universe: for every type $A$
 	that we can show it's a proposition,
 	there is supposed to be $[A] : \textsf{Prop}$ (please don't take the notation seriously)
@@ -1309,3 +1373,7 @@ There are several constructs in \CTT{} that are not covered in this tutorial:
 The source code of the \GuestName{} project is available at
 \url{https://github.com/ice1000/guest0x0}. The development is already integrated into
 the Aya Prover\footnote{\url{https://www.aya-prover.org}} which is a more mature system.
+
+\subsection{Acknowledgment}
+The author is grateful for Jonathan Sterling, Chang Wen, and Kiva Oyama
+for reviewing the early versions of this tutorial and discussing ideas about \CTT{}.
