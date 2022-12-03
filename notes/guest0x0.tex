@@ -656,6 +656,13 @@ y&=\lcon&\mapsto \papp{p_0}x\\
 y&=\rcon&\mapsto \papp{p_1}x}\]
 \end{example}
 
+\begin{remark}
+It would be nice if we can implement automatic coercion from
+pi types $\overline{(x:\II)}\to X$ to generalized path types
+and vice versa by $\eta$-expansion.
+This makes programming with \CTT{} so much easier.
+\end{remark}
+
 \subsection{Cubical subtypes}\label{sub:cubsub}
 Cofibrations in generalized paths are always \textit{bounded}
 in the sense that they cannot reference arbitrary local variables.
@@ -1141,18 +1148,18 @@ is decomposed as (pictures are still upside-down):
 }
 Note that $\disj$ in this case is $(z=\rcon)$,
 and the corresponding terms should look like the following,
-where \fbox{$i:\II;z= \rcon \vdash u:A$}:
+where \fbox{$y:\II;z= \rcon \vdash u:A$}:
 \[
-	\lam i \lrbbar{z=\rcon \mapsto u} :
+	\lam y \lrbbar{z=\rcon \mapsto u} :
 	\II \to \Partial{z=\rcon} A
 \]
 Then, \hcompLong{} should give us the following,
-where $u[\rcon/i]$ is just the top face of the wall $u$
+where $u[\rcon/y]$ is just the top face of the wall $u$
 (it is left to the reader to figure out why the floor
-must be $u[[\lcon/i]]$):
+must be $u[[\lcon/y]]$):
 \[
-\hcomp{A}{\lam i \lrbbar{z=\rcon \mapsto u}}{u[[\lcon/i]]}
-: \subTy{A}{z=\rcon}{z=\rcon \mapsto u[\rcon/i]}
+\hcomp{A}{\lam y \lrbbar{z=\rcon \mapsto u}}{u[[\lcon/y]]}
+: \subTy{A}{z=\rcon}{z=\rcon \mapsto u[\rcon/y]}
 \]
 \carloCTikZ{
 \carloXyz
@@ -1333,7 +1340,7 @@ There are several constructs in \CTT{} that are not covered in this tutorial:
 \item[V type] is a special case of Glue type that is sufficient to prove univalence,
   but cannot handle \hcompLong{} on universes, hence a \CTT{} with V type needs
 	to handle \hcompLong{} on universes.
-	V type is discussed in~\cite{CHTT3}.
+	V type is discussed in~\cite{CHTT3,CoolCCTT}.
 \item[Cubical computational type theory] is a variant of \CTT{} built in a computational
   (extensional) type theory, discussed in~\cite{CHTT1,CHTT2,CHTT3,CHTT4,CCCTT}.
 	It features an exact equality type with equality reflection.
