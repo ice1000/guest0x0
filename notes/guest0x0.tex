@@ -1156,9 +1156,9 @@ where \fbox{$y:\II;z= \rcon \vdash u:A$}:
 Then, \hcompLong{} should give us the following,
 where $u[\rcon/y]$ is just the top face of the wall $u$
 (it is left to the reader to figure out why the floor
-must be $u[[\lcon/y]]$):
+must be $u[\lcon/y]$):
 \[
-\hcomp{A}{\lam y \lrbbar{z=\rcon \mapsto u}}{u[[\lcon/y]]}
+\hcomp{A}{\lam y \lrbbar{z=\rcon \mapsto u}}{u[\lcon/y]}
 : \subTy{A}{z=\rcon}{z=\rcon \mapsto u[\rcon/y]}
 \]
 \carloCTikZ{
