@@ -13,7 +13,7 @@ import static org.aya.guest0x0.syntax.Term.*;
  * References:
  * <ul>
  * <li><a href="https://github.com/molikto/mlang/blob/5110e18d20484a3f4ee57ee68e2793e5cf0e28e6/src-main/src/main/scala/mlang/compiler/semantic/10_value_fibrant.scala">10_value_fibrant.scala</a></li>
- * <li><a href="https://www.cse.chalmers.se/~simonhu/misc/hcomp.pdf">hcomp.pdf</a></li>
+ * <li><a href="https://simhu.github.io/misc/hcomp.pdf">hcomp.pdf</a></li>
  * </ul>
  */
 public interface HCompPDF {
