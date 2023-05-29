@@ -704,16 +704,15 @@ Hence the typing rules as in~\cref{fig:typing-subtype}.
 
 Cubical subtypes compute in the following cases:
 \begin{itemize}
-\item The elimination rule always cancels the introduction rule.
-\item The introduction rule cancels the elimination rule when
-they share the same cofibration.
+\item The juxtaposition of elimination and introduction always cancels each other.
+By type checking, they should have the same cofibrations.
 \item The elimination rule computes according to the partial element.
 \end{itemize}
 Hence the computation rules as in~\cref{fig:compute-subtype}.
 \begin{figure}[h!]
 \begin{mathpar}
-\inferrule{\PGvdash u:A \\ \PGvdash \disj_0 \\ \PGvdash \disj_1}
-{\PGvdash \outS{\disj_0}{\inS{\disj_1} u}\equiv u:A} \and
+\inferrule{\PGvdash u:A \\ \PGvdash \disj \\ \PGvdash \disj}
+{\PGvdash \outS{\disj}{\inS{\disj} u}\equiv u:A} \and
 \inferrule{\PGvdash u:\subTy{A}{\disj}{\overline\face}}
 {\PGvdash \inS{\disj}{\outS{\disj} u}\equiv u:\subTy{A}{\disj}{\overline\face}}\and
 \inferrule{\PGvdash u:\subTy{A}{\disj}{\overline{\conj_i\mapsto v_i}}}
@@ -1384,3 +1383,5 @@ the Aya Prover\footnote{\url{https://www.aya-prover.org}} which is a more mature
 \subsection{Acknowledgment}
 The author is grateful for Jonathan Sterling, Chang Wen, and Kiva Oyama
 for reviewing the early versions of this tutorial and discussing ideas about \CTT{}.
+Daniel Gratzer corrected a mistake regarding subtype computation
+during the HoTT '23 conference.
