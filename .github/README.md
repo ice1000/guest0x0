@@ -1,6 +1,7 @@
 # Guest0x0
 
 [![maven]](https://repo1.maven.org/maven2/org/aya-prover/guest0x0/base/)
+[![arXiv](https://img.shields.io/badge/arXiv-2210.08232-b31b1b.svg)](https://arxiv.org/abs/2210.08232)
 [![test](https://github.com/ice1000/guest0x0/actions/workflows/gradle-check.yml/badge.svg)](https://github.com/ice1000/guest0x0/actions/workflows/gradle-check.yml)
 
 ![image](https://user-images.githubusercontent.com/16398479/162600129-d59a0c0c-de5a-49e4-b0dd-dd3c4fd51938.png)
